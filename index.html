@@ -1114,7 +1114,7 @@ calculateTotal(); // 更新总价显示
             }
 
 function sendOrderViaWhatsApp(orderData) {
-    // ===== 1. 电话号码格式化函数 =====
+    // 1. 电话号码格式化函数
     const formatPhoneNumber = (phone) => {
         let cleaned = phone.replace(/\D/g, '');
         if (cleaned.startsWith('60')) {
@@ -1125,7 +1125,7 @@ function sendOrderViaWhatsApp(orderData) {
         return cleaned;
     };
 
-    // ===== 2. 生成订单信息 =====
+    // 2. 生成订单信息
     const orderId = Date.now().toString().slice(-6);
     const orderTime = new Date().toLocaleString('zh-CN', {
         year: 'numeric',
@@ -1136,10 +1136,10 @@ function sendOrderViaWhatsApp(orderData) {
         hour12: false
     }).replace(/\//g, '-');
 
-    // ===== 3. 判断客户语言 =====
+    // 3. 判断客户语言
     const isChineseCustomer = /[\u4e00-\u9fa5]/.test(orderData.name);
 
-    // ===== 4. 构建客户消息 =====
+    // 4. 构建客户消息
     let customerMessage = isChineseCustomer 
         ? `*🍢 锋味派订单确认*%0A%0A📌 *预购说明*:%0A- 此为预购商品%0A- 预计30-60天到货%0A- 国际运费后续通知%0A%0A`
         : `*🍢 Feng Wei Pai Order Confirmation*%0A%0A📌 *Pre-order Notice*:%0A- This is a pre-order%0A- Estimated 30-60 days delivery%0A- Shipping fee will be notified later%0A%0A`;
@@ -1171,11 +1171,7 @@ function sendOrderViaWhatsApp(orderData) {
         ? `%0A💰 *总计: RM${orderData.total.toFixed(2)}*%0A%0A`
         : `%0A💰 *Total: RM${orderData.total.toFixed(2)}*%0A%0A`;
     
-    customerMessage += isChineseCustomer
-        ? `📢 联系商家: https://wa.me/60162327792`
-        : `📢 Contact: https://wa.me/60162327792`;
-
-    // ===== 5. 构建商家消息 =====
+    // 5. 构建商家消息
     let businessMessage = isChineseCustomer
         ? `*🛎️ [新订单] 锋味派网页订单*%0A%0A`
         : `*🛎️ [New Order] Feng Wei Pai Web Order*%0A%0A`;
@@ -1189,7 +1185,9 @@ function sendOrderViaWhatsApp(orderData) {
     businessMessage += isChineseCustomer
         ? `👤 顾客: ${orderData.name}%0A`
         : `👤 Customer: ${orderData.name}%0A`;
-    businessMessage += `📞 电话: https://wa.me/${formatPhoneNumber(orderData.phone)}%0A`;
+    businessMessage += isChineseCustomer
+        ? `📞 电话: ${orderData.phone}%0A`
+        : `📞 Phone: ${orderData.phone}%0A`;
     businessMessage += isChineseCustomer
         ? `🚚 方式: ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`
         : `🚚 Method: ${orderData.delivery === 'self-pickup' ? 'Self Pickup' : 'Lalamove Delivery'}%0A%0A`;
@@ -1205,37 +1203,60 @@ function sendOrderViaWhatsApp(orderData) {
         ? `%0A💳 *总金额: RM${orderData.total.toFixed(2)}*%0A`
         : `%0A💳 *Total Amount: RM${orderData.total.toFixed(2)}*%0A`;
     
-    businessMessage += isChineseCustomer
-        ? `%0A📝 *备注*: ______`
-        : `%0A📝 *Notes*: ______`;
-
-    // ===== 6. 发送消息函数 =====
-    const sendMessage = (phone, message, isBusiness = false) => {
-        try {
-            const waUrl = `https://wa.me/${phone}?text=${message}`;
-            const newWindow = window.open(waUrl, '_blank');
-            
-            if (!newWindow) {
-                console.error('窗口被阻止，尝试备用方法');
-                if (confirm(`无法自动打开 WhatsApp，是否复制${isBusiness ? '商家' : '客户'}通知内容？`)) {
-                    navigator.clipboard.writeText(decodeURIComponent(message))
-                        .then(() => alert('已复制到剪贴板！请手动粘贴到 WhatsApp'))
-                        .catch(() => prompt('请手动复制以下内容：', decodeURIComponent(message)));
-                }
-            }
-        } catch (error) {
-            console.error('发送失败:', error);
-        }
+    // 6. 创建WhatsApp按钮
+    const createWhatsAppButton = (phone, message, label) => {
+        const waUrl = `https://wa.me/${phone}?text=${message}`;
+        const btn = document.createElement('a');
+        btn.href = waUrl;
+        btn.className = 'whatsapp-btn';
+        btn.target = '_blank';
+        btn.innerHTML = `<span class="emoji">💬</span> ${label}`;
+        return btn;
     };
 
-    // ===== 7. 执行发送 =====
-    const customerPhone = formatPhoneNumber(orderData.phone);
-    const businessPhone = '60162327792';
-
-    sendMessage(customerPhone, customerMessage);
-    setTimeout(() => {
-        sendMessage(businessPhone, businessMessage, true);
-    }, 2000);
+    // 7. 显示消息发送提示
+    const confirmationDiv = document.createElement('div');
+    confirmationDiv.style.background = 'white';
+    confirmationDiv.style.padding = '20px';
+    confirmationDiv.style.borderRadius = '10px';
+    confirmationDiv.style.marginTop = '20px';
+    
+    if (isChineseCustomer) {
+        confirmationDiv.innerHTML = `
+            <h3 style="margin-top:0;color:var(--primary);">请发送订单确认信息</h3>
+            <p>请点击下方按钮发送订单确认信息给我们：</p>
+        `;
+    } else {
+        confirmationDiv.innerHTML = `
+            <h3 style="margin-top:0;color:var(--primary);">Please Send Order Confirmation</h3>
+            <p>Click the button below to send your order confirmation to us:</p>
+        `;
+    }
+    
+    // 添加客户发送按钮
+    const customerBtn = createWhatsAppButton(
+        formatPhoneNumber(orderData.phone), 
+        customerMessage,
+        isChineseCustomer ? '发送给我的WhatsApp' : 'Send to My WhatsApp'
+    );
+    
+    // 添加商家发送按钮
+    const businessBtn = createWhatsAppButton(
+        '60162327792', 
+        businessMessage,
+        isChineseCustomer ? '发送给商家' : 'Send to Business'
+    );
+    
+    confirmationDiv.appendChild(customerBtn);
+    confirmationDiv.appendChild(document.createElement('br'));
+    confirmationDiv.appendChild(businessBtn);
+    
+    // 8. 显示在表单中
+    const form = document.getElementById('orderForm');
+    form.insertBefore(confirmationDiv, form.querySelector('.submit-btn'));
+    
+    // 9. 滚动到按钮位置
+    confirmationDiv.scrollIntoView({ behavior: 'smooth' });
 }
 
             // ====================== 表单提交事件 ======================
