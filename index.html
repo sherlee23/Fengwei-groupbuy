@@ -1,3 +1,5 @@
+Check check WhatsApp
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -1070,242 +1072,100 @@ html += `</div>`;
                 });
             }
             
-            // ====================== 提交订单 ======================
-        async function submitOrder(orderData) {
-    const orderId = `${new Date().getFullYear()}${(new Date().getMonth()+1).toString().padStart(2,'0')}${new Date().getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
-    
-    const isChineseCustomer = /[\u4e00-\u9fa5]/.test(orderData.name);
-    document.getElementById('loadingOverlay').style.display = 'flex';
-    
-    try {
-        const paymentFile = document.getElementById('payment').files[0];
-        let paymentProofUrl = '';
+            <script>
+    // ... 其他代码（formatPhoneNumber、DOMContentLoaded 等）...
+
+    // ====================== WhatsApp 消息发送函数 ======================
+    function sendOrderViaWhatsApp(orderData) {
+        // 确保 orderData.items 存在
+        if (!orderData.items || !Array.isArray(orderData.items)) {  // 修正多余的括号
+            console.error('订单商品信息缺失:', orderData);
+            return;
+        }
+
+        // 构建商家消息
+        let businessMessage = `*🛎️ [新订单] 锋味派订单 #${orderData.orderId}*%0A%0A`;
+        businessMessage += `👤 *客户信息*:%0A`;
+        businessMessage += `▫️ 姓名: ${orderData.name}%0A`;
+        businessMessage += `▫️ 电话: https://wa.me/${formatPhoneNumber(orderData.phone)}%0A`;
+        businessMessage += `▫️ 取货方式: ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`;
         
-        if (paymentFile) {
-            const fileExt = paymentFile.name.split('.').pop();
-            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-            const { data, error } = await supabase.storage
-                .from('payment-proofs')
-                .upload(`proofs/${fileName}`, paymentFile);
+        businessMessage += `🛒 *订单内容*:%0A`;
+        orderData.items.forEach(item => {
+            const productName = item.product.replace(/[^\w\s]/gi, '').trim();
+            businessMessage += `▫️ ${productName} × ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}%0A`;
+        });
+        
+        businessMessage += `%0A💰 *总金额: RM${orderData.total.toFixed(2)}*%0A`;
+        businessMessage += `📅 *下单时间: ${new Date().toLocaleString('zh-CN')}*%0A%0A`;
+        businessMessage += `📝 *备注*: ______`;
+
+        // 打开 WhatsApp 发送给商家
+        window.open(`https://wa.me/60162327792?text=${encodeURIComponent(businessMessage)}`, '_blank');
+    }
+
+    // ====================== 提交订单函数 ======================
+    async function submitOrder(orderData) {
+        const orderId = `${new Date().getFullYear()}${(new Date().getMonth()+1).toString().padStart(2,'0')}${new Date().getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const isChineseCustomer = /[\u4e00-\u9fa5]/.test(orderData.name);
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        
+        try {
+            // 1. 上传支付凭证
+            const paymentFile = document.getElementById('payment').files[0];
+            let paymentProofUrl = '';
+            
+            if (paymentFile) {
+                const fileExt = paymentFile.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+                const { data, error } = await supabase.storage
+                    .from('payment-proofs')
+                    .upload(`proofs/${fileName}`, paymentFile);
+                
+                if (error) throw error;
+                
+                const { data: { publicUrl } } = supabase.storage
+                    .from('payment-proofs')
+                    .getPublicUrl(`proofs/${fileName}`);
+                paymentProofUrl = publicUrl;
+            }
+            
+            // 2. 插入订单数据到 Supabase
+            const { data, error } = await supabase
+                .from('orders')
+                .insert([{
+                    order_id: orderId,
+                    name: orderData.name,
+                    phone: orderData.phone,
+                    delivery_method: orderData.delivery,
+                    order_items: orderData.items,
+                    total_amount: orderData.total,
+                    payment_proof_url: paymentProofUrl,
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                }]);
             
             if (error) throw error;
             
-            const { data: { publicUrl } } = supabase.storage
-                .from('payment-proofs')
-                .getPublicUrl(`proofs/${fileName}`);
-            paymentProofUrl = publicUrl;
+            // 3. 发送 WhatsApp 消息
+            sendOrderViaWhatsApp({
+                ...orderData,
+                orderId: orderId
+            });
+            
+            alert(isChineseCustomer ? '订单提交成功！请发送WhatsApp确认' : 'Order submitted! Please send WhatsApp confirmation');
+            
+        } catch (error) {
+            console.error('完整错误信息:', {
+                message: error.message,
+                stack: error.stack,
+                supabaseError: error
+            });
+            alert(isChineseCustomer ? '提交订单失败，请重试' : 'Order submission failed, please try again');
+        } finally {
+            document.getElementById('loadingOverlay').style.display = 'none';
         }
-        
-        // 只调用一次 sendOrderViaWhatsApp
-        sendOrderViaWhatsApp(orderData, orderId);
-        
-        const { data, error } = await supabase
-            .from('orders')
-            .insert([{
-                order_id: orderId,
-                name: orderData.name,
-                phone: orderData.phone,
-                delivery_method: orderData.delivery,
-                order_items: orderData.items,
-                total_amount: orderData.total,
-                payment_proof_url: paymentProofUrl,
-                status: 'pending',
-                created_at: new Date().toISOString()
-            }]);
-        
-        if (error) throw error;
-        
-        alert(isChineseCustomer ? '订单提交成功！请发送WhatsApp确认' : 'Order submitted! Please send WhatsApp confirmation');
-        
-    } catch (error) {
-        console.error('完整错误信息:', {
-            message: error.message,
-            stack: error.stack,
-            supabaseError: error
-        });
-        alert(isChineseCustomer ? '提交订单失败，请重试' : 'Order submission failed, please try again');
-    } finally {
-        document.getElementById('loadingOverlay').style.display = 'none';
     }
-}
-
-<script>
-function sendOrderViaWhatsApp(orderData, orderId) {
-    // 1. 格式化时间
-    const orderTime = new Date().toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-    }).replace(/\//g, '-');
-
-    // 2. 判断客户语言
-    const isChineseCustomer = /[\u4e00-\u9fa5]/.test(orderData.name);
-
-    // 3. 构建更完整的客户消息
-    let customerMessage = isChineseCustomer 
-        ? `*🍢 锋味派订单确认 #${orderId}*%0A%0A📌 *预购说明*:%0A- 此为预购商品%0A- 预计30-60天到货%0A- 国际运费后续通知%0A%0A`
-        : `*🍢 Feng Wei Pai Order Confirmation #${orderId}*%0A%0A📌 *Pre-order Notice*:%0A- This is a pre-order%0A- Estimated 30-60 days delivery%0A- Shipping fee will be notified later%0A%0A`;
-
-    // 添加客户信息
-    customerMessage += isChineseCustomer
-        ? `👤 *客户信息*:%0A`
-        : `👤 *Customer Info*:%0A`;
-    customerMessage += isChineseCustomer
-        ? `▫️ 姓名: ${orderData.name}%0A`
-        : `▫️ Name: ${orderData.name}%0A`;
-    customerMessage += isChineseCustomer
-        ? `▫️ 电话: ${orderData.phone}%0A`
-        : `▫️ Phone: ${orderData.phone}%0A`;
-    customerMessage += isChineseCustomer
-        ? `▫️ 取货方式: ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`
-        : `▫️ Delivery: ${orderData.delivery === 'self-pickup' ? 'Self Pickup' : 'Lalamove Delivery'}%0A%0A`;
-    
-    // 添加订单详情 - 确保使用正确的orderData.items
-    customerMessage += isChineseCustomer
-        ? `🛒 *订单明细*:%0A`
-        : `🛒 *Order Details*:%0A`;
-    
-    // 确保orderData.items存在且是数组
-    if (orderData.items && Array.isArray(orderData.items)) {
-        orderData.items.forEach(item => {
-            // 移除控制字符和表情符号
-            const productName = item.product.replace(/[\u0000-\u001F\u007F-\u009F\u2000-\u206F\u20D0-\u20FF\uFE00-\uFE0F\uFE20-\uFE2F\u2600-\u26FF]/g, "").trim();
-            customerMessage += `▫️ ${productName} × ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}%0A`;
-        });
-    } else {
-        customerMessage += isChineseCustomer 
-            ? `▫️ 无商品信息%0A` 
-            : `▫️ No items information%0A`;
-    }
-    
-    // 添加总结
-    customerMessage += isChineseCustomer
-        ? `%0A💰 *订单总计: RM${orderData.total.toFixed(2)}*%0A%0A`
-        : `%0A💰 *Order Total: RM${orderData.total.toFixed(2)}*%0A%0A`;
-    customerMessage += isChineseCustomer
-        ? `📅 *下单时间: ${orderTime}*%0A%0A`
-        : `📅 *Order Time: ${orderTime}*%0A%0A`;
-    customerMessage += isChineseCustomer
-        ? `📢 如有任何问题，请联系: https://wa.me/60162327792`
-        : `📢 For any inquiries, contact: https://wa.me/60162327792`;
-
-    customerMessage += isChineseCustomer
-        ? `%0A🔹 *下一步*: 请点击下方按钮发送订单确认，然后完成支付`
-        : `%0A🔹 *Next Step*: Please click the button below to confirm your order, then proceed with payment`;
-
-    // 4. 构建更完整的商家消息 - 使用相同的orderData.items
-    let businessMessage = isChineseCustomer
-        ? `*🛎️ [新订单] 锋味派订单 #${orderId}*%0A%0A`
-        : `*🛎️ [New Order] Feng Wei Pai #${orderId}*%0A%0A`;
-    
-    // 添加客户信息
-    businessMessage += isChineseCustomer
-        ? `👤 *客户信息*:%0A`
-        : `👤 *Customer Info*:%0A`;
-    businessMessage += isChineseCustomer
-        ? `▫️ 姓名: ${orderData.name}%0A`
-        : `▫️ Name: ${orderData.name}%0A`;
-    businessMessage += isChineseCustomer
-        ? `▫️ 电话: https://wa.me/${formatPhoneNumber(orderData.phone)}%0A`
-        : `▫️ Phone: https://wa.me/${formatPhoneNumber(orderData.phone)}%0A`;
-    businessMessage += isChineseCustomer
-        ? `▫️ 取货方式: ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`
-        : `▫️ Delivery: ${orderData.delivery === 'self-pickup' ? 'Self Pickup' : 'Lalamove Delivery'}%0A%0A`;
-    
-    // 添加订单详情 - 确保使用正确的orderData.items
-    businessMessage += isChineseCustomer
-        ? `🛒 *订单内容*:%0A`
-        : `🛒 *Order Items*:%0A`;
-    
-    if (orderData.items && Array.isArray(orderData.items)) {
-        orderData.items.forEach(item => {
-            // 移除控制字符和表情符号
-            const productName = item.product.replace(/[\u0000-\u001F\u007F-\u009F\u2000-\u206F\u20D0-\u20FF\uFE00-\uFE0F\uFE20-\uFE2F\u2600-\u26FF]/g, "").trim();
-            businessMessage += `▫️ ${productName} × ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}%0A`;
-        });
-    } else {
-        businessMessage += isChineseCustomer 
-            ? `▫️ 无商品信息%0A` 
-            : `▫️ No items information%0A`;
-    }
-    
-    // 添加总结
-    businessMessage += isChineseCustomer
-        ? `%0A💰 *总金额: RM${orderData.total.toFixed(2)}*%0A`
-        : `%0A💰 *Total Amount: RM${orderData.total.toFixed(2)}*%0A`;
-    businessMessage += isChineseCustomer
-        ? `📅 *下单时间: ${orderTime}*%0A%0A`
-        : `📅 *Order Time: ${orderTime}*%0A%0A`;
-    businessMessage += isChineseCustomer
-        ? `📝 *备注*: ______`
-        : `📝 *Notes*: ______`;
-
-    // 5. 创建WhatsApp按钮容器
-    const whatsappContainer = document.createElement('div');
-    whatsappContainer.id = 'whatsappButtons';
-    whatsappContainer.style.background = 'white';
-    whatsappContainer.style.padding = '20px';
-    whatsappContainer.style.borderRadius = '10px';
-    whatsappContainer.style.marginTop = '20px';
-    whatsappContainer.style.textAlign = 'center';
-    
-    if (isChineseCustomer) {
-        whatsappContainer.innerHTML = `
-            <h3 style="margin-top:0;color:var(--primary);">订单提交成功！</h3>
-            <p>请点击下方按钮发送订单确认信息：</p>
-        `;
-    } else {
-        whatsappContainer.innerHTML = `
-            <h3 style="margin-top:0;color:var(--primary);">Order Submitted Successfully!</h3>
-            <p>Please click the buttons below to send order confirmation:</p>
-        `;
-    }
-    
-    // 6. 创建并添加WhatsApp按钮
-    const createWhatsAppButton = (phone, message, label, isPrimary = false) => {
-        const waUrl = `https://wa.me/${phone}?text=${message}`;
-        const btn = document.createElement('a');
-        btn.href = waUrl;
-        btn.className = 'whatsapp-btn';
-        btn.style.backgroundColor = isPrimary ? '#25D366' : '#075E54';
-        btn.style.margin = '10px';
-        btn.style.display = 'inline-block';
-        btn.target = '_blank';
-        btn.innerHTML = `<span class="emoji">💬</span> ${label}`;
-        return btn;
-    };
-
-    // 添加发送给客户的按钮
-    whatsappContainer.appendChild(createWhatsAppButton(
-        formatPhoneNumber(orderData.phone),
-        customerMessage,
-        isChineseCustomer ? '发送订单确认给我' : 'Send Confirmation to Me',
-        true
-    ));
-    
-    // 添加发送给商家的按钮
-    whatsappContainer.appendChild(createWhatsAppButton(
-        '60162327792',
-        businessMessage,
-        isChineseCustomer ? '发送订单详情给商家' : 'Send Order to Business'
-    ));
-    
-    // 7. 添加到表单中
-    const form = document.getElementById('orderForm');
-    const existingWhatsappButtons = document.getElementById('whatsappButtons');
-    if (existingWhatsappButtons) {
-        form.replaceChild(whatsappContainer, existingWhatsappButtons);
-    } else {
-        form.insertBefore(whatsappContainer, form.querySelector('.submit-btn'));
-    }
-    
-    // 8. 滚动到按钮位置
-    whatsappContainer.scrollIntoView({ behavior: 'smooth' });
-}
-</script>
 
             // ====================== 表单提交事件 ======================
             document.getElementById('orderForm').addEventListener('submit', function(e) {
