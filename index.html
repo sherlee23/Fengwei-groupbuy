@@ -1101,8 +1101,12 @@ calculateTotal(); // 更新总价显示
 
                     
                 } catch (error) {
-                    console.error('订单提交失败:', error);
-                    alert('提交订单失败，请重试: ' + error.message);
+    console.error('订单提交失败:', error);
+    let errorMsg = '提交订单失败，请重试';
+    if (error.message.includes('isChineseChinese')) {
+        errorMsg += ' (系统错误：请联系管理员)';
+    }
+    alert(errorMsg);
                 } finally {
                     // 隐藏加载指示器
                     document.getElementById('loadingOverlay').style.display = 'none';
@@ -1112,23 +1116,17 @@ calculateTotal(); // 更新总价显示
 function sendOrderViaWhatsApp(orderData) {
     // ===== 1. 电话号码格式化函数 =====
     const formatPhoneNumber = (phone) => {
-        // 移除所有非数字字符（包括 +、空格、横杠）
         let cleaned = phone.replace(/\D/g, '');
-        
-        // 处理马来西亚号码格式：
-        // - 如果以 "60" 开头（已含国际区号），直接返回
-        // - 如果以 "0" 开头（本地格式），替换为 "60"
-        // - 其他情况原样返回
         if (cleaned.startsWith('60')) {
             return cleaned;
         } else if (cleaned.startsWith('0')) {
             return '60' + cleaned.substring(1);
         }
-        return cleaned; // 默认返回（假设用户已输入国际格式）
+        return cleaned;
     };
 
     // ===== 2. 生成订单信息 =====
-    const orderId = Date.now().toString().slice(-6); // 6位订单ID
+    const orderId = Date.now().toString().slice(-6);
     const orderTime = new Date().toLocaleString('zh-CN', {
         year: 'numeric',
         month: '2-digit',
@@ -1138,7 +1136,7 @@ function sendOrderViaWhatsApp(orderData) {
         hour12: false
     }).replace(/\//g, '-');
 
-    // ===== 3. 判断客户语言（中文/英文） =====
+    // ===== 3. 判断客户语言 =====
     const isChineseCustomer = /[\u4e00-\u9fa5]/.test(orderData.name);
 
     // ===== 4. 构建客户消息 =====
@@ -1162,7 +1160,6 @@ function sendOrderViaWhatsApp(orderData) {
         ? `🚚 取货方式: ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`
         : `🚚 Delivery: ${orderData.delivery === 'self-pickup' ? 'Self Pickup' : 'Lalamove Delivery'}%0A%0A`;
     
-    // 添加订单明细
     customerMessage += isChineseCustomer
         ? `*📝 订单明细:*%0A`
         : `*📝 Order Details:*%0A`;
@@ -1186,7 +1183,7 @@ function sendOrderViaWhatsApp(orderData) {
     businessMessage += isChineseCustomer
         ? `🆔 订单号: #${orderId}%0A`
         : `🆔 Order ID: #${orderId}%0A`;
-    businessMessage += isChineseChinese
+    businessMessage += isChineseCustomer
         ? `🕒 时间: ${orderTime}%0A`
         : `🕒 Time: ${orderTime}%0A`;
     businessMessage += isChineseCustomer
@@ -1233,9 +1230,8 @@ function sendOrderViaWhatsApp(orderData) {
 
     // ===== 7. 执行发送 =====
     const customerPhone = formatPhoneNumber(orderData.phone);
-    const businessPhone = '60162327792'; // 您的商家号码
+    const businessPhone = '60162327792';
 
-    // 先发客户，2秒后发商家（避免浏览器拦截）
     sendMessage(customerPhone, customerMessage);
     setTimeout(() => {
         sendMessage(businessPhone, businessMessage, true);
