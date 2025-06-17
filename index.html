@@ -1130,9 +1130,7 @@ html += `</div>`;
 }
 
 function sendOrderViaWhatsApp(orderData, orderId) {
-    // 移除 orderId 生成代码，直接使用传入的 orderId
-    
-    // 2. 格式化时间
+    // 1. 格式化时间
     const orderTime = new Date().toLocaleString('zh-CN', {
         year: 'numeric',
         month: '2-digit',
@@ -1142,18 +1140,16 @@ function sendOrderViaWhatsApp(orderData, orderId) {
         hour12: false
     }).replace(/\//g, '-');
 
-    // 3. 判断客户语言
+    // 2. 判断客户语言
     const isChineseCustomer = /[\u4e00-\u9fa5]/.test(orderData.name);
 
-    // 4. 构建更完整的客户消息
+    // 3. 构建更完整的客户消息
     let customerMessage = isChineseCustomer 
         ? `*🍢 锋味派订单确认 #${orderId}*%0A%0A📌 *预购说明*:%0A- 此为预购商品%0A- 预计30-60天到货%0A- 国际运费后续通知%0A%0A`
         : `*🍢 Feng Wei Pai Order Confirmation #${orderId}*%0A%0A📌 *Pre-order Notice*:%0A- This is a pre-order%0A- Estimated 30-60 days delivery%0A- Shipping fee will be notified later%0A%0A`;
 
     // 添加客户信息
-customerMessage += isChineseCustomer
-    ? `▫️ 电话: https://wa.me/${formatPhoneNumber(orderData.phone)}%0A`
-    : `▫️ Phone: https://wa.me/${formatPhoneNumber(orderData.phone)}%0A`; customerMessage += isChineseCustomer
+    customerMessage += isChineseCustomer
         ? `👤 *客户信息*:%0A`
         : `👤 *Customer Info*:%0A`;
     customerMessage += isChineseCustomer
@@ -1166,13 +1162,24 @@ customerMessage += isChineseCustomer
         ? `▫️ 取货方式: ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`
         : `▫️ Delivery: ${orderData.delivery === 'self-pickup' ? 'Self Pickup' : 'Lalamove Delivery'}%0A%0A`;
     
-    // 添加订单详情
+    // 添加订单详情 - 这里修复了订单详情显示问题
     customerMessage += isChineseCustomer
         ? `🛒 *订单明细*:%0A`
         : `🛒 *Order Details*:%0A`;
-    orderData.items.forEach(item => {
-        customerMessage += `▫️ ${item.product} × ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}%0A`;
-    });
+    
+    // 确保orderData.items存在且是数组
+    if (orderData.items && Array.isArray(orderData.items)) {
+        orderData.items.forEach(item => {
+            const productName = isChineseCustomer ? 
+                item.product.replace(/[\u0000-\u001F\u007F-\u009F]/g, "") : 
+                item.product.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+            customerMessage += `▫️ ${productName} × ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}%0A`;
+        });
+    } else {
+        customerMessage += isChineseCustomer 
+            ? `▫️ 无商品信息%0A` 
+            : `▫️ No items information%0A`;
+    }
     
     // 添加总结
     customerMessage += isChineseCustomer
@@ -1185,11 +1192,11 @@ customerMessage += isChineseCustomer
         ? `📢 如有任何问题，请联系: https://wa.me/60162327792`
         : `📢 For any inquiries, contact: https://wa.me/60162327792`;
 
-customerMessage += isChineseCustomer
-    ? `%0A🔹 *下一步*: 请点击下方按钮发送订单确认，然后完成支付`
-    : `%0A🔹 *Next Step*: Please click the button below to confirm your order, then proceed with payment`;
+    customerMessage += isChineseCustomer
+        ? `%0A🔹 *下一步*: 请点击下方按钮发送订单确认，然后完成支付`
+        : `%0A🔹 *Next Step*: Please click the button below to confirm your order, then proceed with payment`;
 
-    // 5. 构建更完整的商家消息
+    // 4. 构建更完整的商家消息
     let businessMessage = isChineseCustomer
         ? `*🛎️ [新订单] 锋味派订单 #${orderId}*%0A%0A`
         : `*🛎️ [New Order] Feng Wei Pai #${orderId}*%0A%0A`;
@@ -1208,13 +1215,23 @@ customerMessage += isChineseCustomer
         ? `▫️ 取货方式: ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`
         : `▫️ Delivery: ${orderData.delivery === 'self-pickup' ? 'Self Pickup' : 'Lalamove Delivery'}%0A%0A`;
     
-    // 添加订单详情
+    // 添加订单详情 - 同样修复商家消息中的订单详情
     businessMessage += isChineseCustomer
         ? `🛒 *订单内容*:%0A`
         : `🛒 *Order Items*:%0A`;
-    orderData.items.forEach(item => {
-        businessMessage += `▫️ ${item.product} × ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}%0A`;
-    });
+    
+    if (orderData.items && Array.isArray(orderData.items)) {
+        orderData.items.forEach(item => {
+            const productName = isChineseCustomer ? 
+                item.product.replace(/[\u0000-\u001F\u007F-\u009F]/g, "") : 
+                item.product.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+            businessMessage += `▫️ ${productName} × ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}%0A`;
+        });
+    } else {
+        businessMessage += isChineseCustomer 
+            ? `▫️ 无商品信息%0A` 
+            : `▫️ No items information%0A`;
+    }
     
     // 添加总结
     businessMessage += isChineseCustomer
@@ -1227,7 +1244,7 @@ customerMessage += isChineseCustomer
         ? `📝 *备注*: ______`
         : `📝 *Notes*: ______`;
 
-    // 6. 创建WhatsApp按钮容器
+    // 5. 创建WhatsApp按钮容器
     const whatsappContainer = document.createElement('div');
     whatsappContainer.id = 'whatsappButtons';
     whatsappContainer.style.background = 'white';
@@ -1248,7 +1265,7 @@ customerMessage += isChineseCustomer
         `;
     }
     
-    // 7. 创建并添加WhatsApp按钮
+    // 6. 创建并添加WhatsApp按钮
     const createWhatsAppButton = (phone, message, label, isPrimary = false) => {
         const waUrl = `https://wa.me/${phone}?text=${message}`;
         const btn = document.createElement('a');
@@ -1277,7 +1294,7 @@ customerMessage += isChineseCustomer
         isChineseCustomer ? '发送订单详情给商家' : 'Send Order to Business'
     ));
     
-    // 8. 添加到表单中
+    // 7. 添加到表单中
     const form = document.getElementById('orderForm');
     const existingWhatsappButtons = document.getElementById('whatsappButtons');
     if (existingWhatsappButtons) {
@@ -1286,11 +1303,8 @@ customerMessage += isChineseCustomer
         form.insertBefore(whatsappContainer, form.querySelector('.submit-btn'));
     }
     
-    // 9. 滚动到按钮位置
+    // 8. 滚动到按钮位置
     whatsappContainer.scrollIntoView({ behavior: 'smooth' });
-    
-    // 10. 返回订单ID用于数据库存储
-    return orderId;
 }
 
             // ====================== 表单提交事件 ======================
