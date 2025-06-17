@@ -1129,6 +1129,7 @@ html += `</div>`;
     }
 }
 
+<script>
 function sendOrderViaWhatsApp(orderData, orderId) {
     // 1. 格式化时间
     const orderTime = new Date().toLocaleString('zh-CN', {
@@ -1162,7 +1163,7 @@ function sendOrderViaWhatsApp(orderData, orderId) {
         ? `▫️ 取货方式: ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`
         : `▫️ Delivery: ${orderData.delivery === 'self-pickup' ? 'Self Pickup' : 'Lalamove Delivery'}%0A%0A`;
     
-    // 添加订单详情
+    // 添加订单详情 - 确保使用正确的orderData.items
     customerMessage += isChineseCustomer
         ? `🛒 *订单明细*:%0A`
         : `🛒 *Order Details*:%0A`;
@@ -1195,7 +1196,7 @@ function sendOrderViaWhatsApp(orderData, orderId) {
         ? `%0A🔹 *下一步*: 请点击下方按钮发送订单确认，然后完成支付`
         : `%0A🔹 *Next Step*: Please click the button below to confirm your order, then proceed with payment`;
 
-    // 4. 构建更完整的商家消息
+    // 4. 构建更完整的商家消息 - 使用相同的orderData.items
     let businessMessage = isChineseCustomer
         ? `*🛎️ [新订单] 锋味派订单 #${orderId}*%0A%0A`
         : `*🛎️ [New Order] Feng Wei Pai #${orderId}*%0A%0A`;
@@ -1214,7 +1215,7 @@ function sendOrderViaWhatsApp(orderData, orderId) {
         ? `▫️ 取货方式: ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`
         : `▫️ Delivery: ${orderData.delivery === 'self-pickup' ? 'Self Pickup' : 'Lalamove Delivery'}%0A%0A`;
     
-    // 添加订单详情
+    // 添加订单详情 - 确保使用正确的orderData.items
     businessMessage += isChineseCustomer
         ? `🛒 *订单内容*:%0A`
         : `🛒 *Order Items*:%0A`;
@@ -1304,6 +1305,7 @@ function sendOrderViaWhatsApp(orderData, orderId) {
     // 8. 滚动到按钮位置
     whatsappContainer.scrollIntoView({ behavior: 'smooth' });
 }
+</script>
 
             // ====================== 表单提交事件 ======================
             document.getElementById('orderForm').addEventListener('submit', function(e) {
