@@ -103,6 +103,11 @@
       border-radius: 10px;
       font-size: 16px;
     }
+    textarea {
+      height: 48px;
+      resize: vertical;
+      max-height: 120px;
+    }
     .disclaimer-box {
       background-color: #FFF3F3;
       border-left: 4px solid #FF4757;
@@ -128,7 +133,7 @@
       background-color: #6c757d;
       color: white;
     }
-    #confirmationDialog, #loadingOverlay {
+    #confirmationDialog {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -137,12 +142,34 @@
       align-items: center;
       z-index: 1000;
     }
-    #confirmationDialog > div, #loadingOverlay > div {
+    #confirmationDialog > div {
       background: white;
       padding: 25px;
       border-radius: 12px;
       max-width: 500px;
       width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    #loadingOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      color: white;
+      font-size: 20px;
+    }
+    .error-message {
+      color: #dc3545;
+      font-size: 14px;
+      margin-top: 5px;
+      display: none;
+    }
+    .input-error {
+      border-color: #dc3545 !important;
     }
   </style>
 </head>
@@ -156,18 +183,25 @@
         <p>当前价格<strong>不包含</strong>国际运费，运费将根据实际物流成本后续通知收取。</p>
         <label><input type="checkbox" id="agreeCheckbox" required /> 我已阅读并同意上述条款</label>
       </div>
-      <div class="form-group"><label>姓名 Name</label><input type="text" id="name" required /></div>
-      <div class="form-group"><label>电话 Phone</label><input type="tel" id="phone" required /></div>
       <div class="form-group">
-        <label>取货方式 Delivery</label>
+        <label for="name">姓名 Name</label>
+        <input type="text" id="name" required />
+        <div id="nameError" class="error-message"></div>
+      </div>
+      <div class="form-group">
+        <label for="phone">电话 Phone</label>
+        <input type="tel" id="phone" required />
+        <div id="phoneError" class="error-message"></div>
+      </div>
+      <div class="form-group">
+        <label for="delivery">取货方式 Delivery</label>
         <select id="delivery" required>
           <option value="">请选择方式...</option>
           <option value="self-pickup">自取 Self Pickup</option>
           <option value="lalamove">Lalamove 送货</option>
         </select>
+        <div id="deliveryError" class="error-message"></div>
       </div>
-
-      <!-- ============= 商品列表开始 ============= -->
 
 <!-- ============= 烤肠系列 ============= -->
             <h3 class="category-title"><span class="emoji">🌭</span>烤肠系列</h3>
@@ -538,11 +572,13 @@
 
             <!-- ============= 商品列表结束 ============= -->
 
-      <div class="total">共计：RM<span id="totalAmount">0</span></div>
+      <div class="total">
+        共计：RM<span id="totalAmount">0.00</span>
+      </div>
 
       <div class="form-group">
-        <label>📝 备注</label>
-        <textarea id="remarks" rows="3" placeholder="例如：请放门口、我要辣、不吃香菜"></textarea>
+        <label for="remarks">备注（可选）</label>
+        <textarea id="remarks" placeholder="例如：一起交给某某某，到时再安排，等等"></textarea>
       </div>
 
       <div class="form-group">
@@ -558,8 +594,9 @@
       </div>
 
       <div class="form-group">
-        <label>💳 上传转账凭证</label>
+        <label for="payment">💳 上传转账凭证</label>
         <input type="file" id="payment" accept="image/*" required />
+        <div id="paymentError" class="error-message"></div>
       </div>
 
       <button type="submit" class="submit-btn">🚀 提交订单</button>
@@ -576,6 +613,10 @@
   </div>
 
 <script>
+const SUPABASE_URL = 'https://edfnhhthztskuuosuasw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampvLYJr-KgqVwXsKoAo';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 function formatPhoneNumber(phone) {
   const cleaned = phone.replace(/\D/g, '');
   if (cleaned.startsWith('60')) return cleaned;
@@ -584,230 +625,236 @@ function formatPhoneNumber(phone) {
   return '60' + cleaned;
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-  const SUPABASE_URL = 'https://edfnhhthztskuuosuasw.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampvLYJr-KgqVwXsKoAo';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+function calculateTotal() {
+  let total = 0;
+  document.querySelectorAll('.quantity-input').forEach(input => {
+    const quantity = parseInt(input.value) || 0;
+    if (quantity > 0) {
+      const price = parseFloat(input.closest('.product').querySelector('.product-price').textContent.replace('RM', ''));
+      total += quantity * price;
+    }
+  });
+  document.getElementById('totalAmount').textContent = total.toFixed(2);
+  return total;
+}
 
-  function calculateTotal() {
-    let total = 0;
-    document.querySelectorAll('.quantity-input').forEach(input => {
-      const quantity = parseInt(input.value) || 0;
-      if (quantity > 0) {
-        const priceText = input.closest('.product').querySelector('.product-price').textContent;
-        const price = parseFloat(priceText.replace('RM', ''));
-        total += quantity * price;
-      }
-    });
-    document.getElementById('totalAmount').textContent = total.toFixed(2);
-    return total;
+function validateForm() {
+  let valid = true;
+
+  const name = document.getElementById('name');
+  const phone = document.getElementById('phone');
+  const delivery = document.getElementById('delivery');
+  const payment = document.getElementById('payment');
+  const agree = document.getElementById('agreeCheckbox');
+
+  const nameError = document.getElementById('nameError');
+  const phoneError = document.getElementById('phoneError');
+  const deliveryError = document.getElementById('deliveryError');
+  const paymentError = document.getElementById('paymentError');
+
+  nameError.style.display = phoneError.style.display = deliveryError.style.display = paymentError.style.display = 'none';
+  name.classList.remove('input-error');
+  phone.classList.remove('input-error');
+  delivery.classList.remove('input-error');
+  payment.classList.remove('input-error');
+
+  if (!name.value.trim()) {
+    nameError.textContent = '请输入姓名';
+    nameError.style.display = 'block';
+    name.classList.add('input-error');
+    valid = false;
   }
 
-  document.querySelectorAll('.quantity-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const inputId = btn.dataset.product;
-      const input = document.getElementById(inputId);
-      let value = parseInt(input.value) || 0;
-      value = btn.classList.contains('plus') ? value + 1 : Math.max(0, value - 1);
-      input.value = value;
-      calculateTotal();
-    });
+  if (!phone.value.trim()) {
+    phoneError.textContent = '请输入电话';
+    phoneError.style.display = 'block';
+    phone.classList.add('input-error');
+    valid = false;
+  }
+
+  if (!delivery.value) {
+    deliveryError.textContent = '请选择取货方式';
+    deliveryError.style.display = 'block';
+    delivery.classList.add('input-error');
+    valid = false;
+  }
+
+  if (!agree.checked) {
+    alert('请先阅读并勾选同意条款');
+    valid = false;
+  }
+
+  if (!payment.files.length) {
+    paymentError.textContent = '请上传转账凭证';
+    paymentError.style.display = 'block';
+    payment.classList.add('input-error');
+    valid = false;
+  }
+
+  const hasProduct = [...document.querySelectorAll('.quantity-input')].some(input => parseInt(input.value) > 0);
+  if (!hasProduct) {
+    alert('请至少选择一件商品');
+    valid = false;
+  }
+
+  return valid;
+}
+
+function buildWhatsAppMessage(data) {
+  const formattedPhone = formatPhoneNumber(data.phone);
+  let msg = `*🛎️ [新订单] 锋味派订单 #${data.orderId}*%0A%0A`;
+  msg += `👤 *客户信息*:%0A`;
+  msg += `▫️ 姓名: ${data.name}%0A`;
+  msg += `▫️ 电话: https://wa.me/${formattedPhone}%0A`;
+  msg += `▫️ 取货方式: ${data.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`;
+  msg += `🛒 *订单内容*:%0A`;
+  data.items.forEach(item => {
+    msg += `▫️ ${item.product} × ${item.quantity} = RM${(item.quantity * item.price).toFixed(2)}%0A`;
   });
+  msg += `%0A💰 *总金额: RM${data.total.toFixed(2)}*%0A`;
+  msg += `📅 *下单时间:* ${new Date().toLocaleString()}%0A`;
+  msg += `📝 *备注:* ${data.remarks || '（无）'}`;
+  return msg;
+}
+
+async function submitOrder(data) {
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  try {
+    const paymentFile = document.getElementById('payment').files[0];
+    let paymentProofUrl = '';
+    if (paymentFile) {
+      const ext = paymentFile.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from('payment-proofs').upload(`proofs/${fileName}`, paymentFile);
+      if (uploadErr) throw uploadErr;
+      const { data: fileData } = supabase.storage.from('payment-proofs').getPublicUrl(`proofs/${fileName}`);
+      paymentProofUrl = fileData.publicUrl;
+    }
+
+    await supabase.from('orders').insert([{
+      order_id: data.orderId,
+      name: data.name,
+      phone: data.phone,
+      delivery_method: data.delivery,
+      order_items: data.items,
+      total_amount: data.total,
+      remarks: data.remarks,
+      payment_proof_url: paymentProofUrl,
+      status: 'pending',
+      created_at: new Date().toISOString()
+    }]);
+
+    alert('订单已提交，正在跳转 WhatsApp...');
+  } catch (err) {
+    alert('订单提交失败，请重试');
+    console.error(err);
+  } finally {
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
+}
+
+function showOrderConfirmation() {
+  const orderId = `${new Date().getFullYear()}${(new Date().getMonth()+1).toString().padStart(2,'0')}${new Date().getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+  const orderData = {
+    orderId,
+    name: document.getElementById('name').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    delivery: document.getElementById('delivery').value,
+    remarks: document.getElementById('remarks').value.trim(),
+    items: [],
+    total: calculateTotal()
+  };
 
   document.querySelectorAll('.quantity-input').forEach(input => {
-    input.addEventListener('change', () => {
-      input.value = Math.max(0, parseInt(input.value) || 0);
-      calculateTotal();
-    });
+    const qty = parseInt(input.value) || 0;
+    if (qty > 0) {
+      const product = input.closest('.product');
+      const name = product.querySelector('.product-name').textContent.split(' ')[0];
+      const price = parseFloat(product.querySelector('.product-price').textContent.replace('RM', ''));
+      orderData.items.push({ product: name, quantity: qty, price });
+    }
   });
 
-  calculateTotal();
+  const message = buildWhatsAppMessage(orderData);
+  const preview = decodeURIComponent(message).replace(/%0A/g, '\n');
 
-  function validateForm() {
-    let valid = true;
-    const name = document.getElementById('name');
-    const phone = document.getElementById('phone');
-    const delivery = document.getElementById('delivery');
-    const payment = document.getElementById('payment');
-    const agree = document.getElementById('agreeCheckbox');
+  const html = `
+    <h2 class="confirmation-title">订单确认</h2>
+    <p><strong>姓名:</strong> ${orderData.name}</p>
+    <p><strong>电话:</strong> ${orderData.phone}</p>
+    <p><strong>取货方式:</strong> ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}</p>
+    <h3 style="margin-top:20px;">订单明细</h3>
+    ${orderData.items.map(item => `<p>${item.product} × ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}</p>`).join('')}
+    <h3>总计: RM${orderData.total.toFixed(2)}</h3>
+    <h3>📤 WhatsApp 预览</h3>
+    <textarea style="width:100%;height:150px;border-radius:6px;">${preview}</textarea>
+    <div class="confirmation-buttons" style="margin-top:20px;">
+      <button id="confirmCancel" class="confirmation-btn confirmation-cancel">取消</button>
+      <button id="confirmSubmit" class="confirmation-btn confirmation-submit">确认并发送</button>
+    </div>
+  `;
 
-    document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('input, select, textarea').forEach(el => el.classList.remove('input-error'));
+  document.getElementById('confirmationContent').innerHTML = html;
+  document.getElementById('confirmationDialog').style.display = 'flex';
 
-    if (!name.value.trim()) valid = false;
-    if (!phone.value.trim()) valid = false;
-    if (!delivery.value) valid = false;
-    if (!agree.checked) {
-      alert('请先阅读并勾选同意条款');
-      valid = false;
-    }
-    if (!payment.files || payment.files.length === 0) valid = false;
-
-    const hasProduct = [...document.querySelectorAll('.quantity-input')].some(input => parseInt(input.value) > 0);
-    if (!hasProduct) {
-      alert('请至少选择一件商品');
-      valid = false;
-    }
-
-    return valid;
-  }
-
-  function buildWhatsAppMessage(data) {
-    const formattedPhone = formatPhoneNumber(data.phone);
-    let msg = `*🛎️ [新订单] 锋味派订单 #${data.orderId}*%0A%0A`;
-    msg += `👤 *客户信息*:%0A`;
-    msg += `▫️ 姓名: ${data.name}%0A`;
-    msg += `▫️ 电话: https://wa.me/${formattedPhone}%0A`;
-    msg += `▫️ 取货方式: ${data.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`;
-    msg += `🛒 *订单内容*:%0A`;
-    data.items.forEach(item => {
-      msg += `▫️ ${item.product} × ${item.quantity} = RM${(item.quantity * item.price).toFixed(2)}%0A`;
-    });
-    msg += `%0A💰 *总金额: RM${data.total.toFixed(2)}*%0A`;
-    msg += `📅 *下单时间:* ${new Date().toLocaleString()}%0A`;
-    msg += `📝 *备注:* ${data.remarks || '（无）'}`;
-    return msg;
-  }
-
-  async function submitOrder(data) {
-    document.getElementById('loadingOverlay').style.display = 'flex';
-    try {
-      const paymentFile = document.getElementById('payment').files[0];
-      let paymentProofUrl = '';
-      if (paymentFile) {
-        const ext = paymentFile.name.split('.').pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-        const { error: uploadErr } = await supabase.storage.from('payment-proofs').upload(`proofs/${fileName}`, paymentFile);
-        if (uploadErr) throw uploadErr;
-        const { data: fileData } = supabase.storage.from('payment-proofs').getPublicUrl(`proofs/${fileName}`);
-        paymentProofUrl = fileData.publicUrl;
-      }
-
-      await supabase.from('orders').insert([{
-        order_id: data.orderId,
-        name: data.name,
-        phone: data.phone,
-        delivery_method: data.delivery,
-        order_items: data.items,
-        total_amount: data.total,
-        remarks: data.remarks,
-        payment_proof_url: paymentProofUrl,
-        status: 'pending',
-        created_at: new Date().toISOString()
-      }]);
-
-      alert('订单已提交，正在跳转 WhatsApp...');
-    } catch (err) {
-      alert('订单提交失败，请重试');
-      console.error(err);
-    } finally {
-      document.getElementById('loadingOverlay').style.display = 'none';
-    }
-  }
-
-  function showOrderConfirmation() {
-    const orderId = `${new Date().getFullYear()}${(new Date().getMonth()+1).toString().padStart(2,'0')}${new Date().getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const orderData = {
-      orderId,
-      name: document.getElementById('name').value.trim(),
-      phone: document.getElementById('phone').value.trim(),
-      delivery: document.getElementById('delivery').value,
-      remarks: document.getElementById('remarks').value.trim(),
-      items: [],
-      total: calculateTotal()
-    };
-
-    document.querySelectorAll('.quantity-input').forEach(input => {
-      const qty = parseInt(input.value) || 0;
-      if (qty > 0) {
-        const product = input.closest('.product');
-        const name = product.querySelector('.product-name').textContent.split(' ')[0];
-        const price = parseFloat(product.querySelector('.product-price').textContent.replace('RM', ''));
-        orderData.items.push({ product: name, quantity: qty, price });
-      }
-    });
-
-    const message = buildWhatsAppMessage(orderData);
-    const preview = decodeURIComponent(message).replace(/%0A/g, '\n');
-
-    const html = `
-      <h2 class="confirmation-title">订单确认</h2>
-      <p><strong>姓名:</strong> ${orderData.name}</p>
-      <p><strong>电话:</strong> ${orderData.phone}</p>
-      <p><strong>取货方式:</strong> ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}</p>
-      <h3 style="margin-top:20px;">订单明细</h3>
-      ${orderData.items.map(item => `<p>${item.product} × ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}</p>`).join('')}
-      <h3>总计: RM${orderData.total.toFixed(2)}</h3>
-      <h3>📤 WhatsApp 预览</h3>
-      <textarea style="width:100%;height:150px;border-radius:6px;">${preview}</textarea>
-      <div class="confirmation-buttons">
-        <button id="confirmCancel" class="confirmation-btn confirmation-cancel">取消</button>
-        <button id="confirmSubmit" class="confirmation-btn confirmation-submit">确认并发送</button>
-      </div>
-    `;
-
-    document.getElementById('confirmationContent').innerHTML = html;
-    document.getElementById('confirmationDialog').style.display = 'flex';
-
-    document.getElementById('confirmCancel').onclick = () => {
-      document.getElementById('confirmationDialog').style.display = 'none';
-    };
-
-    document.getElementById('confirmSubmit').onclick = () => {
-      document.getElementById('confirmationDialog').style.display = 'none';
-      const whatsappUrl = `https://wa.me/${formatPhoneNumber('0162327792')}?text=${message}`;
-      const link = document.createElement('a');
-      link.href = whatsappUrl;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      submitOrder(orderData);
-    };
-  }
-
-  document.getElementById('orderForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    if (validateForm()) showOrderConfirmation();
-  });
-
-  document.getElementById('showExportBtn').onclick = () => {
-    document.getElementById('adminPanel').style.display = 'block';
+  document.getElementById('confirmCancel').onclick = () => {
+    document.getElementById('confirmationDialog').style.display = 'none';
   };
 
-  document.getElementById('realExportBtn').onclick = async () => {
-    const pwd = document.getElementById('adminPassword').value;
-    if (pwd !== 'fengweipai2024') {
-      alert('密码错误');
-      return;
-    }
-
-    const { data, error } = await supabase.from('orders').select('*');
-    if (error) {
-      alert('导出失败');
-      console.error(error);
-      return;
-    }
-
-    const rows = data.map(o => ({
-      订单编号: o.order_id,
-      姓名: o.name,
-      电话: o.phone,
-      取货方式: o.delivery_method,
-      商品: o.order_items.map(i => `${i.product}×${i.quantity}`).join(', '),
-      总金额: o.total_amount,
-      备注: o.remarks || '',
-      凭证链接: o.payment_proof_url,
-      时间: o.created_at
-    }));
-
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(rows);
-    XLSX.utils.book_append_sheet(wb, ws, "订单");
-    XLSX.writeFile(wb, `订单导出_${new Date().toLocaleDateString()}.xlsx`);
+  document.getElementById('confirmSubmit').onclick = () => {
+    document.getElementById('confirmationDialog').style.display = 'none';
+    const whatsappUrl = `https://wa.me/${formatPhoneNumber('0162327792')}?text=${message}`;
+    const link = document.createElement('a');
+    link.href = whatsappUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    submitOrder(orderData);
   };
+}
+
+document.getElementById('orderForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  if (validateForm()) showOrderConfirmation();
 });
+
+document.getElementById('showExportBtn').onclick = () => {
+  document.getElementById('adminPanel').style.display = 'block';
+};
+
+document.getElementById('realExportBtn').onclick = async () => {
+  const pwd = document.getElementById('adminPassword').value;
+  if (pwd !== 'fengweipai2024') {
+    alert('密码错误');
+    return;
+  }
+
+  const { data, error } = await supabase.from('orders').select('*');
+  if (error) {
+    alert('导出失败');
+    console.error(error);
+    return;
+  }
+
+  const rows = data.map(o => ({
+    订单编号: o.order_id,
+    姓名: o.name,
+    电话: o.phone,
+    取货方式: o.delivery_method,
+    商品: o.order_items.map(i => `${i.product}×${i.quantity}`).join(', '),
+    总金额: o.total_amount,
+    备注: o.remarks || '',
+    凭证链接: o.payment_proof_url,
+    时间: o.created_at
+  }));
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, ws, "订单");
+  XLSX.writeFile(wb, `订单导出_${new Date().toLocaleDateString()}.xlsx`);
+};
 </script>
 </body>
 </html>
