@@ -7,82 +7,81 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
   <style>
-    :root {
-      --primary: #FF4757;
-      --secondary: #FF6B81;
-      --accent: #FFA502;
-      --light: #F1F2F6;
-      --dark: #2F3542;
-    }
     body {
       font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
       max-width: 600px;
       margin: 0 auto;
-      padding: 0;
       background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      color: var(--dark);
+      color: #2F3542;
     }
     .header {
       text-align: center;
       padding: 25px 20px;
-      background: linear-gradient(to right, var(--primary), var(--secondary));
+      background: linear-gradient(to right, #FF4757, #FF6B81);
       color: white;
       border-radius: 0 0 20px 20px;
       margin-bottom: 20px;
     }
-    .header h1 {
-      margin: 0;
-      font-size: 28px;
-      font-weight: 700;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-    }
     .container {
       padding: 0 20px 30px;
     }
-    .form-group, .file-upload {
-      margin-bottom: 22px;
-    }
-    .form-group label, .file-upload label {
-      display: block;
-      margin-bottom: 10px;
-      font-weight: 600;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 12px 15px;
-      border: 2px solid #e0e0e0;
-      border-radius: 10px;
-      font-size: 16px;
-      transition: all 0.3s;
-      box-sizing: border-box;
-    }
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--primary);
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.2);
-    }
-    .disclaimer-box {
-      background-color: #FFF3F3;
+    .product {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 15px;
       border-left: 4px solid #FF4757;
-      padding: 15px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+    .product-image-container {
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
       border-radius: 8px;
-      margin-bottom: 25px;
-    }
-    .disclaimer-title {
-      color: #FF4757;
-      font-size: 18px;
-    }
-    .disclaimer-content p {
-      margin: 10px 0;
-      line-height: 1.5;
-    }
-    .disclaimer-checkbox {
-      margin-top: 15px;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
+      justify-content: center;
+      background-color: #f5f5f5;
     }
-    .disclaimer-checkbox input {
-      margin-right: 10px;
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .product-name {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+    .product-price {
+      color: #FF4757;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .quantity-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: linear-gradient(to right, #FF4757, #FF6B81);
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+    .quantity-input {
+      width: 50px;
+      height: 36px;
+      text-align: center;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
     }
     .total {
       font-size: 20px;
@@ -92,7 +91,24 @@
       padding: 18px;
       background: white;
       border-radius: 12px;
-      color: var(--primary);
+      color: #FF4757;
+    }
+    .form-group {
+      margin-bottom: 22px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    .disclaimer-box {
+      background-color: #FFF3F3;
+      border-left: 4px solid #FF4757;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 25px;
     }
     .submit-btn, .export-btn {
       width: 100%;
@@ -105,74 +121,28 @@
       margin-top: 20px;
     }
     .submit-btn {
-      background: linear-gradient(to right, var(--primary), var(--secondary));
+      background: linear-gradient(to right, #FF4757, #FF6B81);
       color: white;
     }
     .export-btn {
       background-color: #6c757d;
       color: white;
     }
-    .admin-panel {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 20px;
-      border: 1px solid #e0e0e0;
-      display: none;
-    }
-    #loadingOverlay {
+    #confirmationDialog, #loadingOverlay {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.5);
-      z-index: 1001;
       justify-content: center;
       align-items: center;
-      color: white;
-      font-size: 24px;
-    }
-    #confirmationDialog {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
       z-index: 1000;
-      justify-content: center;
-      align-items: center;
     }
-    #confirmationDialog > div {
+    #confirmationDialog > div, #loadingOverlay > div {
       background: white;
       padding: 25px;
       border-radius: 12px;
       max-width: 500px;
       width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-    .confirmation-title {
-      color: var(--primary);
-      text-align: center;
-    }
-    .confirmation-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 25px;
-    }
-    .confirmation-btn {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .confirmation-cancel {
-      background-color: #6c757d;
-      color: white;
-    }
-    .confirmation-submit {
-      background-color: #25D366;
-      color: white;
     }
   </style>
 </head>
@@ -181,38 +151,20 @@
   <div class="container">
     <form id="orderForm">
       <div class="disclaimer-box">
-        <h3 class="disclaimer-title">⚠️ 重要声明 / Important Notice</h3>
-        <div class="disclaimer-content">
-          <p>1. 此为预购商品，我们将收集所有订单后统一向供应商下单。</p>
-          <p>2. 预计等待时间：30-60天（从下单日起计算）。</p>
-          <p>3. 当前价格<strong>不包含</strong>国际运费，运费将根据实际物流成本后续通知收取。</p>
-        </div>
-        <div class="disclaimer-checkbox">
-          <input type="checkbox" id="agreeCheckbox" required>
-          <label for="agreeCheckbox">我已阅读并同意上述条款 / I agree to the terms</label>
-        </div>
+        <h3>⚠️ 重要声明 / Important Notice</h3>
+        <p>此为预购商品，预计等待时间：30-60天（从下单日起计算）。</p>
+        <p>当前价格<strong>不包含</strong>国际运费，运费将根据实际物流成本后续通知收取。</p>
+        <label><input type="checkbox" id="agreeCheckbox" required /> 我已阅读并同意上述条款</label>
       </div>
-
+      <div class="form-group"><label>姓名 Name</label><input type="text" id="name" required /></div>
+      <div class="form-group"><label>电话 Phone</label><input type="tel" id="phone" required /></div>
       <div class="form-group">
-        <label for="name">👤 姓名 Name</label>
-        <input type="text" id="name" required />
-        <div id="nameError" class="error-message"></div>
-      </div>
-
-      <div class="form-group">
-        <label for="phone">📱 电话 Phone</label>
-        <input type="tel" id="phone" required />
-        <div id="phoneError" class="error-message"></div>
-      </div>
-
-      <div class="form-group">
-        <label for="delivery">🚚 取货方式 Delivery</label>
+        <label>取货方式 Delivery</label>
         <select id="delivery" required>
-          <option value="">请选择取货方式...</option>
-          <option value="self-pickup">自取 Self pick up</option>
+          <option value="">请选择方式...</option>
+          <option value="self-pickup">自取 Self Pickup</option>
           <option value="lalamove">Lalamove 送货</option>
         </select>
-        <div id="deliveryError" class="error-message"></div>
       </div>
 
       <!-- ============= 商品列表开始 ============= -->
@@ -589,36 +541,35 @@
       <div class="total">共计：RM<span id="totalAmount">0</span></div>
 
       <div class="form-group">
-        <label for="remarks">📝 备注（可选）</label>
-        <textarea id="remarks" rows="3" placeholder="例如：我要辣、请放门口、送货时间等"></textarea>
+        <label>📝 备注</label>
+        <textarea id="remarks" rows="3" placeholder="例如：请放门口、我要辣、不吃香菜"></textarea>
       </div>
 
       <div class="form-group">
-        <label>🏦 银行转账信息</label>
+        <h3>🏦 银行转账信息</h3>
         <p>银行名称：Maybank</p>
         <p>户口名：Choong Sher Lee</p>
         <p>户口号码：114209540438</p>
-        <p>📷 请扫描以下二维码转账：</p>
-        <div style="display:flex; gap:10px;">
-          <img src="https://via.placeholder.com/180x180.png?text=QR1" style="width:180px;height:180px;">
-          <img src="https://via.placeholder.com/180x180.png?text=QR2" style="width:180px;height:180px;">
+        <p>📷 请扫描以下任意一个二维码完成转账：</p>
+        <div style="display:flex; gap:12px; justify-content:center; margin-top:10px;">
+          <img src="IMG_4043.jpeg" style="width:160px; height:160px; object-fit:contain;" />
+          <img src="IMG_4042.png" style="width:160px; height:160px; object-fit:contain;" />
         </div>
       </div>
 
-      <div class="file-upload">
-        <label for="payment">💳 上传转账凭证</label>
+      <div class="form-group">
+        <label>💳 上传转账凭证</label>
         <input type="file" id="payment" accept="image/*" required />
-        <div id="paymentError" class="error-message"></div>
       </div>
 
       <button type="submit" class="submit-btn">🚀 提交订单</button>
     </form>
 
     <div id="confirmationDialog"><div id="confirmationContent"></div></div>
-    <div id="loadingOverlay">正在提交订单...</div>
+    <div id="loadingOverlay"><div>正在提交订单，请稍候...</div></div>
 
-    <div class="admin-panel" id="adminPanel">
-      <input type="password" id="adminPassword" class="password-input" placeholder="请输入管理员密码">
+    <div class="admin-panel" id="adminPanel" style="display:none; margin-top:20px;">
+      <input type="password" id="adminPassword" placeholder="管理员密码" style="width:100%; padding:10px; margin-bottom:10px;" />
       <button id="realExportBtn" class="export-btn">📤 确认导出 Excel</button>
     </div>
     <button id="showExportBtn" class="export-btn">📤 导出订单 (需管理员权限)</button>
@@ -683,38 +634,14 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
     document.querySelectorAll('input, select, textarea').forEach(el => el.classList.remove('input-error'));
 
-    if (!name.value.trim()) {
-      name.classList.add('input-error');
-      document.getElementById('nameError').textContent = '请输入姓名';
-      document.getElementById('nameError').style.display = 'block';
-      valid = false;
-    }
-
-    if (!phone.value.trim()) {
-      phone.classList.add('input-error');
-      document.getElementById('phoneError').textContent = '请输入电话';
-      document.getElementById('phoneError').style.display = 'block';
-      valid = false;
-    }
-
-    if (!delivery.value) {
-      delivery.classList.add('input-error');
-      document.getElementById('deliveryError').textContent = '请选择方式';
-      document.getElementById('deliveryError').style.display = 'block';
-      valid = false;
-    }
-
+    if (!name.value.trim()) valid = false;
+    if (!phone.value.trim()) valid = false;
+    if (!delivery.value) valid = false;
     if (!agree.checked) {
       alert('请先阅读并勾选同意条款');
       valid = false;
     }
-
-    if (!payment.files || payment.files.length === 0) {
-      payment.classList.add('input-error');
-      document.getElementById('paymentError').textContent = '请上传转账凭证';
-      document.getElementById('paymentError').style.display = 'block';
-      valid = false;
-    }
+    if (!payment.files || payment.files.length === 0) valid = false;
 
     const hasProduct = [...document.querySelectorAll('.quantity-input')].some(input => parseInt(input.value) > 0);
     if (!hasProduct) {
@@ -845,7 +772,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (validateForm()) showOrderConfirmation();
   });
 
-  // 管理员导出功能
   document.getElementById('showExportBtn').onclick = () => {
     document.getElementById('adminPanel').style.display = 'block';
   };
@@ -883,6 +809,5 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 });
 </script>
-
 </body>
 </html>
