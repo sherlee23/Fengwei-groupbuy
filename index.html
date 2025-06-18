@@ -841,13 +841,11 @@
 
 <script>
 function formatPhoneNumber(phone) {
-    if (!phone) return '';
     const cleaned = phone.replace(/\D/g, '');
-    if (cleaned.startsWith('60')) return cleaned.substring(2);
-    if (cleaned.startsWith('+60')) return cleaned.substring(3);
-    if (cleaned.startsWith('0')) return cleaned.substring(1);
-    if (cleaned.startsWith('6')) return cleaned;
-    return '6' + cleaned;
+    if (cleaned.startsWith('60')) return cleaned;
+    if (cleaned.startsWith('+60')) return cleaned.substring(1);
+    if (cleaned.startsWith('0')) return '60' + cleaned.substring(1);
+    return '60' + cleaned; // fallback
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -900,7 +898,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let msg = `*🛎️ [新订单] 锋味派订单 #${orderData.orderId}*%0A%0A`;
         msg += `👤 *客户信息*:%0A`;
         msg += `▫️ 姓名: ${orderData.name}%0A`;
-        msg += `▫️ 电话: https://wa.me/6${formattedPhone}%0A`;
+        msg += `▫️ 电话: https://wa.me/${formattedPhone}%0A`;
         msg += `▫️ 取货方式: ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`;
         msg += `🛒 *订单内容*:%0A`;
         orderData.items.forEach(item => {
@@ -908,7 +906,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         msg += `%0A💰 *总金额: RM${orderData.total.toFixed(2)}*%0A`;
         msg += `📅 *下单时间: ${new Date().toLocaleString('zh-CN')}*%0A%0A`;
-        msg += `📝 *备注*: ______`;
+        msg += `📝 *备注*: ${orderData.remarks || '（无）'}`;
         return msg;
     }
 
@@ -935,6 +933,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 delivery_method: orderData.delivery,
                 order_items: orderData.items,
                 total_amount: orderData.total,
+                remarks: orderData.remarks,
                 payment_proof_url: paymentProofUrl,
                 status: 'pending',
                 created_at: new Date().toISOString()
@@ -958,7 +957,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const payment = document.getElementById('payment');
 
         document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('input, select').forEach(el => el.classList.remove('input-error'));
+        document.querySelectorAll('input, select, textarea').forEach(el => el.classList.remove('input-error'));
 
         if (!name.value.trim()) {
             document.getElementById('nameError').textContent = '请输入姓名';
@@ -1008,6 +1007,7 @@ document.addEventListener('DOMContentLoaded', function () {
             name: document.getElementById('name').value.trim(),
             phone: document.getElementById('phone').value.trim(),
             delivery: document.getElementById('delivery').value,
+            remarks: document.getElementById('remarks').value.trim(),
             items: [],
             total: calculateTotal()
         };
@@ -1050,9 +1050,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.getElementById('confirmSubmit').onclick = () => {
             document.getElementById('confirmationDialog').style.display = 'none';
-            const whatsappUrl = `https://wa.me/6${formatPhoneNumber('0162327792')}?text=${messageEncoded}`;
+            const whatsappUrl = `https://wa.me/${formatPhoneNumber('0162327792')}?text=${messageEncoded}`;
 
-            // ✅ 使用真实点击 <a> 标签方式打开 WhatsApp，兼容 Safari
+            // Safari/iOS 兼容跳转
             const link = document.createElement('a');
             link.href = whatsappUrl;
             link.target = '_blank';
@@ -1061,7 +1061,6 @@ document.addEventListener('DOMContentLoaded', function () {
             link.click();
             document.body.removeChild(link);
 
-            // ✅ 后台异步提交订单数据
             submitOrder(orderData);
         };
     }
