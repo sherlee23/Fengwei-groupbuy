@@ -839,364 +839,293 @@
         </button>
     </div>
 
-    <script>
-        function formatPhoneNumber(phone) {
-            if (!phone) return '';
-            const cleaned = phone.replace(/\D/g, '');
-            if (cleaned.startsWith('60')) return cleaned.substring(2);
-            if (cleaned.startsWith('+60')) return cleaned.substring(3);
-            if (cleaned.startsWith('0')) return cleaned.substring(1);
-            if (cleaned.startsWith('6')) return cleaned;
-            return '6' + cleaned;
+<script>
+function formatPhoneNumber(phone) {
+    if (!phone) return '';
+    const cleaned = phone.replace(/\D/g, '');
+    if (cleaned.startsWith('60')) return cleaned.substring(2);
+    if (cleaned.startsWith('+60')) return cleaned.substring(3);
+    if (cleaned.startsWith('0')) return cleaned.substring(1);
+    if (cleaned.startsWith('6')) return cleaned;
+    return '6' + cleaned;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    function handleQuantityChange(e) {
+        const button = e.target.closest('.quantity-btn');
+        if (!button) return;
+
+        e.preventDefault();
+        const productId = button.dataset.product;
+        const input = document.getElementById(productId);
+
+        let value = parseInt(input.value) || 0;
+        if (button.classList.contains('plus')) value++;
+        else if (button.classList.contains('minus')) value = Math.max(0, value - 1);
+
+        input.value = value;
+        calculateTotal();
+    }
+
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('.quantity-btn')) {
+            handleQuantityChange(e);
+        }
+    });
+
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', function () {
+            this.value = Math.max(0, parseInt(this.value) || 0);
+            calculateTotal();
+        });
+    });
+
+    function calculateTotal() {
+        let total = 0;
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            const quantity = parseInt(input.value) || 0;
+            if (quantity > 0) {
+                const priceText = input.closest('.product').querySelector('.product-price').textContent;
+                const price = parseFloat(priceText.replace('RM', ''));
+                total += quantity * price;
+            }
+        });
+        document.getElementById('totalAmount').textContent = total;
+        return total;
+    }
+
+    calculateTotal();
+
+    const SUPABASE_URL = 'https://edfnhhthztskuuosuasw.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampvLYJr-KgqVwXsKoAo';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    function buildWhatsAppMessage(orderData) {
+        const formattedPhone = formatPhoneNumber(orderData.phone);
+        let message = `*🛎️ [新订单] 锋味派订单 #${orderData.orderId}*%0A%0A`;
+        message += `👤 *客户信息*:%0A`;
+        message += `▫️ 姓名: ${orderData.name}%0A`;
+        message += `▫️ 电话: https://wa.me/6${formattedPhone}%0A`;
+        message += `▫️ 取货方式: ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`;
+        message += `🛒 *订单内容*:%0A`;
+        orderData.items.forEach(item => {
+            message += `▫️ ${item.product} × ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}%0A`;
+        });
+        message += `%0A💰 *总金额: RM${orderData.total.toFixed(2)}*%0A`;
+        message += `📅 *下单时间: ${new Date().toLocaleString('zh-CN')}*%0A%0A`;
+        message += `📝 *备注*: ______`;
+        return message;
+    }
+
+    async function submitOrder(orderData, whatsappUrl) {
+        const orderId = `${new Date().getFullYear()}${(new Date().getMonth()+1).toString().padStart(2,'0')}${new Date().getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const isChineseCustomer = /[\u4e00-\u9fa5]/.test(orderData.name);
+        document.getElementById('loadingOverlay').style.display = 'flex';
+
+        try {
+            const paymentFile = document.getElementById('payment').files[0];
+            let paymentProofUrl = '';
+
+            if (paymentFile) {
+                const fileExt = paymentFile.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+                const { data, error } = await supabase.storage
+                    .from('payment-proofs')
+                    .upload(`proofs/${fileName}`, paymentFile);
+
+                if (error) throw error;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('payment-proofs')
+                    .getPublicUrl(`proofs/${fileName}`);
+                paymentProofUrl = publicUrl;
+            }
+
+            await supabase.from('orders').insert([{
+                order_id: orderId,
+                name: orderData.name,
+                phone: orderData.phone,
+                delivery_method: orderData.delivery,
+                order_items: orderData.items,
+                total_amount: orderData.total,
+                payment_proof_url: paymentProofUrl,
+                status: 'pending',
+                created_at: new Date().toISOString()
+            }]);
+
+            setTimeout(() => {
+                window.open(whatsappUrl, '_blank');
+            }, 500);
+
+            alert(isChineseCustomer ? '订单提交成功！即将跳转 WhatsApp...' : 'Order submitted! Redirecting to WhatsApp...');
+        } catch (error) {
+            console.error('提交订单失败：', error);
+            alert(isChineseCustomer ? '提交订单失败，请稍后再试。' : 'Submission failed. Please try again.');
+        } finally {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+    }
+
+    function validateForm() {
+        let isValid = true;
+        const nameInput = document.getElementById('name');
+        const phoneInput = document.getElementById('phone');
+        const deliveryInput = document.getElementById('delivery');
+        const agreeCheckbox = document.getElementById('agreeCheckbox');
+        const paymentInput = document.getElementById('payment');
+
+        document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('input, select').forEach(el => el.classList.remove('input-error'));
+
+        if (!nameInput.value.trim()) {
+            document.getElementById('nameError').textContent = '请输入姓名';
+            document.getElementById('nameError').style.display = 'block';
+            nameInput.classList.add('input-error');
+            isValid = false;
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // ====================== 数量控制逻辑 ======================
-            function handleQuantityChange(e) {
-                const button = e.target.closest('.quantity-btn');
-                if (!button) return;
-                
-                e.preventDefault();
-                const productId = button.dataset.product;
-                const input = document.getElementById(productId);
-                
-                if (!input) {
-                    console.error('未找到输入框:', productId);
-                    return;
-                }
-                
-                let value = parseInt(input.value) || 0;
-                if (button.classList.contains('plus')) {
-                    value++;
-                } else if (button.classList.contains('minus')) {
-                    value = Math.max(0, value - 1);
-                }
-                
-                input.value = value;
-                calculateTotal();
-            }
-            
-            // 使用事件委托绑定所有加减按钮
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.quantity-btn')) {
-                    handleQuantityChange(e);
-                }
-            });
-            
-            // 绑定手动输入验证
-            document.querySelectorAll('.quantity-input').forEach(input => {
-                input.addEventListener('change', function() {
-                    this.value = Math.max(0, parseInt(this.value) || 0);
-                    calculateTotal();
-                });
-            });
-            
-            // ====================== 计算总价 ======================
-            function calculateTotal() {
-                let total = 0;
-                document.querySelectorAll('.quantity-input').forEach(input => {
-                    const quantity = parseInt(input.value) || 0;
-                    if (quantity > 0) {
-                        const priceText = input.closest('.product').querySelector('.product-price').textContent;
-                        const price = parseFloat(priceText.replace('RM', ''));
-                        total += quantity * price;
-                    }
-                });
-                document.getElementById('totalAmount').textContent = total;
-                return total;
-            }
-            
-            // 初始化总价显示
-            calculateTotal();
-            
-            // ====================== Supabase 配置 ======================
-            const SUPABASE_URL = 'https://edfnhhthztskuuosuasw.supabase.co';
-            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampvLYJr-KgqVwXsKoAo';
-            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            
-            // ====================== WhatsApp 消息发送函数 ======================
-            async function sendOrderViaWhatsApp(orderData) {
-                try {
-                    if (!orderData.items || !Array.isArray(orderData.items)) {
-                        console.error('订单商品信息缺失:', orderData);
-                        return false;
-                    }
+        if (!phoneInput.value.trim()) {
+            document.getElementById('phoneError').textContent = '请输入联系电话';
+            document.getElementById('phoneError').style.display = 'block';
+            phoneInput.classList.add('input-error');
+            isValid = false;
+        }
 
-                    const formattedPhone = formatPhoneNumber(orderData.phone);
-                    if (!formattedPhone) {
-                        console.error('无效的电话号码:', orderData.phone);
-                        return false;
-                    }
+        if (!deliveryInput.value) {
+            document.getElementById('deliveryError').textContent = '请选择取货方式';
+            document.getElementById('deliveryError').style.display = 'block';
+            deliveryInput.classList.add('input-error');
+            isValid = false;
+        }
 
-                    // 构建商家消息
-                    let businessMessage = `*🛎️ [新订单] 锋味派订单 #${orderData.orderId}*%0A%0A`;
-                    businessMessage += `👤 *客户信息*:%0A`;
-                    businessMessage += `▫️ 姓名: ${orderData.name}%0A`;
-                    businessMessage += `▫️ 电话: https://wa.me/6${formattedPhone}%0A`;
-                    businessMessage += `▫️ 取货方式: ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`;
-                    
-                    businessMessage += `🛒 *订单内容*:%0A`;
-                    orderData.items.forEach(item => {
-                        const productName = item.product.replace(/[^\w\s]/gi, '').trim();
-                        businessMessage += `▫️ ${productName} × ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}%0A`;
-                    });
-                    
-                    businessMessage += `%0A💰 *总金额: RM${orderData.total.toFixed(2)}*%0A`;
-                    businessMessage += `📅 *下单时间: ${new Date().toLocaleString('zh-CN')}*%0A%0A`;
-                    businessMessage += `📝 *备注*: ______`;
+        if (!agreeCheckbox.checked) {
+            alert('请先阅读并同意条款');
+            isValid = false;
+        }
 
-                    // 强制打开WhatsApp
-                    const whatsappUrl = `https://wa.me/60162327792?text=${businessMessage}`;
-                    window.open(whatsappUrl, '_blank');
-                    return true;
-                } catch (error) {
-                    console.error('发送WhatsApp消息时出错:', error);
-                    return false;
-                }
-            }
+        if (!paymentInput.files || paymentInput.files.length === 0) {
+            document.getElementById('paymentError').textContent = '请上传支付凭证';
+            document.getElementById('paymentError').style.display = 'block';
+            paymentInput.classList.add('input-error');
+            isValid = false;
+        }
 
-            // ====================== 提交订单函数 ======================
-            async function submitOrder(orderData) {
-                const orderId = `${new Date().getFullYear()}${(new Date().getMonth()+1).toString().padStart(2,'0')}${new Date().getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
-                const isChineseCustomer = /[\u4e00-\u9fa5]/.test(orderData.name);
-                document.getElementById('loadingOverlay').style.display = 'flex';
-                
-                try {
-                    // 1. 上传支付凭证
-                    const paymentFile = document.getElementById('payment').files[0];
-                    let paymentProofUrl = '';
-                    
-                    if (paymentFile) {
-                        const fileExt = paymentFile.name.split('.').pop();
-                        const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-                        const { data, error } = await supabase.storage
-                            .from('payment-proofs')
-                            .upload(`proofs/${fileName}`, paymentFile);
-                        
-                        if (error) throw error;
-                        
-                        const { data: { publicUrl } } = supabase.storage
-                            .from('payment-proofs')
-                            .getPublicUrl(`proofs/${fileName}`);
-                        paymentProofUrl = publicUrl;
-                    }
-                    
-                    // 2. 插入订单数据到 Supabase
-                    const { data, error } = await supabase
-                        .from('orders')
-                        .insert([{
-                            order_id: orderId,
-                            name: orderData.name,
-                            phone: orderData.phone,
-                            delivery_method: orderData.delivery,
-                            order_items: orderData.items,
-                            total_amount: orderData.total,
-                            payment_proof_url: paymentProofUrl,
-                            status: 'pending',
-                            created_at: new Date().toISOString()
-                        }]);
-                    
-                    if (error) throw error;
-                    
-                    // 3. 强制发送 WhatsApp 消息
-                    const whatsappSent = await sendOrderViaWhatsApp({
-                        ...orderData,
-                        orderId: orderId
-                    });
-                    
-                    if (!whatsappSent) {
-                        alert(isChineseCustomer ? '订单提交成功！但WhatsApp消息发送失败，请手动联系商家' : 'Order submitted! But failed to send WhatsApp, please contact seller manually');
-                    } else {
-                        alert(isChineseCustomer ? '订单提交成功！已自动打开WhatsApp' : 'Order submitted! WhatsApp has been opened');
-                    }
-                    
-                } catch (error) {
-                    console.error('完整错误信息:', error);
-                    alert(isChineseCustomer ? '提交订单失败，请重试' : 'Order submission failed, please try again');
-                } finally {
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                }
+        if (calculateTotal() === 0) {
+            alert('请至少选择一件商品');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    function showOrderConfirmation() {
+        const orderData = {
+            name: document.getElementById('name').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            delivery: document.getElementById('delivery').value,
+            items: [],
+            total: calculateTotal()
+        };
+
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            const quantity = parseInt(input.value) || 0;
+            if (quantity > 0) {
+                const productElement = input.closest('.product');
+                const productName = productElement.querySelector('.product-name').textContent.split(' ')[0];
+                const priceText = productElement.querySelector('.product-price').textContent;
+                const price = parseFloat(priceText.replace('RM', ''));
+                orderData.items.push({ product: productName, quantity, price });
             }
-            
-            // ====================== 表单验证 ======================
-            function validateForm() {
-                let isValid = true;
-                const nameInput = document.getElementById('name');
-                const phoneInput = document.getElementById('phone');
-                const deliveryInput = document.getElementById('delivery');
-                const agreeCheckbox = document.getElementById('agreeCheckbox');
-                const paymentInput = document.getElementById('payment');
-                
-                // 重置错误状态
-                document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
-                document.querySelectorAll('input, select').forEach(el => el.classList.remove('input-error'));
-                
-                // 验证姓名
-                if (!nameInput.value.trim()) {
-                    document.getElementById('nameError').textContent = '请输入姓名';
-                    document.getElementById('nameError').style.display = 'block';
-                    nameInput.classList.add('input-error');
-                    isValid = false;
-                }
-                
-                // 验证电话
-                if (!phoneInput.value.trim()) {
-                    document.getElementById('phoneError').textContent = '请输入联系电话';
-                    document.getElementById('phoneError').style.display = 'block';
-                    phoneInput.classList.add('input-error');
-                    isValid = false;
-                }
-                
-                // 验证取货方式
-                if (!deliveryInput.value) {
-                    document.getElementById('deliveryError').textContent = '请选择取货方式';
-                    document.getElementById('deliveryError').style.display = 'block';
-                    deliveryInput.classList.add('input-error');
-                    isValid = false;
-                }
-                
-                // 验证同意条款
-                if (!agreeCheckbox.checked) {
-                    alert('请先阅读并同意条款');
-                    isValid = false;
-                }
-                
-                // 验证支付凭证
-                if (!paymentInput.files || paymentInput.files.length === 0) {
-                    document.getElementById('paymentError').textContent = '请上传支付凭证';
-                    document.getElementById('paymentError').style.display = 'block';
-                    paymentInput.classList.add('input-error');
-                    isValid = false;
-                }
-                
-                // 验证订单商品
-                if (calculateTotal() === 0) {
-                    alert('请至少选择一件商品');
-                    isValid = false;
-                }
-                
-                return isValid;
-            }
-            
-            // ====================== 订单确认功能 ======================
-            function showOrderConfirmation() {
-                // 收集订单数据
-                const orderData = {
-                    name: document.getElementById('name').value.trim(),
-                    phone: document.getElementById('phone').value.trim(),
-                    delivery: document.getElementById('delivery').value,
-                    items: [],
-                    total: calculateTotal()
-                };
-                
-                // 收集订单商品
-                document.querySelectorAll('.quantity-input').forEach(input => {
-                    const quantity = parseInt(input.value) || 0;
-                    if (quantity > 0) {
-                        const productElement = input.closest('.product');
-                        const productName = productElement.querySelector('.product-name').textContent.split(' ')[0];
-                        const priceText = productElement.querySelector('.product-price').textContent;
-                        const price = parseFloat(priceText.replace('RM', ''));
-                        
-                        orderData.items.push({
-                            product: productName,
-                            quantity: quantity,
-                            price: price
-                        });
-                    }
-                });
-                
-                // 生成确认对话框内容
-                let html = `<h2 class="confirmation-title">订单确认</h2>`;
-                html += `<p><strong>姓名:</strong> ${orderData.name}</p>`;
-                html += `<p><strong>电话:</strong> ${orderData.phone}</p>`;
-                html += `<p><strong>取货方式:</strong> ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}</p>`;
-                
-                html += `<h3 style="margin-top:20px;border-bottom:1px solid #eee;padding-bottom:5px;">订单明细</h3>`;
-                orderData.items.forEach(item => {
-                    html += `<p style="margin:8px 0;">${item.product} x ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}</p>`;
-                });
-                
-                html += `<h3 style="margin-top:20px;border-bottom:1px solid #eee;padding-bottom:5px;">总计: RM${orderData.total.toFixed(2)}</h3>`;
-                
-                // 添加按钮
-                html += `<div class="confirmation-buttons">`;
-                html += `<button id="confirmCancel" class="confirmation-btn confirmation-cancel">取消</button>`;
-                html += `<button id="confirmSubmit" class="confirmation-btn confirmation-submit">确认并发送WhatsApp</button>`;
-                html += `</div>`;
-                
-                // 显示对话框
-                document.getElementById('confirmationContent').innerHTML = html;
-                document.getElementById('confirmationDialog').style.display = 'flex';
-                
-                // 添加事件监听
-                document.getElementById('confirmCancel').addEventListener('click', () => {
-                    document.getElementById('confirmationDialog').style.display = 'none';
-                });
-                
-                document.getElementById('confirmSubmit').addEventListener('click', async () => {
-                    document.getElementById('confirmationDialog').style.display = 'none';
-                    await submitOrder(orderData);
-                });
-            }
-            
-            // ====================== 表单提交事件 ======================
-            document.getElementById('orderForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // 验证表单
-                if (validateForm()) {
-                    // 显示订单确认对话框
-                    showOrderConfirmation();
-                }
-            });
-            
-            // ====================== 管理员导出功能 ======================
-            document.getElementById('showExportBtn').addEventListener('click', function() {
-                document.getElementById('adminPanel').style.display = 'block';
-            });
-            
-            document.getElementById('realExportBtn').addEventListener('click', async function() {
-                const password = document.getElementById('adminPassword').value;
-                
-                if (password !== 'admin123') {
-                    alert('管理员密码错误');
-                    return;
-                }
-                
-                const { data: orders, error } = await supabase
-                    .from('orders')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (error) {
-                    console.error('获取订单失败:', error);
-                    alert('导出失败，请重试');
-                    return;
-                }
-                
-                const excelData = orders.map(order => ({
-                    '订单ID': order.order_id,
-                    '日期': new Date(order.created_at).toLocaleString(),
-                    '客户姓名': order.name,
-                    '联系电话': order.phone,
-                    '配送方式': order.delivery_method === 'self-pickup' ? '自取' : 'Lalamove',
-                    '订单内容': order.order_items.map(item => `${item.product} x${item.quantity}`).join(', '),
-                    '总金额': `RM${order.total_amount}`,
-                    '支付凭证': order.payment_proof_url,
-                    '状态': order.status === 'pending' ? '待处理' : '已完成'
-                }));
-                
-                const ws = XLSX.utils.json_to_sheet(excelData);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "订单数据");
-                
-                XLSX.writeFile(wb, `锋味派订单_${new Date().toLocaleDateString()}.xlsx`);
-                alert('导出成功！');
-                document.getElementById('adminPanel').style.display = 'none';
-                document.getElementById('adminPassword').value = '';
-            });
         });
-    </script>
-</body>
-</html>
+
+        const tempOrderId = `TEMP-${Date.now()}`;
+        const whatsappMessage = buildWhatsAppMessage({ ...orderData, orderId: tempOrderId });
+        const preview = decodeURIComponent(whatsappMessage).replace(/%0A/g, '\n');
+
+        let html = `<h2 class="confirmation-title">订单确认</h2>`;
+        html += `<p><strong>姓名:</strong> ${orderData.name}</p>`;
+        html += `<p><strong>电话:</strong> ${orderData.phone}</p>`;
+        html += `<p><strong>取货方式:</strong> ${orderData.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}</p>`;
+        html += `<h3 style="margin-top:20px;border-bottom:1px solid #eee;padding-bottom:5px;">订单明细</h3>`;
+        orderData.items.forEach(item => {
+            html += `<p style="margin:8px 0;">${item.product} x ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}</p>`;
+        });
+        html += `<h3 style="margin-top:20px;border-bottom:1px solid #eee;padding-bottom:5px;">总计: RM${orderData.total.toFixed(2)}</h3>`;
+
+        html += `<h3 style="margin-top:20px;">📤 WhatsApp 预览内容</h3>`;
+        html += `<textarea style="width:100%; height:160px; border:1px solid #ccc; border-radius:6px; padding:10px;" readonly>${preview}</textarea>`;
+        html += `<p style="font-size:14px;color:#888;">点击“确认并发送”后会跳转 WhatsApp 页面发送信息</p>`;
+
+        html += `<div class="confirmation-buttons">`;
+        html += `<button id="confirmCancel" class="confirmation-btn confirmation-cancel">取消</button>`;
+        html += `<button id="confirmSubmit" class="confirmation-btn confirmation-submit">确认并发送</button>`;
+        html += `</div>`;
+
+        document.getElementById('confirmationContent').innerHTML = html;
+        document.getElementById('confirmationDialog').style.display = 'flex';
+
+        document.getElementById('confirmCancel').addEventListener('click', () => {
+            document.getElementById('confirmationDialog').style.display = 'none';
+        });
+
+        document.getElementById('confirmSubmit').addEventListener('click', async () => {
+            document.getElementById('confirmationDialog').style.display = 'none';
+            const orderId = `${new Date().getFullYear()}${(new Date().getMonth()+1).toString().padStart(2,'0')}${new Date().getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+            const whatsappText = buildWhatsAppMessage({ ...orderData, orderId });
+            const whatsappUrl = `https://wa.me/6${formatPhoneNumber('0162327792')}?text=${whatsappText}`;
+            await submitOrder(orderData, whatsappUrl);
+        });
+    }
+
+    document.getElementById('orderForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (validateForm()) {
+            showOrderConfirmation();
+        }
+    });
+
+    document.getElementById('showExportBtn').addEventListener('click', function () {
+        document.getElementById('adminPanel').style.display = 'block';
+    });
+
+    document.getElementById('realExportBtn').addEventListener('click', async function () {
+        const password = document.getElementById('adminPassword').value;
+        if (password !== 'admin123') {
+            alert('管理员密码错误');
+            return;
+        }
+
+        const { data: orders, error } = await supabase
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('获取订单失败:', error);
+            alert('导出失败，请重试');
+            return;
+        }
+
+        const excelData = orders.map(order => ({
+            '订单ID': order.order_id,
+            '日期': new Date(order.created_at).toLocaleString(),
+            '客户姓名': order.name,
+            '联系电话': order.phone,
+            '配送方式': order.delivery_method === 'self-pickup' ? '自取' : 'Lalamove',
+            '订单内容': order.order_items.map(item => `${item.product} x${item.quantity}`).join(', '),
+            '总金额': `RM${order.total_amount}`,
+            '支付凭证': order.payment_proof_url,
+            '状态': order.status === 'pending' ? '待处理' : '已完成'
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(excelData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "订单数据");
+
+        XLSX.writeFile(wb, `锋味派订单_${new Date().toLocaleDateString()}.xlsx`);
+        alert('导出成功！');
+        document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('adminPassword').value = '';
+    });
+});
+</script>
