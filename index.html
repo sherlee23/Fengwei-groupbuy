@@ -258,30 +258,32 @@
       box-sizing: border-box;
     }
 
-    /* 重要声明样式调整 */
-    .important-notice {
-      background:#fff2f0;
-      padding:15px;
-      border-left:4px solid #ff4757;
-      border-radius:8px;
-      margin-bottom:25px;
-      box-sizing: border-box;
-    }
-
-    .important-notice ul {
-      padding-left:18px;
-      margin:12px 0;
-    }
-
-    .important-notice label {
-      display:flex;
-      align-items:center;
-      margin-top:10px;
-    }
-
-    .important-notice input[type="checkbox"] {
-      width: auto;
-      margin-right:8px;
+    .disclaimer-box {
+    background-color: #FFF3F3;
+    border-left: 4px solid #FF4757;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+.disclaimer-title {
+    color: #FF4757;
+    margin-top: 0;
+    font-size: 18px;
+}
+.disclaimer-content p {
+    margin: 10px 0;
+    line-height: 1.5;
+}
+.disclaimer-checkbox {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+}
+.disclaimer-checkbox input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary); /* 使复选框与主题色一致 */
+    margin-right: 10px;
     }
   </style>
 </head>
