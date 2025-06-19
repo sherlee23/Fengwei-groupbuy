@@ -285,50 +285,65 @@
     accent-color: var(--primary); /* 使复选框与主题色一致 */
     margin-right: 10px;
     }
-  </style>
+
+    </style>
 </head>
-
 <body>
-  <div class="header">
-    <h1>锋味派团购订单</h1>
-  </div>
+    <div class="header">
+        <h1>🍢 锋味派美食团购</h1>
+    </div>
 
-  <div class="container">
-    <form id="orderForm">
-      <!-- 📢 重要声明 -->
-      <div class="form-group" style="background:#fff2f0;padding:15px;border-left:4px solid #ff4757;border-radius:8px;margin-bottom:25px;">
-        <strong>⚠️ 重要声明 Important Notice</strong>
-        <ul style="padding-left:18px;margin:12px 0;">
-          <li>此为预购商品，我们将收集所有订单后统一向供应商下单。</li>
-          <li>预计等待时间：30-60天（从下单日起计算）。</li>
-          <li>当前价格<strong>不包含</strong>国际运费，运费将根据实际物流成本后续通知收取。</li>
-        </ul>
-        <label style="display:flex;align-items:center;margin-top:10px;">
-          <input type="checkbox" id="agreeCheckbox" required style="margin-right:8px;">我已阅读并同意上述条款
-        </label>
-      </div>
+    <div class="container">
+        <!-- 订单确认对话框 -->
+        <div id="confirmationDialog">
+            <div>
+                <div id="confirmationContent"></div>
+            </div>
+        </div>
 
-      <!-- 👤 顾客信息 -->
-      <div class="form-group">
-        <label for="name">姓名 *</label>
-        <input type="text" id="name" name="name" required>
-      </div>
+        <!-- 加载指示器 -->
+        <div id="loadingOverlay">正在提交订单，请稍候...</div>
 
-      <div class="form-group">
-        <label for="phone">电话 *</label>
-        <input type="tel" id="phone" name="phone" required>
-      </div>
+        <form id="orderForm">
+    <div class="disclaimer-box">
+        <h3 class="disclaimer-title">⚠️ 重要声明 / Important Notice</h3>
+        <div class="disclaimer-content">
+            <p>1. 此为预购商品，我们将收集所有订单后统一向供应商下单。</p>
+            <p>1. This is a pre-order. We will place the bulk order after collecting all purchases.</p>
+            <p>2. 预计等待时间：30-60天（从下单日起计算）。</p>
+            <p>2. Estimated waiting time: 30-60 days (from order date).</p>
+            <p>3. 当前价格<strong>不包含</strong>国际运费，运费将根据实际物流成本后续通知收取。</p>
+            <p>3. Current prices <strong>DO NOT INCLUDE</strong> international shipping fees. Fees will be calculated later.</p>
+        </div>
+        <div class="disclaimer-checkbox">
+            <input type="checkbox" id="agreeCheckbox" required>
+            <label for="agreeCheckbox">我已阅读并同意上述条款 / I have read and agree to the terms</label>
+        </div>
+    </div>
+            <!-- 客户信息 -->
+            <div class="form-group">
+                <label for="name"><span class="emoji">👤</span>*1. 姓名 Name</label>
+                <input type="text" id="name" name="name" required placeholder="请输入您的姓名">
+                <div id="nameError" class="error-message"></div>
+            </div>
 
-      <div class="form-group">
-        <label for="delivery">取货方式 *</label>
-        <select id="delivery" name="delivery" required>
-          <option value="">请选择...</option>
-          <option value="self-pickup">自取 Self Pick-up</option>
-          <option value="lalamove">Lalamove 送货</option>
-        </select>
-      </div>
+            <div class="form-group">
+                <label for="phone"><span class="emoji">📱</span>*2. 电话 HP</label>
+                <input type="tel" id="phone" name="phone" required placeholder="请输入联系电话">
+                <div id="phoneError" class="error-message"></div>
+            </div>
 
-      <h2 style="font-size:20px;margin:20px 0;">🛒 请选择商品（最多 27 项）</h2>
+            <div class="form-group">
+                <label for="delivery"><span class="emoji">🚚</span>*3. 取货方式 Delivery Method</label>
+                <select id="delivery" name="delivery" required>
+                    <option value="">请选择取货方式...</option>
+                    <option value="self-pickup">自取 Self pick up</option>
+                    <option value="lalamove">Lalamove 送货</option>
+                </select>
+                <div id="deliveryError" class="error-message"></div>
+            </div>
+
+            <h2 class="category-title"><span class="emoji">🛒</span>4. 请选择商品</h2>
 
       <!-- 🍢 烤肠系列 -->
       <h3>🌭 烤肠系列</h3>
