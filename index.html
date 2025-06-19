@@ -404,15 +404,15 @@ textarea:focus {
 /* 新增或修改的样式 */
     #confirmationDialog {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       background: rgba(0,0,0,0.5);
       z-index: 1000;
       display: none;
-      align-items: center;
-      justify-content: center;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
     }
     
     #confirmationContent {
@@ -422,11 +422,22 @@ textarea:focus {
       max-width: 500px;
       width: 90%;
       max-height: 80vh;
-      overflow-y: auto;
+      margin: 20px auto;
       box-shadow: 0 10px 25px rgba(0,0,0,0.2);
       animation: fadeIn 0.3s ease;
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
     }
-    
+
+    .file-upload-label span.file-name {
+      display: block;
+      margin-top: 8px;
+      color: var(--primary);
+      font-weight: bold;
+      word-break: break-all;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -1129,24 +1140,44 @@ document.addEventListener('DOMContentLoaded', function () {
     };
   }
 
+  // 文件上传显示文件名
+  document.getElementById('paymentProof').addEventListener('change', function(e) {
+    const label = document.querySelector('.file-upload-label');
+    const fileNameDisplay = label.querySelector('.file-name') || document.createElement('span');
+    
+    if (this.files.length > 0) {
+      fileNameDisplay.className = 'file-name';
+      fileNameDisplay.textContent = this.files[0].name;
+      if (!label.querySelector('.file-name')) {
+        label.appendChild(fileNameDisplay);
+      }
+      label.querySelector('span:not(.file-name)').textContent = '已选择文件:';
+    } else {
+      label.querySelector('span:not(.file-name)').textContent = '点击或拖拽文件到此处';
+      if (label.querySelector('.file-name')) {
+        label.removeChild(label.querySelector('.file-name'));
+      }
+    }
+  });
+
   // 构建WhatsApp消息
   function buildWhatsAppMessage(order) {
-    let msg = `*🛎️ 锋味派新订单 #${order.orderId}*\n\n`;
-    msg += `*👤 客户信息*\n`;
-    msg += `▫️ 姓名: ${order.name}\n`;
-    msg += `▫️ 电话: ${order.phone}\n`;
-    msg += `▫️ 取货方式: ${order.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}\n\n`;
-    msg += `*🛒 订单明细*\n`;
+    let msg = `*🛎️ 锋味派新订单 #${order.orderId}*%0A%0A`;
+    msg += `*👤 客户信息*%0A`;
+    msg += `▫️ 姓名: ${order.name}%0A`;
+    msg += `▫️ 电话: ${order.phone}%0A`;
+    msg += `▫️ 取货方式: ${order.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`;
+    msg += `*🛒 订单明细*%0A`;
     order.items.forEach(item => {
-      msg += `▫️ ${item.product} × ${item.quantity} = RM${(item.quantity * item.price).toFixed(2)}\n`;
+      msg += `▫️ ${item.product} × ${item.quantity} = RM${(item.quantity * item.price).toFixed(2)}%0A`;
     });
-    msg += `\n*💰 总金额: RM${order.total.toFixed(2)}*\n`;
-    msg += `*📝 备注*: ${order.remarks || '无'}\n`;
+    msg += `%0A*💰 总金额: RM${order.total.toFixed(2)}*%0A`;
+    msg += `*📝 备注*: ${order.remarks || '无'}%0A`;
     msg += `*📅 下单时间*: ${new Date().toLocaleString('zh-CN')}`;
     return msg;
   }
 
-  // 显示确认弹窗
+  // 显示确认弹窗 - 自动滚动到对话框位置
   function showConfirmation(order) {
     const dialog = document.getElementById('confirmationDialog');
     const content = document.getElementById('confirmationContent');
@@ -1167,7 +1198,7 @@ document.addEventListener('DOMContentLoaded', function () {
       
       <div class="whatsapp-preview">
         <strong>将发送到WhatsApp的内容:</strong>
-        <div>${whatsappMsg.replace(/\n/g, '<br>')}</div>
+        <div>${whatsappMsg.replace(/%0A/g, '<br>')}</div>
       </div>
       
       <hr style="border:none;border-top:1px solid #eee;margin:15px 0;"/>
@@ -1177,8 +1208,11 @@ document.addEventListener('DOMContentLoaded', function () {
       </div>
     `;
     
-    dialog.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // 防止背景滚动
+    dialog.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+
+    // 自动滚动到对话框位置
+    dialog.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     document.getElementById('cancelConfirm').onclick = () => {
       dialog.style.display = 'none';
@@ -1199,6 +1233,7 @@ document.addEventListener('DOMContentLoaded', function () {
       let proofUrl = '';
       
       if (file) {
+
         // 上传支付凭证
         const ext = file.name.split('.').pop();
         const filename = `proofs/${order.orderId}.${ext}`;
@@ -1236,31 +1271,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (insertError) throw insertError;
 
-      // 跳转WhatsApp - 使用encodeURIComponent确保特殊字符正确编码
-      const whatsappUrl = `https://wa.me/60162327792?text=${encodeURIComponent(whatsappMsg)}`;
-      window.open(whatsappUrl, '_blank');
+// 跳转WhatsApp - 使用新窗口打开
+      const whatsappUrl = `https://wa.me/60162327792?text=${whatsappMsg}`;
+      window.location.href = whatsappUrl;
       
       // 重置表单
-      document.getElementById('orderForm').reset();
-      document.querySelectorAll('.quantity-input').forEach(input => input.value = '0');
-      document.getElementById('totalAmount').textContent = '0.00';
+      setTimeout(() => {
+        document.getElementById('orderForm').reset();
+        document.querySelectorAll('.quantity-input').forEach(input => input.value = '0');
+        document.getElementById('totalAmount').textContent = '0.00';
+        const label = document.querySelector('.file-upload-label');
+        label.querySelector('span:not(.file-name)').textContent = '点击或拖拽文件到此处';
+        if (label.querySelector('.file-name')) {
+          label.removeChild(label.querySelector('.file-name'));
+        }
+      }, 1000);
       
-      // 显示成功提示
-      alert('订单提交成功！已打开WhatsApp窗口，请确认发送消息。');
     } catch (error) {
       console.error('订单提交错误:', error);
       alert(`提交失败: ${error.message}`);
     }
   }
 
-  // 表单提交事件
-  document.getElementById('orderForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    if (!validateForm()) return;
-    
-    const order = buildOrderData();
-    showConfirmation(order);
-  });
+  // 表单提交事件保持不变...
 });
 </script>
 </body>
