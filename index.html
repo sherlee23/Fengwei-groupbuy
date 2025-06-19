@@ -8,76 +8,47 @@
   <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
   <style>
     body {
-      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      max-width: 600px;
+      font-family: 'Microsoft YaHei', sans-serif;
       margin: 0 auto;
-      padding: 0 15px 80px;
-      background: #f8f9fa;
-      color: #2f3542;
+      max-width: 600px;
+      background: #f9f9f9;
+      padding: 20px;
     }
-    .header {
+    h1 {
       text-align: center;
-      background: linear-gradient(to right, #ff4757, #ff6b81);
-      color: white;
-      padding: 20px 0;
-      margin-bottom: 20px;
-      border-radius: 0 0 15px 15px;
-    }
-    .header h1 {
-      margin: 0;
-      font-size: 26px;
-    }
-    .disclaimer {
-      background: #fff0f0;
-      border-left: 4px solid #ff4757;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 25px;
-      font-size: 15px;
-    }
-    .disclaimer p {
-      margin: 6px 0;
-      line-height: 1.5;
+      color: #ff4757;
     }
     .category-title {
       font-size: 20px;
-      margin: 30px 0 12px;
-      font-weight: bold;
-      color: #2f3542;
+      margin: 20px 0 10px;
       border-left: 5px solid #ff4757;
       padding-left: 10px;
     }
     .product {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      background: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      margin-bottom: 12px;
     }
     .product-image-container {
       width: 100%;
       height: 180px;
       overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 10px;
-      background: #f2f2f2;
-      border-radius: 6px;
+      border-radius: 8px;
+      margin-bottom: 8px;
     }
     .product-image {
-      width: auto;
-      max-height: 100%;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
     .product-name {
       font-weight: bold;
-      font-size: 16px;
-      margin-bottom: 6px;
     }
     .product-price {
       color: #ff4757;
-      font-weight: bold;
-      margin-bottom: 10px;
+      margin: 8px 0;
     }
     .quantity-control {
       display: flex;
@@ -85,123 +56,124 @@
       gap: 10px;
     }
     .quantity-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      font-weight: bold;
       background: #ff6b81;
-      border: none;
       color: white;
-      font-size: 20px;
+      border: none;
+      border-radius: 50%;
       cursor: pointer;
     }
     .quantity-input {
       width: 50px;
       text-align: center;
-      font-size: 16px;
-      padding: 5px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
     }
     .form-group {
-      margin-bottom: 20px;
+      margin: 15px 0;
     }
     .form-group label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 8px;
+      font-weight: bold;
     }
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
+    textarea#remarks {
       width: 100%;
-      padding: 10px;
-      border: 1.5px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
+      resize: vertical;
       box-sizing: border-box;
     }
-    textarea {
-      resize: vertical;
-      max-width: 100%;
-    }
     .total {
-      text-align: right;
       font-weight: bold;
-      font-size: 20px;
-      margin-top: 20px;
+      text-align: right;
+      margin-top: 15px;
+      font-size: 18px;
     }
     .submit-btn {
       width: 100%;
-      background: linear-gradient(to right, #ff4757, #ff6b81);
+      padding: 12px;
+      background: #ff4757;
       color: white;
-      font-weight: bold;
-      padding: 14px;
-      border: none;
-      border-radius: 8px;
       font-size: 18px;
-      cursor: pointer;
+      border: none;
+      border-radius: 6px;
       margin-top: 20px;
+      cursor: pointer;
+    }
+    .export-btn {
+      width: 100%;
+      padding: 12px;
+      background: #2f3542;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      margin-top: 10px;
+      cursor: pointer;
     }
     .admin-panel {
       display: none;
-      background: #f1f2f6;
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 30px;
+      margin-top: 10px;
     }
-    .export-btn {
-      background: #2f3542;
-      color: white;
-      padding: 12px;
-      border: none;
-      font-weight: bold;
+    #confirmationDialog {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    #confirmationDialog > div {
+      background: #fff;
+      padding: 20px;
+      max-width: 500px;
+      border-radius: 10px;
+    }
+    .disclaimer {
+      background: #ffecec;
+      border: 1px solid #ff4757;
       border-radius: 8px;
-      width: 100%;
-      cursor: pointer;
-      margin-top: 12px;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>🍢 锋味派美食团购</h1>
-  </div>
-
-  <div class="disclaimer">
-    <p>⚠️ 此为预购商品，预计发货时间为下单后30-60天</p>
-    <p>⚠️ This is a pre-order. Estimated delivery: 30-60 days after ordering</p>
-    <p>⚠️ 当前价格不含运费，运费将另行通知</p>
-    <p>⚠️ Shipping fee not included. Will be notified later.</p>
-  </div>
+  <h1>锋味派美食团购</h1>
 
   <form id="orderForm">
+    <!-- ✅ 声明内容 -->
+    <div class="disclaimer">
+      <strong>⚠️ 重要声明 Important Notice：</strong><br>
+      1. 此为预购商品，我们将统一下单。This is a pre-order.<br>
+      2. 预计等待 30-60 天（取决于物流）。Estimated wait: 30-60 days.<br>
+      3. 当前价格不含国际运费，运费另计。Price excludes shipping.<br>
+    </div>
     <div class="form-group">
-      <label for="name">姓名 Name</label>
+      <input type="checkbox" id="agreeCheckbox" required />
+      <label for="agreeCheckbox">我已阅读并同意以上声明 I agree to the terms</label>
+    </div>
+
+    <!-- ✅ 顾客基本信息 -->
+    <div class="form-group">
+      <label for="name">姓名 Name *</label>
       <input type="text" id="name" required />
     </div>
-
     <div class="form-group">
-      <label for="phone">联系电话 Phone</label>
+      <label for="phone">电话 Phone *</label>
       <input type="tel" id="phone" required />
     </div>
-
     <div class="form-group">
-      <label for="delivery">取货方式 Delivery</label>
+      <label for="delivery">取货方式 Delivery *</label>
       <select id="delivery" required>
-        <option value="">请选择取货方式</option>
-        <option value="self-pickup">自取 Self Pick-Up</option>
-        <option value="lalamove">Lalamove 配送</option>
+        <option value="">请选择...</option>
+        <option value="self">自取 Self Pickup</option>
+        <option value="lalamove">Lalamove</option>
       </select>
     </div>
 
-    <div class="form-group">
-      <label for="remarks">备注 Remarks</label>
-      <textarea id="remarks" rows="3" placeholder="可填写地址、偏好等"></textarea>
-    </div>
-<!-- 🛒 商品清单开始 -->
+<h2 class="category-title">🌭 烤肠系列</h2>
 
-<!-- 🌭 烤肠系列 -->
-<h3 class="category-title">🌭 烤肠系列</h3>
 <div class="product">
   <div class="product-image-container"><img src="IMG_3859.jpeg" class="product-image" alt="原味烤肠"></div>
   <div class="product-name">原味烤肠</div>
@@ -268,8 +240,8 @@
   </div>
 </div>
 
-<!-- 🦐 虾肠&虾饼系列 -->
-<h3 class="category-title">🦐 虾肠&虾饼系列</h3>
+<h2 class="category-title">🦐 虾肠 & 虾饼系列</h2>
+
 <div class="product">
   <div class="product-image-container"><img src="IMG_3853.jpeg" class="product-image" alt="原味虾肠"></div>
   <div class="product-name">原味虾肠</div>
@@ -303,12 +275,8 @@
   </div>
 </div>
 
-<!-- 🍕 披萨系列 -->
-<h3 class="category-title">🍕 披萨系列</h3>
-<!-- 同样格式继续插入披萨4款、酥饼2款、小笼包3款、鸡排鸡翅4款、纸皮烧卖5款 -->
-<!-- 后续会继续贴出，保持结构与 data-name/data-price 一致 -->
+<h2 class="category-title">🍕 披萨系列</h2>
 
-<!-- 🍕 披萨系列 -->
 <div class="product">
   <div class="product-image-container"><img src="IMG_3841.jpeg" class="product-image" alt="玛格丽特披萨"></div>
   <div class="product-name">玛格丽特披萨</div>
@@ -341,7 +309,6 @@
     <button type="button" class="quantity-btn plus">+</button>
   </div>
 </div>
-
 <div class="product">
   <div class="product-image-container"><img src="IMG_3852.jpeg" class="product-image" alt="双料榴莲披萨"></div>
   <div class="product-name">双料榴莲披萨</div>
@@ -353,32 +320,8 @@
   </div>
 </div>
 
-<!-- 🥮 酥饼系列 -->
-<h3 class="category-title">🥮 酥饼系列</h3>
-<div class="product">
-  <div class="product-image-container"><img src="IMG_3837.jpeg" class="product-image" alt="黑猪肉酥饼"></div>
-  <div class="product-name">黑猪肉酥饼</div>
-  <div class="product-price">RM55</div>
-  <div class="quantity-control">
-    <button type="button" class="quantity-btn minus">-</button>
-    <input type="number" class="quantity-input" data-name="黑猪肉酥饼" data-price="55" value="0" min="0">
-    <button type="button" class="quantity-btn plus">+</button>
-  </div>
-</div>
+<h2 class="category-title">🥟 小笼汤包系列</h2>
 
-<div class="product">
-  <div class="product-image-container"><img src="IMG_3838.jpeg" class="product-image" alt="安格斯牛肉酥饼"></div>
-  <div class="product-name">安格斯牛肉酥饼</div>
-  <div class="product-price">RM55</div>
-  <div class="quantity-control">
-    <button type="button" class="quantity-btn minus">-</button>
-    <input type="number" class="quantity-input" data-name="安格斯牛肉酥饼" data-price="55" value="0" min="0">
-    <button type="button" class="quantity-btn plus">+</button>
-  </div>
-</div>
-
-<!-- 🥟 小笼汤包系列 -->
-<h3 class="category-title">🥟 小笼汤包系列</h3>
 <div class="product">
   <div class="product-image-container"><img src="IMG_3874.jpeg" class="product-image" alt="鲜肉小笼汤包"></div>
   <div class="product-name">鲜肉小笼汤包</div>
@@ -412,8 +355,32 @@
   </div>
 </div>
 
-<!-- 🍗 鸡排&鸡翅系列 -->
-<h3 class="category-title">🍗 鸡排&鸡翅系列</h3>
+<h2 class="category-title">🥮 酥饼系列</h2>
+
+<div class="product">
+  <div class="product-image-container"><img src="IMG_3837.jpeg" class="product-image" alt="黑猪肉酥饼"></div>
+  <div class="product-name">黑猪肉酥饼</div>
+  <div class="product-price">RM55</div>
+  <div class="quantity-control">
+    <button type="button" class="quantity-btn minus">-</button>
+    <input type="number" class="quantity-input" data-name="黑猪肉酥饼" data-price="55" value="0" min="0">
+    <button type="button" class="quantity-btn plus">+</button>
+  </div>
+</div>
+
+<div class="product">
+  <div class="product-image-container"><img src="IMG_3838.jpeg" class="product-image" alt="安格斯牛肉酥饼"></div>
+  <div class="product-name">安格斯牛肉酥饼</div>
+  <div class="product-price">RM55</div>
+  <div class="quantity-control">
+    <button type="button" class="quantity-btn minus">-</button>
+    <input type="number" class="quantity-input" data-name="安格斯牛肉酥饼" data-price="55" value="0" min="0">
+    <button type="button" class="quantity-btn plus">+</button>
+  </div>
+</div>
+
+<h2 class="category-title">🍗 鸡排系列</h2>
+
 <div class="product">
   <div class="product-image-container"><img src="IMG_3835.jpeg" class="product-image" alt="原味鸡排"></div>
   <div class="product-name">原味鸡排</div>
@@ -435,6 +402,8 @@
     <button type="button" class="quantity-btn plus">+</button>
   </div>
 </div>
+
+<h2 class="category-title">🍗 鸡翅系列</h2>
 
 <div class="product">
   <div class="product-image-container"><img src="IMG_3865.jpeg" class="product-image" alt="奥尔良鸡翅"></div>
@@ -458,8 +427,8 @@
   </div>
 </div>
 
-<!-- 🥟 纸皮烧卖系列 -->
-<h3 class="category-title">🥟 纸皮烧卖系列</h3>
+<h2 class="category-title">🥟 纸皮烧卖系列</h2>
+
 <div class="product">
   <div class="product-image-container"><img src="IMG_3843.jpeg" class="product-image" alt="黑猪三丁纸皮烧卖"></div>
   <div class="product-name">黑猪三丁纸皮烧卖</div>
@@ -514,50 +483,74 @@
     <button type="button" class="quantity-btn plus">+</button>
   </div>
 </div>
-<!-- ✅ 总金额显示 -->
-<div class="total">总金额：RM <span id="totalAmount">0</span></div>
 
-<!-- ✅ 上传转账凭证 -->
+<!-- 🧾 总金额 -->
+<div class="total">共计金额：RM <span id="totalAmount">0.00</span></div>
+
+<!-- ✍️ 备注 -->
 <div class="form-group">
-  <label for="payment">上传转账凭证 (截图或PDF)</label>
-  <input type="file" id="payment" accept="image/*,.pdf" required>
+  <label for="remarks">备注（选填）Remarks</label>
+  <textarea id="remarks" rows="3" placeholder="例如：请尽快通知我取货时间" style="resize:vertical;"></textarea>
 </div>
 
-<!-- ✅ 提交按钮 -->
-<button type="submit" class="submit-btn">提交订单</button>
+<!-- 🏦 银行转账信息 -->
+<div class="form-group">
+  <label>收款信息 Bank Details</label>
+  <div style="background:#f1f1f1; padding:10px; border-radius:8px;">
+    <strong>银行名称 Bank:</strong> Maybank<br>
+    <strong>户口名 Name:</strong> Choong Sher Lee<br>
+    <strong>户口号码 Acc No:</strong> 114209540438
+  </div>
+</div>
 
-<!-- ✅ 管理员导出区域 -->
+<!-- 📷 二维码（预留） -->
+<div class="form-group">
+  <label>可扫描二维码转账</label>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <img src="IMG_4042.png" style="width:45%; border:1px solid #ccc; border-radius:6px;">
+    <img src="IMG_4043.jpeg" style="width:45%; border:1px solid #ccc; border-radius:6px;">
+  </div>
+</div>
+
+<!-- 📤 上传转账凭证 -->
+<div class="form-group">
+  <label for="paymentProof">上传转账凭证 Upload Transfer Proof *</label>
+  <input type="file" id="paymentProof" required accept="image/*,application/pdf" />
+</div>
+
+<!-- 🚀 提交按钮 -->
+<button type="submit" class="submit-btn">提交订单 Submit</button>
+
+<!-- 🔐 管理员导出 -->
 <div class="admin-panel" id="adminPanel">
-  <h3>管理员导出</h3>
   <div class="form-group">
-    <label for="adminPassword">请输入管理员密码</label>
-    <input type="password" id="adminPassword" />
+    <label for="adminPassword">管理员密码 Admin Password</label>
+    <input type="password" id="adminPassword" placeholder="请输入密码">
   </div>
-  <button type="button" class="export-btn" id="realExportBtn">导出 Excel</button>
+  <button type="button" class="export-btn" id="exportBtn">导出 Excel</button>
 </div>
-<button type="button" class="export-btn" id="showExportBtn">导出订单 (需管理员密码)</button>
 
-<!-- ✅ 订单确认弹窗 -->
-<div id="confirmationDialog" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
-  <div style="background:white; padding:20px; border-radius:10px; max-width:90%; width:500px;">
+<button type="button" class="export-btn" onclick="document.getElementById('adminPanel').style.display='block'">管理员导出</button>
+
+<!-- ✅ 确认弹窗 -->
+<div id="confirmationDialog">
+  <div>
     <div id="confirmationContent"></div>
-    <div style="text-align:right; margin-top:15px;">
-      <button id="confirmCancel" style="margin-right:10px;">取消</button>
-      <button id="confirmSubmit" style="background:#ff4757; color:white;">确认并提交</button>
-    </div>
   </div>
 </div>
-
-</form>
 
 <script>
-const SUPABASE_URL = 'https://edfnhhthztskuuosuasw.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampvLYJr-KgqVwXsKoAo';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = window.supabase.createClient(
+  'https://edfnhhthztskuuosuasw.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampvLYJr-KgqVwXsKoAo'
+);
 
 function generateOrderId() {
   const now = new Date();
-  return `ORD-${now.getFullYear()}${(now.getMonth()+1+"").padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${Math.floor(1000 + Math.random()*9000)}`;
+  return now.getFullYear().toString() +
+    (now.getMonth()+1).toString().padStart(2,'0') +
+    now.getDate().toString().padStart(2,'0') +
+    '-' + Math.floor(1000 + Math.random() * 9000);
 }
 
 function calculateTotal() {
@@ -571,164 +564,152 @@ function calculateTotal() {
   return total;
 }
 
-function collectOrderData() {
+document.addEventListener('input', calculateTotal);
+document.addEventListener('click', function(e){
+  if (e.target.classList.contains('plus') || e.target.classList.contains('minus')) {
+    const input = e.target.parentElement.querySelector('.quantity-input');
+    const current = parseInt(input.value) || 0;
+    input.value = e.target.classList.contains('plus') ? current + 1 : Math.max(current - 1, 0);
+    calculateTotal();
+  }
+});
+
+function buildWhatsAppMessage(order) {
+  const phoneLink = order.phone.replace(/\D/g, '').replace(/^0/, '60');
+  let msg = `*🛎️ [新订单] 锋味派订单 #${order.order_id}*%0A%0A`;
+  msg += `👤 姓名: ${order.name}%0A📱 电话: https://wa.me/${phoneLink}%0A🚚 取货方式: ${order.delivery}%0A%0A`;
+  msg += `🛒 订单明细:%0A`;
+  order.items.forEach(i => {
+    msg += `▫️ ${i.name} × ${i.quantity} = RM${(i.price * i.quantity).toFixed(2)}%0A`;
+  });
+  msg += `%0A💰 总金额: RM${order.total.toFixed(2)}%0A📝 备注: ${order.remarks || '无'}%0A📅 时间: ${new Date().toLocaleString('zh-CN')}`;
+  return msg;
+}
+
+async function submitOrder(order, whatsappMsg) {
+  try {
+    const proofFile = document.getElementById('paymentProof').files[0];
+    let proofUrl = '';
+    if (proofFile) {
+      const filename = `${Date.now()}_${proofFile.name}`;
+      const { error } = await supabase.storage.from('payment-proofs').upload(`proofs/${filename}`, proofFile);
+      if (error) throw error;
+      const { data } = supabase.storage.from('payment-proofs').getPublicUrl(`proofs/${filename}`);
+      proofUrl = data.publicUrl;
+    }
+
+    await supabase.from('orders').insert([{
+      order_id: order.order_id,
+      name: order.name,
+      phone: order.phone,
+      delivery_method: order.delivery,
+      order_items: order.items,
+      total_amount: order.total,
+      remarks: order.remarks,
+      payment_proof_url: proofUrl,
+      created_at: new Date().toISOString(),
+      status: 'pending'
+    }]);
+
+    alert('✅ 订单提交成功！即将跳转 WhatsApp...');
+    const waUrl = `https://wa.me/60162327792?text=${encodeURIComponent(whatsappMsg)}`;
+    window.open(waUrl, '_blank');
+  } catch (err) {
+    alert('❌ 提交失败，请重试');
+    console.error(err);
+  }
+}
+
+function showConfirmation(order) {
+  const preview = decodeURIComponent(buildWhatsAppMessage(order)).replace(/%0A/g, '\n');
+  let html = `<h3>确认订单</h3>`;
+  html += `<p><strong>姓名:</strong> ${order.name}</p>`;
+  html += `<p><strong>电话:</strong> ${order.phone}</p>`;
+  html += `<p><strong>取货方式:</strong> ${order.delivery}</p>`;
+  html += `<h4>订单明细:</h4>`;
+  order.items.forEach(i => {
+    html += `<p>${i.name} × ${i.quantity} = RM${(i.quantity * i.price).toFixed(2)}</p>`;
+  });
+  html += `<p><strong>总金额:</strong> RM${order.total.toFixed(2)}</p>`;
+  html += `<p><strong>备注:</strong> ${order.remarks || '无'}</p>`;
+  html += `<p><strong>📤 WhatsApp 内容预览:</strong></p>`;
+  html += `<textarea style="width:100%;height:120px;">${preview}</textarea>`;
+  html += `<div style="margin-top:15px;text-align:right;">
+    <button onclick="hideDialog()">取消</button>
+    <button onclick="confirmSubmit()">确认并发送</button>
+  </div>`;
+  document.getElementById('confirmationContent').innerHTML = html;
+  document.getElementById('confirmationDialog').style.display = 'flex';
+}
+
+function hideDialog() {
+  document.getElementById('confirmationDialog').style.display = 'none';
+}
+
+function confirmSubmit() {
+  hideDialog();
+  const order = window.__PENDING_ORDER__;
+  const msg = buildWhatsAppMessage(order);
+  submitOrder(order, msg);
+}
+
+document.getElementById('orderForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const delivery = document.getElementById('delivery').value;
+  const remarks = document.getElementById('remarks').value.trim();
+  const agreed = document.getElementById('agreeCheckbox').checked;
+  const proof = document.getElementById('paymentProof').files[0];
+
   const items = [];
   document.querySelectorAll('.quantity-input').forEach(input => {
-    const qty = parseInt(input.value) || 0;
-    if (qty > 0) {
+    const quantity = parseInt(input.value);
+    if (quantity > 0) {
       items.push({
-        product: input.dataset.name,
-        quantity: qty,
-        price: parseFloat(input.dataset.price)
+        name: input.dataset.name,
+        price: parseFloat(input.dataset.price),
+        quantity
       });
     }
   });
 
-  return {
-    order_id: generateOrderId(),
-    name: document.getElementById('name').value.trim(),
-    phone: document.getElementById('phone').value.trim(),
-    delivery: document.getElementById('delivery').value,
-    remarks: document.getElementById('remarks').value.trim(),
-    total: calculateTotal(),
-    items
-  };
-}
-
-function buildWhatsAppMessage(data) {
-  let msg = `*🛎️ [新订单] 锋味派订单 #${data.order_id}*%0A`;
-  msg += `👤 姓名: ${data.name}%0A`;
-  msg += `📞 电话: ${data.phone}%0A`;
-  msg += `🚚 取货方式: ${data.delivery}%0A`;
-  msg += `📦 商品:%0A`;
-  data.items.forEach(item => {
-    msg += `• ${item.product} × ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}%0A`;
-  });
-  msg += `💰 总金额: RM${data.total.toFixed(2)}%0A`;
-  msg += `📝 备注: ${data.remarks || '无'}`;
-  return msg;
-}
-
-async function submitToSupabase(orderData, file) {
-  let paymentUrl = '';
-  if (file) {
-    const ext = file.name.split('.').pop();
-    const path = `proofs/${orderData.order_id}.${ext}`;
-    const { error } = await supabase.storage.from('payment-proofs').upload(path, file);
-    if (!error) {
-      const { data } = supabase.storage.from('payment-proofs').getPublicUrl(path);
-      paymentUrl = data.publicUrl;
-    }
+  if (!name || !phone || !delivery || !agreed || !proof || items.length === 0) {
+    alert('❗ 请完整填写表单并勾选声明');
+    return;
   }
 
-  await supabase.from('orders').insert({
-    order_id: orderData.order_id,
-    name: orderData.name,
-    phone: orderData.phone,
-    delivery_method: orderData.delivery,
-    remarks: orderData.remarks,
-    order_items: orderData.items,
-    total_amount: orderData.total,
-    payment_proof_url: paymentUrl,
-    created_at: new Date().toISOString()
-  });
-}
-
-function showConfirmation(orderData, messageEncoded) {
-  const dialog = document.getElementById('confirmationDialog');
-  const preview = decodeURIComponent(messageEncoded).replace(/%0A/g, '\n');
-  document.getElementById('confirmationContent').innerHTML = `
-    <h3>订单确认</h3>
-    <p><strong>姓名:</strong> ${orderData.name}</p>
-    <p><strong>电话:</strong> ${orderData.phone}</p>
-    <p><strong>取货方式:</strong> ${orderData.delivery}</p>
-    <p><strong>总金额:</strong> RM${orderData.total.toFixed(2)}</p>
-    <textarea style="width:100%;height:100px">${preview}</textarea>
-  `;
-  dialog.style.display = 'flex';
-
-  document.getElementById('confirmCancel').onclick = () => {
-    dialog.style.display = 'none';
+  const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const order = {
+    order_id: generateOrderId(),
+    name, phone, delivery, remarks, items, total
   };
+  window.__PENDING_ORDER__ = order;
+  showConfirmation(order);
+});
 
-  document.getElementById('confirmSubmit').onclick = async () => {
-    dialog.style.display = 'none';
-    const file = document.getElementById('payment').files[0];
-    await submitToSupabase(orderData, file);
-    const phone = '60162327792';
-    const url = `https://wa.me/${phone}?text=${messageEncoded}`;
-    window.open(url, '_blank');
-    alert('提交成功，已跳转 WhatsApp');
-  };
-}
+// Excel 导出功能
+document.getElementById('exportBtn').addEventListener('click', async () => {
+  const pass = document.getElementById('adminPassword').value;
+  if (pass !== 'fengweipaiadmin') return alert('密码错误');
 
-// 初始化按钮绑定
-document.addEventListener('DOMContentLoaded', () => {
-  // 加减按钮绑定
-  document.querySelectorAll('.quantity-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const input = btn.parentElement.querySelector('.quantity-input');
-      let val = parseInt(input.value) || 0;
-      if (btn.classList.contains('plus')) val++;
-      else val = Math.max(0, val - 1);
-      input.value = val;
-      calculateTotal();
-    });
-  });
+  const { data, error } = await supabase.from('orders').select('*');
+  if (error) return alert('导出失败');
 
-  document.querySelectorAll('.quantity-input').forEach(input => {
-    input.addEventListener('input', () => {
-      calculateTotal();
-    });
-  });
+  const rows = data.map(o => ({
+    订单编号: o.order_id,
+    姓名: o.name,
+    电话: o.phone,
+    取货方式: o.delivery_method,
+    总金额: o.total_amount,
+    备注: o.remarks,
+    下单时间: o.created_at
+  }));
 
-  document.getElementById('orderForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const orderData = collectOrderData();
-    const file = document.getElementById('payment').files[0];
-
-    if (!orderData.name || !orderData.phone || !orderData.delivery || !file || orderData.items.length === 0) {
-      alert('请填写完整信息并至少选择一项商品');
-      return;
-    }
-
-    const message = buildWhatsAppMessage(orderData);
-    showConfirmation(orderData, encodeURIComponent(message));
-  });
-
-  // 管理员导出按钮
-  document.getElementById('showExportBtn').onclick = () => {
-    document.getElementById('adminPanel').style.display = 'block';
-  };
-
-  document.getElementById('realExportBtn').onclick = async () => {
-    const pwd = document.getElementById('adminPassword').value;
-    if (pwd !== 'fengweipaiadmin') {
-      alert('密码错误');
-      return;
-    }
-
-    const { data, error } = await supabase.from('orders').select('*');
-    if (error || !data) {
-      alert('导出失败');
-      return;
-    }
-
-    const rows = data.map(row => ({
-      订单编号: row.order_id,
-      姓名: row.name,
-      电话: row.phone,
-      取货方式: row.delivery_method,
-      备注: row.remarks,
-      总金额: row.total_amount,
-      下单时间: row.created_at
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, worksheet, "订单记录");
-    XLSX.writeFile(wb, "orders.xlsx");
-  };
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, ws, '订单');
+  XLSX.writeFile(wb, `锋味派订单-${new Date().toISOString().slice(0,10)}.xlsx`);
 });
 </script>
 </body>
