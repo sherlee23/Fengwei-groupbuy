@@ -2,489 +2,604 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>锋味派团购订单</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
   <style>
     :root {
-      --primary: #ff4757;
-      --secondary: #ff6b81;
-      --accent: #ffa502;
-      --light: #f1f2f6;
-      --dark: #2f3542;
+      --primary: #FF4757;
+      --secondary: #FFA502;
+      --accent: #2ed573;
+      --bg-light: #f9f9f9;
+      --text-dark: #2f3542;
     }
-
     body {
-      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      max-width: 640px;
-      margin: 0 auto;
-      padding: 0 10px 60px;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      color: var(--dark);
-    }
-
-    .header {
-      text-align: center;
-      padding: 25px 20px;
-      background: linear-gradient(to right, var(--primary), var(--secondary));
-      border-radius: 0 0 20px 20px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
-      color: white;
-    }
-
-    .header h1 {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background-color: var(--bg-light);
       margin: 0;
-      font-size: 28px;
-      font-weight: 700;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+      padding: 0;
+      color: var(--text-dark);
     }
-
     .container {
-      padding: 0 12px;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 20px;
     }
-
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1.5px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    .form-group textarea {
+      resize: vertical;
+      height: 48px;
+    }
     .product {
-      background-color: white;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 15px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-      border-left: 4px solid var(--primary);
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 16px;
     }
-
     .product-image-container {
       width: 100%;
-      aspect-ratio: 1.6;
+      height: 200px;
       overflow: hidden;
       border-radius: 8px;
       margin-bottom: 12px;
-      background-color: #f5f5f5;
+      background: #f0f0f0;
       display: flex;
       justify-content: center;
       align-items: center;
     }
-
     .product-image {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      background-color: #f5f5f5;
     }
-
     .product-name {
       font-weight: bold;
       font-size: 18px;
-      margin-bottom: 5px;
-      color: var(--dark);
+      margin-bottom: 6px;
     }
-
     .product-price {
+      font-size: 16px;
       color: var(--primary);
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
-
     .quantity-control {
       display: flex;
       align-items: center;
-      justify-content: space-between;
     }
-
-    .quantity-btn {
-      width: 36px;
-      height: 36px;
-      border: none;
-      background: linear-gradient(to right, var(--primary), var(--secondary));
-      color: white;
-      font-size: 18px;
-      cursor: pointer;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
     .quantity-input {
-      width: 50px;
-      height: 36px;
+      width: 60px;
       text-align: center;
+      font-size: 16px;
       margin: 0 10px;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
-
-    .form-group {
-      margin-bottom: 22px;
+    .quantity-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      font-size: 18px;
+      border-radius: 6px;
+      cursor: pointer;
     }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 10px;
-      font-weight: 600;
-      color: var(--dark);
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      padding: 12px 15px;
-      border: 2px solid #e0e0e0;
-      border-radius: 10px;
-      font-size: 16px;
-      transition: all 0.3s;
-      box-sizing: border-box;
-    }
-
-    .form-group textarea {
-      resize: vertical;
-      min-height: 48px;
-      max-height: 120px;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      border-color: var(--primary);
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.2);
-    }
-
     .total {
-      font-size: 20px;
-      font-weight: bold;
       text-align: right;
-      margin: 25px 0;
-      padding: 18px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-      color: var(--primary);
+      font-size: 18px;
+      font-weight: bold;
+      margin: 20px 0;
     }
-
-    .file-upload {
-      margin-top: 20px;
-    }
-
-    .file-upload input[type="file"] {
-      width: 100%;
-      padding: 12px;
-      border: 2px dashed #e0e0e0;
-      border-radius: 10px;
-      background: #fff;
-      box-sizing: border-box;
-    }
-
     .submit-btn {
-      width: 100%;
-      padding: 14px;
       background: linear-gradient(to right, var(--primary), var(--secondary));
       color: white;
       border: none;
-      border-radius: 10px;
+      padding: 14px;
       font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 25px;
-    }
-
-    .bank-info {
-      background: #fffaf0;
-      border-left: 4px solid var(--primary);
-      padding: 15px;
-      margin-top: 20px;
-      margin-bottom: 25px;
       border-radius: 10px;
+      width: 100%;
+      cursor: pointer;
     }
-
-    .confirmation-dialog {
+    .bank-info {
+      background: #fff3f3;
+      padding: 16px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 4px solid var(--primary);
+    }
+    .file-upload {
+      margin: 16px 0;
+    }
+    .admin-panel {
       display: none;
+      margin-top: 24px;
+      padding: 16px;
+      background: #f1f1f1;
+      border-radius: 8px;
+    }
+    .confirmation-dialog {
       position: fixed;
       top: 0; left: 0;
-      width: 100%; height: 100%;
+      width: 100%;
+      height: 100%;
       background: rgba(0,0,0,0.5);
+      display: none;
       justify-content: center;
       align-items: center;
-      z-index: 9999;
+      z-index: 1000;
     }
-
     .confirmation-dialog .content {
       background: white;
       padding: 20px;
-      width: 90%;
-      max-width: 500px;
       border-radius: 10px;
+      max-width: 500px;
+      width: 90%;
       max-height: 80vh;
       overflow-y: auto;
-      box-sizing: border-box;
     }
-
-    .confirmation-dialog .content button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+    .confirmation-dialog textarea {
+      font-family: monospace;
+      font-size: 14px;
     }
-
-    .confirmation-dialog .content #cancelConfirm {
-      background: #ccc;
-      color: #333;
-    }
-
-    .confirmation-dialog .content #confirmSubmit {
-      background: var(--primary);
-      color: white;
-    }
-
-    .admin-panel {
-      display: none;
-      background: #f1f1f1;
-      padding: 15px;
-      margin-top: 20px;
-      border-radius: 10px;
-    }
-
-    .admin-panel input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-
-    .disclaimer-box {
-    background-color: #FFF3F3;
-    border-left: 4px solid #FF4757;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 25px;
-}
-.disclaimer-title {
-    color: #FF4757;
-    margin-top: 0;
-    font-size: 18px;
-}
-.disclaimer-content p {
-    margin: 10px 0;
-    line-height: 1.5;
-}
-.disclaimer-checkbox {
-    margin-top: 15px;
-    display: flex;
-    align-items: center;
-}
-.disclaimer-checkbox input {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--primary); /* 使复选框与主题色一致 */
-    margin-right: 10px;
-    }
-
-    </style>
+  </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🍢 锋味派美食团购</h1>
-    </div>
+  <div class="container">
+    <h1>锋味派团购订单</h1>
 
-    <div class="container">
-        <!-- 订单确认对话框 -->
-        <div id="confirmationDialog">
-            <div>
-                <div id="confirmationContent"></div>
-            </div>
-        </div>
-
-        <!-- 加载指示器 -->
-        <div id="loadingOverlay">正在提交订单，请稍候...</div>
-
-        <form id="orderForm">
-    <div class="disclaimer-box">
-        <h3 class="disclaimer-title">⚠️ 重要声明 / Important Notice</h3>
-        <div class="disclaimer-content">
-            <p>1. 此为预购商品，我们将收集所有订单后统一向供应商下单。</p>
-            <p>1. This is a pre-order. We will place the bulk order after collecting all purchases.</p>
-            <p>2. 预计等待时间：30-60天（从下单日起计算）。</p>
-            <p>2. Estimated waiting time: 30-60 days (from order date).</p>
-            <p>3. 当前价格<strong>不包含</strong>国际运费，运费将根据实际物流成本后续通知收取。</p>
-            <p>3. Current prices <strong>DO NOT INCLUDE</strong> international shipping fees. Fees will be calculated later.</p>
-        </div>
-        <div class="disclaimer-checkbox">
-            <input type="checkbox" id="agreeCheckbox" required>
-            <label for="agreeCheckbox">我已阅读并同意上述条款 / I have read and agree to the terms</label>
-        </div>
-    </div>
-            <!-- 客户信息 -->
-            <div class="form-group">
-                <label for="name"><span class="emoji">👤</span>*1. 姓名 Name</label>
-                <input type="text" id="name" name="name" required placeholder="请输入您的姓名">
-                <div id="nameError" class="error-message"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="phone"><span class="emoji">📱</span>*2. 电话 HP</label>
-                <input type="tel" id="phone" name="phone" required placeholder="请输入联系电话">
-                <div id="phoneError" class="error-message"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="delivery"><span class="emoji">🚚</span>*3. 取货方式 Delivery Method</label>
-                <select id="delivery" name="delivery" required>
-                    <option value="">请选择取货方式...</option>
-                    <option value="self-pickup">自取 Self pick up</option>
-                    <option value="lalamove">Lalamove 送货</option>
-                </select>
-                <div id="deliveryError" class="error-message"></div>
-            </div>
-
-            <h2 class="category-title"><span class="emoji">🛒</span>4. 请选择商品</h2>
-
-      <!-- 🍢 烤肠系列 -->
-      <h3>🌭 烤肠系列</h3>
-      <div class="product"><div class="product-image-container"><img src="IMG_3859.jpeg" class="product-image"></div><div class="product-name">原味烤肠</div><div class="product-price">RM28</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="原味烤肠">-</button><input type="number" class="quantity-input" id="原味烤肠" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="原味烤肠">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3864.jpeg" class="product-image"></div><div class="product-name">烟熏蜜汁烤肠</div><div class="product-price">RM28</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="烟熏蜜汁烤肠">-</button><input type="number" class="quantity-input" id="烟熏蜜汁烤肠" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="烟熏蜜汁烤肠">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3863.jpeg" class="product-image"></div><div class="product-name">法式香草烤肠</div><div class="product-price">RM28</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="法式香草烤肠">-</button><input type="number" class="quantity-input" id="法式香草烤肠" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="法式香草烤肠">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3860.jpeg" class="product-image"></div><div class="product-name">黑胡椒烤肠</div><div class="product-price">RM28</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="黑胡椒烤肠">-</button><input type="number" class="quantity-input" id="黑胡椒烤肠" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="黑胡椒烤肠">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3862.jpeg" class="product-image"></div><div class="product-name">孜然脆骨烤肠</div><div class="product-price">RM28</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="孜然脆骨烤肠">-</button><input type="number" class="quantity-input" id="孜然脆骨烤肠" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="孜然脆骨烤肠">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3861.jpeg" class="product-image"></div><div class="product-name">芝士玉米烤肠</div><div class="product-price">RM28</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="芝士玉米烤肠">-</button><input type="number" class="quantity-input" id="芝士玉米烤肠" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="芝士玉米烤肠">+</button></div></div>
-
-      <!-- 🦐 虾肠&虾饼系列 -->
-      <h3>🦐 虾肠&虾饼系列</h3>
-      <div class="product"><div class="product-image-container"><img src="IMG_3853.jpeg" class="product-image"></div><div class="product-name">原味虾肠</div><div class="product-price">RM33</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="原味虾肠">-</button><input type="number" class="quantity-input" id="原味虾肠" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="原味虾肠">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3854.jpeg" class="product-image"></div><div class="product-name">辣味虾肠</div><div class="product-price">RM33</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="辣味虾肠">-</button><input type="number" class="quantity-input" id="辣味虾肠" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="辣味虾肠">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3873.jpeg" class="product-image"></div><div class="product-name">原味虾饼</div><div class="product-price">RM28</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="原味虾饼">-</button><input type="number" class="quantity-input" id="原味虾饼" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="原味虾饼">+</button></div></div>
-
-      <!-- 🍕 披萨系列 -->
-      <h3>🍕 披萨系列</h3>
-      <div class="product"><div class="product-image-container"><img src="IMG_3841.jpeg" class="product-image"></div><div class="product-name">玛格丽特披萨</div><div class="product-price">RM25</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="玛格丽特披萨">-</button><input type="number" class="quantity-input" id="玛格丽特披萨" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="玛格丽特披萨">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3839.jpeg" class="product-image"></div><div class="product-name">黑椒牛肉披萨</div><div class="product-price">RM25</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="黑椒牛肉披萨">-</button><input type="number" class="quantity-input" id="黑椒牛肉披萨" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="黑椒牛肉披萨">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3840.jpeg" class="product-image"></div><div class="product-name">奥尔良鸡肉披萨</div><div class="product-price">RM25</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="奥尔良鸡肉披萨">-</button><input type="number" class="quantity-input" id="奥尔良鸡肉披萨" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="奥尔良鸡肉披萨">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3852.jpeg" class="product-image"></div><div class="product-name">双料榴莲披萨</div><div class="product-price">RM40</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="双料榴莲披萨">-</button><input type="number" class="quantity-input" id="双料榴莲披萨" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="双料榴莲披萨">+</button></div></div>
-
-      <!-- 🥮 酥饼系列 -->
-      <h3>🥮 酥饼系列</h3>
-      <div class="product"><div class="product-image-container"><img src="IMG_3837.jpeg" class="product-image"></div><div class="product-name">黑猪肉酥饼</div><div class="product-price">RM55</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="黑猪肉酥饼">-</button><input type="number" class="quantity-input" id="黑猪肉酥饼" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="黑猪肉酥饼">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3838.jpeg" class="product-image"></div><div class="product-name">安格斯牛肉酥饼</div><div class="product-price">RM55</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="安格斯牛肉酥饼">-</button><input type="number" class="quantity-input" id="安格斯牛肉酥饼" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="安格斯牛肉酥饼">+</button></div></div>
-
-      <!-- 🥟 小笼汤包系列 -->
-      <h3>🥟 小笼汤包系列</h3>
-      <div class="product"><div class="product-image-container"><img src="IMG_3874.jpeg" class="product-image"></div><div class="product-name">鲜肉小笼汤包</div><div class="product-price">RM12</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="鲜肉小笼汤包">-</button><input type="number" class="quantity-input" id="鲜肉小笼汤包" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="鲜肉小笼汤包">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3875.jpeg" class="product-image"></div><div class="product-name">菌菇小笼汤包</div><div class="product-price">RM12</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="菌菇小笼汤包">-</button><input type="number" class="quantity-input" id="菌菇小笼汤包" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="菌菇小笼汤包">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3876.jpeg" class="product-image"></div><div class="product-name">黑松露小笼汤包</div><div class="product-price">RM12</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="黑松露小笼汤包">-</button><input type="number" class="quantity-input" id="黑松露小笼汤包" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="黑松露小笼汤包">+</button></div></div>
-
-      <!-- 🍗 鸡排系列 -->
-      <h3>🍗 鸡排系列</h3>
-      <div class="product"><div class="product-image-container"><img src="IMG_3835.jpeg" class="product-image"></div><div class="product-name">原味鸡排</div><div class="product-price">RM20</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="原味鸡排">-</button><input type="number" class="quantity-input" id="原味鸡排" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="原味鸡排">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3836.jpeg" class="product-image"></div><div class="product-name">奥尔良鸡排</div><div class="product-price">RM20</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="奥尔良鸡排">-</button><input type="number" class="quantity-input" id="奥尔良鸡排" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="奥尔良鸡排">+</button></div></div>
-
-      <!-- 🍗 鸡翅系列 -->
-      <h3>🍗 鸡翅系列</h3>
-      <div class="product"><div class="product-image-container"><img src="IMG_3865.jpeg" class="product-image"></div><div class="product-name">奥尔良鸡翅</div><div class="product-price">RM25</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="奥尔良鸡翅">-</button><input type="number" class="quantity-input" id="奥尔良鸡翅" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="奥尔良鸡翅">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3866.jpeg" class="product-image"></div><div class="product-name">青花椒鸡翅</div><div class="product-price">RM25</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="青花椒鸡翅">-</button><input type="number" class="quantity-input" id="青花椒鸡翅" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="青花椒鸡翅">+</button></div></div>
-
-      <!-- 🥟 纸皮烧卖系列 -->
-      <h3>🥟 纸皮烧卖系列</h3>
-      <div class="product"><div class="product-image-container"><img src="IMG_3843.jpeg" class="product-image"></div><div class="product-name">黑猪三丁纸皮烧卖</div><div class="product-price">RM15</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="黑猪三丁纸皮烧卖">-</button><input type="number" class="quantity-input" id="黑猪三丁纸皮烧卖" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="黑猪三丁纸皮烧卖">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3842.jpeg" class="product-image"></div><div class="product-name">黑椒牛肉纸皮烧卖</div><div class="product-price">RM15</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="黑椒牛肉纸皮烧卖">-</button><input type="number" class="quantity-input" id="黑椒牛肉纸皮烧卖" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="黑椒牛肉纸皮烧卖">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3844.jpeg" class="product-image"></div><div class="product-name">黑猪梅菜干纸皮烧卖</div><div class="product-price">RM15</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="黑猪梅菜干纸皮烧卖">-</button><input type="number" class="quantity-input" id="黑猪梅菜干纸皮烧卖" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="黑猪梅菜干纸皮烧卖">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3845.jpeg" class="product-image"></div><div class="product-name">三丁芝士纸皮烧卖</div><div class="product-price">RM15</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="三丁芝士纸皮烧卖">-</button><input type="number" class="quantity-input" id="三丁芝士纸皮烧卖" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="三丁芝士纸皮烧卖">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3846.jpeg" class="product-image"></div><div class="product-name">乌米腊味纸皮烧卖</div><div class="product-price">RM15</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="乌米腊味纸皮烧卖">-</button><input type="number" class="quantity-input" id="乌米腊味纸皮烧卖" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="乌米腊味纸皮烧卖">+</button></div></div>
-      <!-- 🥮 酥饼系列 -->
-      <h3>🥮 酥饼系列</h3>
-      <div class="product"><div class="product-image-container"><img src="IMG_3837.jpeg" class="product-image"></div><div class="product-name">黑猪肉酥饼</div><div class="product-price">RM55</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="黑猪肉酥饼">-</button><input type="number" class="quantity-input" id="黑猪肉酥饼" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="黑猪肉酥饼">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3838.jpeg" class="product-image"></div><div class="product-name">安格斯牛肉酥饼</div><div class="product-price">RM55</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="安格斯牛肉酥饼">-</button><input type="number" class="quantity-input" id="安格斯牛肉酥饼" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="安格斯牛肉酥饼">+</button></div></div>
-
-      <!-- 🥟 小笼汤包系列 -->
-      <h3>🥟 小笼汤包系列</h3>
-      <div class="product"><div class="product-image-container"><img src="IMG_3874.jpeg" class="product-image"></div><div class="product-name">鲜肉小笼汤包</div><div class="product-price">RM12</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="鲜肉小笼汤包">-</button><input type="number" class="quantity-input" id="鲜肉小笼汤包" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="鲜肉小笼汤包">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3875.jpeg" class="product-image"></div><div class="product-name">菌菇小笼汤包</div><div class="product-price">RM12</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="菌菇小笼汤包">-</button><input type="number" class="quantity-input" id="菌菇小笼汤包" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="菌菇小笼汤包">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3876.jpeg" class="product-image"></div><div class="product-name">黑松露小笼汤包</div><div class="product-price">RM12</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="黑松露小笼汤包">-</button><input type="number" class="quantity-input" id="黑松露小笼汤包" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="黑松露小笼汤包">+</button></div></div>
-
-      <!-- 🍗 鸡排系列 -->
-      <h3>🍗 鸡排系列</h3>
-      <div class="product"><div class="product-image-container"><img src="IMG_3835.jpeg" class="product-image"></div><div class="product-name">原味鸡排</div><div class="product-price">RM20</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="原味鸡排">-</button><input type="number" class="quantity-input" id="原味鸡排" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="原味鸡排">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3836.jpeg" class="product-image"></div><div class="product-name">奥尔良鸡排</div><div class="product-price">RM20</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="奥尔良鸡排">-</button><input type="number" class="quantity-input" id="奥尔良鸡排" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="奥尔良鸡排">+</button></div></div>
-
-      <!-- 🍗 鸡翅系列 -->
-      <h3>🍗 鸡翅系列</h3>
-      <div class="product"><div class="product-image-container"><img src="IMG_3865.jpeg" class="product-image"></div><div class="product-name">奥尔良鸡翅</div><div class="product-price">RM25</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="奥尔良鸡翅">-</button><input type="number" class="quantity-input" id="奥尔良鸡翅" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="奥尔良鸡翅">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3866.jpeg" class="product-image"></div><div class="product-name">青花椒鸡翅</div><div class="product-price">RM25</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="青花椒鸡翅">-</button><input type="number" class="quantity-input" id="青花椒鸡翅" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="青花椒鸡翅">+</button></div></div>
-
-      <!-- 🥟 纸皮烧卖系列 -->
-      <h3>🥟 纸皮烧卖系列</h3>
-      <div class="product"><div class="product-image-container"><img src="IMG_3843.jpeg" class="product-image"></div><div class="product-name">黑猪三丁纸皮烧卖</div><div class="product-price">RM15</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="黑猪三丁纸皮烧卖">-</button><input type="number" class="quantity-input" id="黑猪三丁纸皮烧卖" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="黑猪三丁纸皮烧卖">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3842.jpeg" class="product-image"></div><div class="product-name">黑椒牛肉纸皮烧卖</div><div class="product-price">RM15</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="黑椒牛肉纸皮烧卖">-</button><input type="number" class="quantity-input" id="黑椒牛肉纸皮烧卖" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="黑椒牛肉纸皮烧卖">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3844.jpeg" class="product-image"></div><div class="product-name">黑猪梅菜干纸皮烧卖</div><div class="product-price">RM15</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="黑猪梅菜干纸皮烧卖">-</button><input type="number" class="quantity-input" id="黑猪梅菜干纸皮烧卖" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="黑猪梅菜干纸皮烧卖">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3845.jpeg" class="product-image"></div><div class="product-name">三丁芝士纸皮烧卖</div><div class="product-price">RM15</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="三丁芝士纸皮烧卖">-</button><input type="number" class="quantity-input" id="三丁芝士纸皮烧卖" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="三丁芝士纸皮烧卖">+</button></div></div>
-      <div class="product"><div class="product-image-container"><img src="IMG_3846.jpeg" class="product-image"></div><div class="product-name">乌米腊味纸皮烧卖</div><div class="product-price">RM15</div><div class="quantity-control"><button type="button" class="quantity-btn minus" data-product="乌米腊味纸皮烧卖">-</button><input type="number" class="quantity-input" id="乌米腊味纸皮烧卖" value="0" min="0"><button type="button" class="quantity-btn plus" data-product="乌米腊味纸皮烧卖">+</button></div></div>
-
-      <!-- 📝 顾客备注栏 -->
-      <div class="form-group">
-        <label for="remarks">备注（选填）</label>
-        <textarea id="remarks" name="remarks" placeholder="如需留言备注请写在此处..."></textarea>
+    <form id="orderForm">
+      <!-- 🛡️ 重要声明 -->
+      <div class="form-group disclaimer-box" style="background:#fff3f3;border-left:4px solid #FF4757;padding:16px;border-radius:8px;">
+        <h3 style="margin-top:0;color:#FF4757;">⚠️ 重要声明 Important Notice</h3>
+        <p>1. 此为预购商品，我们将收集所有订单后统一向供应商下单。</p>
+        <p>2. 预计等待时间：30-60天（从下单日起计算）。</p>
+        <p>3. 当前价格<strong>不包含</strong>国际运费，运费将根据实际物流成本后续通知收取。</p>
+        <p style="margin-top:15px;">
+          <label style="display:flex;align-items:center;">
+            <input type="checkbox" id="agreeCheckbox" required style="margin-right:10px;width:18px;height:18px;"/>
+            我已阅读并同意上述条款 I have read and agree to the terms
+          </label>
+        </p>
       </div>
 
-      <!-- 💳 银行转账信息展示 -->
+      <!-- 🧍 顾客资料 -->
+      <div class="form-group">
+        <label for="name">1. 姓名 Name *</label>
+        <input type="text" id="name" name="name" required placeholder="请输入您的姓名">
+      </div>
+
+      <div class="form-group">
+        <label for="phone">2. 电话 HP *</label>
+        <input type="tel" id="phone" name="phone" required placeholder="请输入联系电话">
+      </div>
+
+      <div class="form-group">
+        <label for="delivery">3. 取货方式 Delivery Method *</label>
+        <select id="delivery" name="delivery" required>
+          <option value="">请选择取货方式</option>
+          <option value="self-pickup">自取 Self Pickup</option>
+          <option value="lalamove">Lalamove 送货</option>
+        </select>
+      </div>
+
+      <!-- 🛒 商品标题 -->
+      <h2 style="margin:30px 0 15px;border-left:5px solid var(--primary);padding-left:12px;">4. 请选择商品</h2>
+
+      <!-- ========== 烤肠系列 ========== -->
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3859.jpeg" class="product-image" alt="原味烤肠">
+        </div>
+        <div class="product-name">原味烤肠</div>
+        <div class="product-price">RM28</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="原味烤肠">-</button>
+          <input type="number" class="quantity-input" id="原味烤肠" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="原味烤肠">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3864.jpeg" class="product-image" alt="烟熏蜜汁烤肠">
+        </div>
+        <div class="product-name">烟熏蜜汁烤肠</div>
+        <div class="product-price">RM28</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="烟熏蜜汁烤肠">-</button>
+          <input type="number" class="quantity-input" id="烟熏蜜汁烤肠" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="烟熏蜜汁烤肠">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3863.jpeg" class="product-image" alt="法式香草烤肠">
+        </div>
+        <div class="product-name">法式香草烤肠</div>
+        <div class="product-price">RM28</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="法式香草烤肠">-</button>
+          <input type="number" class="quantity-input" id="法式香草烤肠" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="法式香草烤肠">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3860.jpeg" class="product-image" alt="黑胡椒烤肠">
+        </div>
+        <div class="product-name">黑胡椒烤肠</div>
+        <div class="product-price">RM28</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="黑胡椒烤肠">-</button>
+          <input type="number" class="quantity-input" id="黑胡椒烤肠" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="黑胡椒烤肠">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3862.jpeg" class="product-image" alt="孜然脆骨烤肠">
+        </div>
+        <div class="product-name">孜然脆骨烤肠</div>
+        <div class="product-price">RM28</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="孜然脆骨烤肠">-</button>
+          <input type="number" class="quantity-input" id="孜然脆骨烤肠" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="孜然脆骨烤肠">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3861.jpeg" class="product-image" alt="芝士玉米烤肠">
+        </div>
+        <div class="product-name">芝士玉米烤肠</div>
+        <div class="product-price">RM28</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="芝士玉米烤肠">-</button>
+          <input type="number" class="quantity-input" id="芝士玉米烤肠" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="芝士玉米烤肠">+</button>
+        </div>
+      </div>
+
+      <!-- ========== 虾肠&虾饼系列 ========== -->
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3853.jpeg" class="product-image" alt="原味虾肠">
+        </div>
+        <div class="product-name">原味虾肠</div>
+        <div class="product-price">RM33</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="原味虾肠">-</button>
+          <input type="number" class="quantity-input" id="原味虾肠" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="原味虾肠">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3854.jpeg" class="product-image" alt="辣味虾肠">
+        </div>
+        <div class="product-name">辣味虾肠</div>
+        <div class="product-price">RM33</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="辣味虾肠">-</button>
+          <input type="number" class="quantity-input" id="辣味虾肠" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="辣味虾肠">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3873.jpeg" class="product-image" alt="原味虾饼">
+        </div>
+        <div class="product-name">原味虾饼</div>
+        <div class="product-price">RM28</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="原味虾饼">-</button>
+          <input type="number" class="quantity-input" id="原味虾饼" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="原味虾饼">+</button>
+        </div>
+      </div>
+
+      <!-- ========== 披萨系列 ========== -->
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3841.jpeg" class="product-image" alt="玛格丽特披萨">
+        </div>
+        <div class="product-name">玛格丽特披萨</div>
+        <div class="product-price">RM25</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="玛格丽特披萨">-</button>
+          <input type="number" class="quantity-input" id="玛格丽特披萨" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="玛格丽特披萨">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3839.jpeg" class="product-image" alt="黑椒牛肉披萨">
+        </div>
+        <div class="product-name">黑椒牛肉披萨</div>
+        <div class="product-price">RM25</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="黑椒牛肉披萨">-</button>
+          <input type="number" class="quantity-input" id="黑椒牛肉披萨" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="黑椒牛肉披萨">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3840.jpeg" class="product-image" alt="奥尔良鸡肉披萨">
+        </div>
+        <div class="product-name">奥尔良鸡肉披萨</div>
+        <div class="product-price">RM25</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="奥尔良鸡肉披萨">-</button>
+          <input type="number" class="quantity-input" id="奥尔良鸡肉披萨" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="奥尔良鸡肉披萨">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3852.jpeg" class="product-image" alt="双料榴莲披萨">
+        </div>
+        <div class="product-name">双料榴莲披萨</div>
+        <div class="product-price">RM40</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="双料榴莲披萨">-</button>
+          <input type="number" class="quantity-input" id="双料榴莲披萨" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="双料榴莲披萨">+</button>
+        </div>
+      </div>
+
+      <!-- ========== 酥饼系列 ========== -->
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3837.jpeg" class="product-image" alt="黑猪肉酥饼">
+        </div>
+        <div class="product-name">黑猪肉酥饼</div>
+        <div class="product-price">RM55</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="黑猪肉酥饼">-</button>
+          <input type="number" class="quantity-input" id="黑猪肉酥饼" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="黑猪肉酥饼">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3838.jpeg" class="product-image" alt="安格斯牛肉酥饼">
+        </div>
+        <div class="product-name">安格斯牛肉酥饼</div>
+        <div class="product-price">RM55</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="安格斯牛肉酥饼">-</button>
+          <input type="number" class="quantity-input" id="安格斯牛肉酥饼" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="安格斯牛肉酥饼">+</button>
+        </div>
+      </div>
+
+      <!-- ========== 小笼包系列 ========== -->
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3874.jpeg" class="product-image" alt="鲜肉小笼包">
+        </div>
+        <div class="product-name">鲜肉小笼包</div>
+        <div class="product-price">RM12</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="鲜肉小笼包">-</button>
+          <input type="number" class="quantity-input" id="鲜肉小笼包" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="鲜肉小笼包">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3875.jpeg" class="product-image" alt="菌菇小笼包">
+        </div>
+        <div class="product-name">菌菇小笼包</div>
+        <div class="product-price">RM12</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="菌菇小笼包">-</button>
+          <input type="number" class="quantity-input" id="菌菇小笼包" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="菌菇小笼包">+</button>
+        </div>
+      </div>
+
+      <!-- ========== 鸡排系列 ========== -->
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3835.jpeg" class="product-image" alt="原味鸡排">
+        </div>
+        <div class="product-name">原味鸡排</div>
+        <div class="product-price">RM20</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="原味鸡排">-</button>
+          <input type="number" class="quantity-input" id="原味鸡排" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="原味鸡排">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3836.jpeg" class="product-image" alt="奥尔良鸡排">
+        </div>
+        <div class="product-name">奥尔良鸡排</div>
+        <div class="product-price">RM20</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="奥尔良鸡排">-</button>
+          <input type="number" class="quantity-input" id="奥尔良鸡排" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="奥尔良鸡排">+</button>
+        </div>
+      </div>
+
+      <!-- ========== 纸皮烧卖系列 ========== -->
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3843.jpeg" class="product-image" alt="黑猪三丁纸皮烧卖">
+        </div>
+        <div class="product-name">黑猪三丁纸皮烧卖</div>
+        <div class="product-price">RM15</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="黑猪三丁纸皮烧卖">-</button>
+          <input type="number" class="quantity-input" id="黑猪三丁纸皮烧卖" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="黑猪三丁纸皮烧卖">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3842.jpeg" class="product-image" alt="黑椒牛肉纸皮烧卖">
+        </div>
+        <div class="product-name">黑椒牛肉纸皮烧卖</div>
+        <div class="product-price">RM15</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="黑椒牛肉纸皮烧卖">-</button>
+          <input type="number" class="quantity-input" id="黑椒牛肉纸皮烧卖" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="黑椒牛肉纸皮烧卖">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3844.jpeg" class="product-image" alt="黑猪梅菜干纸皮烧卖">
+        </div>
+        <div class="product-name">黑猪梅菜干纸皮烧卖</div>
+        <div class="product-price">RM15</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="黑猪梅菜干纸皮烧卖">-</button>
+          <input type="number" class="quantity-input" id="黑猪梅菜干纸皮烧卖" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="黑猪梅菜干纸皮烧卖">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3845.jpeg" class="product-image" alt="三丁芝士纸皮烧卖">
+        </div>
+        <div class="product-name">三丁芝士纸皮烧卖</div>
+        <div class="product-price">RM15</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="三丁芝士纸皮烧卖">-</button>
+          <input type="number" class="quantity-input" id="三丁芝士纸皮烧卖" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="三丁芝士纸皮烧卖">+</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image-container">
+          <img src="IMG_3846.jpeg" class="product-image" alt="乌米腊味纸皮烧卖">
+        </div>
+        <div class="product-name">乌米腊味纸皮烧卖</div>
+        <div class="product-price">RM15</div>
+        <div class="quantity-control">
+          <button type="button" class="quantity-btn minus" data-product="乌米腊味纸皮烧卖">-</button>
+          <input type="number" class="quantity-input" id="乌米腊味纸皮烧卖" value="0" min="0">
+          <button type="button" class="quantity-btn plus" data-product="乌米腊味纸皮烧卖">+</button>
+        </div>
+      </div>
+
+      <!-- 📝 顾客备注 -->
+      <div class="form-group">
+        <label for="remarks">5. 备注（如口味、特殊要求等）</label>
+        <textarea id="remarks" name="remarks" placeholder="请输入备注信息（如无可留空）"></textarea>
+      </div>
+
+      <!-- 🏦 银行转账信息 -->
       <div class="bank-info">
         <p><strong>银行名称：</strong> Maybank</p>
         <p><strong>户口名：</strong> Choong Sher Lee</p>
         <p><strong>户口号码：</strong> 114209540438</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
-          <img src="IMG_4043.jpeg" alt="二维码1" style="width:48%;border-radius:8px;border:1px solid #ccc;">
-          <img src="IMG_4042.png" alt="二维码2" style="width:48%;border-radius:8px;border:1px solid #ccc;">
+        <div style="display:flex;gap:12px;margin-top:12px;">
+          <div style="flex:1;">
+            <img src="IMG_4042.png" alt="收款二维码1" style="width:100%;border-radius:10px;">
+          </div>
+          <div style="flex:1;">
+            <img src="IMG_4043.jpeg" alt="收款二维码2" style="width:100%;border-radius:10px;">
+          </div>
         </div>
       </div>
 
       <!-- 📎 上传转账凭证 -->
-      <div class="file-upload">
-        <label for="payment">请上传转账凭证（图片或PDF） *</label>
-        <input type="file" id="payment" name="payment" accept="image/*,application/pdf" required>
+      <div class="form-group file-upload">
+        <label for="payment">6. 上传转账凭证 *</label>
+        <input type="file" id="payment" name="payment" accept="image/*,.pdf" required>
       </div>
 
-      <!-- 💰 订单总金额 -->
-      <div class="total">
-        共计：RM <span id="totalAmount">0.00</span>
-      </div>
+      <!-- 💰 订单总价 -->
+      <div class="total">共计：RM<span id="totalAmount">0</span></div>
 
       <!-- 🚀 提交按钮 -->
       <button type="submit" class="submit-btn">提交订单</button>
     </form>
 
-    <!-- 📥 管理员导出面板 -->
+    <!-- 🔐 管理员导出订单 -->
     <div class="admin-panel" id="adminPanel">
-      <h3>管理员导出</h3>
-      <input type="password" id="adminPassword" placeholder="请输入导出密码">
-      <button id="realExportBtn" class="submit-btn" style="background:gray;">导出订单 Excel</button>
+      <h3>管理员导出 Excel</h3>
+      <input type="password" id="adminPassword" class="form-group" placeholder="请输入管理员密码">
+      <button id="realExportBtn" class="submit-btn" style="background:#6c757d;">导出 Excel</button>
+    </div>
+    <button id="showExportBtn" class="submit-btn" style="margin-top:15px;background:#888;">导出订单（需管理员权限）</button>
+
+    <!-- ✅ 弹出确认框 -->
+    <div id="confirmationDialog" class="confirmation-dialog">
+      <div class="content" id="confirmationContent"></div>
     </div>
 
-    <!-- 🔐 显示导出密码面板按钮 -->
-    <button id="showExportBtn" class="submit-btn" style="margin-top:20px;background:#999;">管理员导出 Excel</button>
-  </div>
-
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const SUPABASE_URL = 'https://edfnhhthztskuuosuasw.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampvLYJr-KgqVwXsKoAo';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = 'https://edfnhhthztskuuosuasw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampvLYJr-KgqVwXsKoAo';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    document.querySelectorAll('.quantity-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.product;
-      const input = document.getElementById(id);
-      let value = parseInt(input.value) || 0;
-      input.value = btn.classList.contains('plus') ? value + 1 : Math.max(0, value - 1);
+document.addEventListener("DOMContentLoaded", function () {
+  function formatPhoneNumber(phone) {
+    const cleaned = phone.replace(/\D/g, '');
+    if (cleaned.startsWith('60')) return cleaned;
+    if (cleaned.startsWith('+60')) return cleaned.substring(1);
+    if (cleaned.startsWith('0')) return '60' + cleaned.substring(1);
+    return '60' + cleaned;
+  }
+
+  // 加减按钮逻辑
+  document.querySelectorAll(".quantity-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+      const input = document.getElementById(this.dataset.product);
+      let val = parseInt(input.value) || 0;
+      input.value = this.classList.contains("plus") ? val + 1 : Math.max(0, val - 1);
       calculateTotal();
     });
   });
 
-  document.querySelectorAll('.quantity-input').forEach(input => {
-    input.addEventListener('input', () => {
+  // 输入变动手动更新总价
+  document.querySelectorAll(".quantity-input").forEach(input => {
+    input.addEventListener("change", () => {
       input.value = Math.max(0, parseInt(input.value) || 0);
       calculateTotal();
     });
@@ -492,178 +607,170 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function calculateTotal() {
     let total = 0;
-    document.querySelectorAll('.product').forEach(product => {
-      const qty = parseInt(product.querySelector('.quantity-input').value) || 0;
-      const price = parseFloat(product.querySelector('.product-price').textContent.replace('RM', '')) || 0;
-      total += qty * price;
+    document.querySelectorAll(".quantity-input").forEach(input => {
+      const quantity = parseInt(input.value) || 0;
+      if (quantity > 0) {
+        const price = parseFloat(input.closest(".product").querySelector(".product-price").textContent.replace('RM',''));
+        total += price * quantity;
+      }
     });
-    document.getElementById('totalAmount').textContent = total.toFixed(2);
+    document.getElementById("totalAmount").textContent = total.toFixed(2);
     return total;
   }
 
-  function formatPhone(phone) {
-    const clean = phone.replace(/\D/g, '');
-    if (clean.startsWith('60')) return clean;
-    if (clean.startsWith('0')) return '60' + clean.slice(1);
-    return clean;
-  }
-
-  function buildOrderData() {
-    const items = [];
-    document.querySelectorAll('.product').forEach(product => {
-      const qty = parseInt(product.querySelector('.quantity-input').value) || 0;
-      if (qty > 0) {
-        const name = product.querySelector('.product-name').textContent.trim();
-        const price = parseFloat(product.querySelector('.product-price').textContent.replace('RM', ''));
-        items.push({ product: name, quantity: qty, price });
+  function validateForm() {
+    let valid = true;
+    const requiredFields = ['name', 'phone', 'delivery'];
+    requiredFields.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value.trim()) {
+        el.style.borderColor = 'red';
+        valid = false;
+      } else {
+        el.style.borderColor = '';
       }
     });
-    return items;
-  }
 
-  function generateOrderId() {
-    const now = new Date();
-    return now.getFullYear().toString() + (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0') + '-' + Math.floor(Math.random() * 9000 + 1000);
+    if (!document.getElementById("agreeCheckbox").checked) {
+      alert("请勾选我已阅读并同意声明");
+      valid = false;
+    }
+
+    const payment = document.getElementById("payment");
+    if (!payment.files || payment.files.length === 0) {
+      alert("请上传转账凭证");
+      valid = false;
+    }
+
+    if (calculateTotal() === 0) {
+      alert("请至少选择一项商品");
+      valid = false;
+    }
+
+    return valid;
   }
 
   function buildWhatsAppMessage(order) {
-    let msg = `*🛎️ [新订单] 锋味派订单 #${order.orderId}*%0A%0A`;
-    msg += `👤 *客户信息*:%0A`;
-    msg += `▫️ 姓名: ${order.name}%0A`;
-    msg += `▫️ 电话: ${order.phone}%0A`;
-    msg += `▫️ 取货方式: ${order.delivery}%0A%0A`;
-    msg += `🛒 *订单内容*:%0A`;
+    let msg = `🛎️ [新订单] 锋味派订单\n\n`;
+    msg += `👤 姓名：${order.name}\n📞 电话：${order.phone}\n🚚 取货方式：${order.delivery}\n\n`;
+    msg += `📝 订单内容：\n`;
     order.items.forEach(item => {
-      msg += `▫️ ${item.product} × ${item.quantity} = RM${(item.quantity * item.price).toFixed(2)}%0A`;
+      msg += `- ${item.name} x ${item.qty} = RM${(item.qty * item.price).toFixed(2)}\n`;
     });
-    msg += `%0A💰 *总金额: RM${order.total.toFixed(2)}*%0A`;
-    msg += `📝 *备注*: ${order.remarks || '无'}%0A`;
-    msg += `📅 *时间*: ${new Date().toLocaleString('zh-CN')}`;
+    msg += `\n💰 总金额：RM${order.total.toFixed(2)}\n`;
+    msg += `🗒️ 备注：${order.remarks || '无'}\n`;
+    msg += `📅 时间：${new Date().toLocaleString()}`;
     return msg;
   }
 
-  document.getElementById('orderForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
-
-    const name = document.getElementById('name').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const delivery = document.getElementById('delivery').value;
-    const remarks = document.getElementById('remarks').value.trim();
-    const proof = document.getElementById('payment').files[0];
-    const agreed = document.getElementById('agreeCheckbox').checked;
-
-    const items = buildOrderData();
-    const total = calculateTotal();
-
-    if (!name || !phone || !delivery || !proof || !agreed) {
-      alert('请填写所有必填信息并勾选同意条款');
-      return;
-    }
-
-    if (items.length === 0) {
-      alert('请至少选择一件商品');
-      return;
-    }
-
-    const orderId = generateOrderId();
-    const orderData = { orderId, name, phone, delivery, remarks, items, total };
-
-    // 显示弹窗
-    const preview = decodeURIComponent(buildWhatsAppMessage(orderData)).replace(/%0A/g, '\n');
-    const dialog = document.createElement('div');
-    dialog.className = 'confirmation-dialog';
-    dialog.innerHTML = `<div class="content">
-      <h3 style="margin-top:0;">订单确认</h3>
-      <p><strong>姓名：</strong>${name}</p>
-      <p><strong>电话：</strong>${phone}</p>
-      <p><strong>取货方式：</strong>${delivery === 'self-pickup' ? '自取 Self Pick-up' : 'Lalamove 送货'}</p>
-      <p><strong>商品总数：</strong>${items.length} 项</p>
-      <p><strong>总金额：</strong>RM${total.toFixed(2)}</p>
-      <p><strong>备注：</strong>${remarks || '无'}</p>
-      <textarea readonly style="width:100%;height:150px;margin-top:12px;border-radius:6px;padding:8px;box-sizing:border-box;">${preview}</textarea>
-      <div style="margin-top:20px;display:flex;justify-content:space-between;gap:10px;">
-        <button id="cancelConfirm" style="flex:1;">取消</button>
-        <button id="confirmSubmit" style="flex:1;">确认并发送</button>
-      </div>
+  function showConfirmation(order) {
+    const content = document.getElementById("confirmationContent");
+    let html = `<h3>确认订单</h3>`;
+    html += `<p><strong>姓名：</strong>${order.name}</p>`;
+    html += `<p><strong>电话：</strong>${order.phone}</p>`;
+    html += `<p><strong>取货方式：</strong>${order.delivery}</p>`;
+    html += `<ul>`;
+    order.items.forEach(i => {
+      html += `<li>${i.name} × ${i.qty} = RM${(i.qty * i.price).toFixed(2)}</li>`;
+    });
+    html += `</ul>`;
+    html += `<p><strong>总金额：</strong>RM${order.total.toFixed(2)}</p>`;
+    html += `<p><strong>备注：</strong>${order.remarks || '无'}</p>`;
+    html += `<textarea style="width:100%;height:120px;margin-top:12px;">${buildWhatsAppMessage(order)}</textarea>`;
+    html += `<div style="text-align:right;margin-top:15px;">
+      <button onclick="document.getElementById('confirmationDialog').style.display='none'" style="margin-right:10px;">取消</button>
+      <button id="confirmSubmitBtn">确认并发送</button>
     </div>`;
-    document.body.appendChild(dialog);
-    dialog.style.display = 'flex';
+    content.innerHTML = html;
+    document.getElementById("confirmationDialog").style.display = "flex";
 
-    document.getElementById('cancelConfirm').onclick = () => {
-      dialog.remove();
-    };
+    setTimeout(() => {
+      document.getElementById("confirmSubmitBtn").onclick = () => {
+        document.getElementById("confirmationDialog").style.display = "none";
+        submitOrder(order);
+      };
+    }, 100);
+  }
 
-    document.getElementById('confirmSubmit').onclick = async () => {
-      dialog.remove();
+  async function submitOrder(order) {
+    const file = document.getElementById("payment").files[0];
+    let fileUrl = '';
+    if (file) {
+      const ext = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${ext}`;
+      await supabase.storage.from('payment-proofs').upload(`proofs/${fileName}`, file);
+      const { data } = supabase.storage.from('payment-proofs').getPublicUrl(`proofs/${fileName}`);
+      fileUrl = data.publicUrl;
+    }
 
-      // 上传文件
-      const ext = proof.name.split('.').pop();
-      const filename = `proofs/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-      let url = '';
-      const { error: uploadErr } = await supabase.storage.from('payment-proofs').upload(filename, proof);
-      if (!uploadErr) {
-        const { data } = supabase.storage.from('payment-proofs').getPublicUrl(filename);
-        url = data.publicUrl;
+    await supabase.from('orders').insert({
+      name: order.name,
+      phone: order.phone,
+      delivery_method: order.delivery,
+      remarks: order.remarks,
+      order_items: order.items,
+      total_amount: order.total,
+      payment_proof_url: fileUrl,
+      created_at: new Date().toISOString()
+    });
+
+    // WhatsApp 跳转
+    const msg = encodeURIComponent(buildWhatsAppMessage(order));
+    const whatsappURL = `https://wa.me/${formatPhoneNumber("0162327792")}?text=${msg}`;
+    window.open(whatsappURL, '_blank');
+    alert("订单提交成功！");
+  }
+
+  document.getElementById("orderForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    const items = [];
+    document.querySelectorAll(".quantity-input").forEach(input => {
+      const qty = parseInt(input.value);
+      if (qty > 0) {
+        const product = input.closest(".product");
+        const name = product.querySelector(".product-name").textContent.trim();
+        const price = parseFloat(product.querySelector(".product-price").textContent.replace('RM',''));
+        items.push({ name, qty, price });
       }
+    });
 
-      // 插入 Supabase
-      await supabase.from('orders').insert([{
-        order_id: orderId,
-        name,
-        phone,
-        delivery_method: delivery,
-        remarks,
-        order_items: items,
-        total_amount: total,
-        payment_proof_url: url,
-        status: 'pending',
-        created_at: new Date().toISOString()
-      }]);
-
-      // 跳转 WhatsApp
-      const message = buildWhatsAppMessage(orderData);
-      window.open(`https://wa.me/60162327792?text=${message}`, '_blank');
-      
-      // 重置表单
-      document.getElementById('orderForm').reset();
-      document.querySelectorAll('.quantity-input').forEach(input => input.value = '0');
-      document.getElementById('totalAmount').textContent = '0.00';
+    const order = {
+      name: document.getElementById("name").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      delivery: document.getElementById("delivery").value,
+      remarks: document.getElementById("remarks").value.trim(),
+      items: items,
+      total: parseFloat(document.getElementById("totalAmount").textContent)
     };
+
+    showConfirmation(order);
   });
 
-  // 管理员导出
-  document.getElementById('showExportBtn').addEventListener('click', () => {
-    document.getElementById('adminPanel').style.display = 'block';
+  // 导出 Excel 功能
+  document.getElementById("showExportBtn").addEventListener("click", () => {
+    document.getElementById("adminPanel").style.display = "block";
   });
 
-  document.getElementById('realExportBtn').addEventListener('click', async () => {
-    const pwd = document.getElementById('adminPassword').value.trim();
-    if (pwd !== 'fengweipaiadmin') {
-      alert('密码错误');
-      return;
-    }
+  document.getElementById("realExportBtn").addEventListener("click", async () => {
+    const pw = document.getElementById("adminPassword").value;
+    if (pw !== "fengweipaiadmin") return alert("密码错误");
 
-    const { data, error } = await supabase.from('orders').select('*');
-    if (error) {
-      alert('获取数据失败');
-      return;
-    }
-
-    const rows = data.map(d => ({
-      订单编号: d.order_id,
-      姓名: d.name,
-      电话: d.phone,
-      方式: d.delivery_method,
-      总金额: d.total_amount,
-      备注: d.remarks,
-      商品: d.order_items.map(i => `${i.product}×${i.quantity}`).join(', '),
-      创建时间: d.created_at
+    const { data } = await supabase.from("orders").select("*");
+    const rows = data.map(row => ({
+      name: row.name,
+      phone: row.phone,
+      delivery: row.delivery_method,
+      remarks: row.remarks,
+      total: row.total_amount,
+      time: row.created_at,
+      items: row.order_items.map(i => `${i.name}x${i.qty}`).join(', ')
     }));
-
-    const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(rows);
-    XLSX.utils.book_append_sheet(wb, ws, 'Orders');
-    XLSX.writeFile(wb, 'fengweipai_orders.xlsx');
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "订单列表");
+    XLSX.writeFile(wb, "fengweipai_orders.xlsx");
   });
 });
 </script>
