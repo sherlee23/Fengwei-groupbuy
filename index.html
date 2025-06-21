@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -9,15 +8,21 @@
   <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
   <style>
 :root {
-  --primary: #d10000; /* 锋味派红色 */
-  --secondary: #000000; /* 黑色 */
-  --accent: #f8b500; /* 金色点缀 */
+  --primary: #d10000;
+  --secondary: #000000;
+  --accent: #f8b500;
   --light: #f8f8f8;
   --dark: #333333;
   --bg-gradient: linear-gradient(135deg, #f9f9f9 0%, #eeeeee 100%);
   --section-bg: rgba(255, 255, 255, 0.9);
   --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* 新增：弹窗滚动修复 */
+html.dialog-open {
+  overflow: hidden;
+  height: 100%;
 }
 
 body {
@@ -28,7 +33,7 @@ body {
   background: var(--bg-gradient);
   color: var(--dark);
   line-height: 1.6;
-  background-image: url('https://example.com/nicholas-tse-bg.jpg'); /* 谢霆锋背景图 */
+  background-image: url('https://example.com/nicholas-tse-bg.jpg');
   background-size: cover;
   background-attachment: fixed;
   background-position: center;
@@ -77,7 +82,40 @@ body {
   backdrop-filter: blur(5px);
 }
 
-/* 产品卡片样式 */
+.category-nav {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 100;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-bottom: 15px;
+  border-radius: 10px;
+}
+
+.category-links {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding-bottom: 5px;
+}
+
+.category-link {
+  white-space: nowrap;
+  padding: 5px 10px;
+  background: #f0f0f0;
+  border-radius: 20px;
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.category-link:hover {
+  background: var(--primary);
+  color: white;
+}
+
 .product {
   background: white;
   border-radius: 12px;
@@ -143,7 +181,6 @@ body {
   margin-bottom: 15px;
 }
 
-/* 数量控制 */
 .quantity-control {
   display: flex;
   align-items: center;
@@ -181,7 +218,6 @@ body {
   font-weight: bold;
 }
 
-/* 表单元素增强 */
 .form-group {
   margin-bottom: 25px;
   background: white;
@@ -214,6 +250,40 @@ body {
 .disclaimer-checkbox input {
   width: 20px;
   height: 20px;
+}
+
+/* 强化错误提示样式 */
+.error-highlight {
+  animation: pulse 0.5s 3;
+  position: relative;
+}
+
+.error-highlight::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--primary);
+  animation: underline 0.5s forwards;
+}
+
+@keyframes pulse {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: rgba(255,0,0,0.1); }
+}
+
+@keyframes underline {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.error-label {
+  color: #ff0000;
+  font-size: 14px;
+  margin-top: 5px;
+  display: block;
 }
 
 .form-group label {
@@ -253,7 +323,6 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(209, 0, 0, 0.2);
 }
 
-/* 文件上传样式 */
 .file-upload {
   position: relative;
   display: block;
@@ -292,7 +361,14 @@ textarea:focus {
   color: var(--primary);
 }
 
-/* 按钮样式 */
+.file-upload-label span.file-name {
+  display: block;
+  margin-top: 8px;
+  color: var(--primary);
+  font-weight: bold;
+  word-break: break-all;
+}
+
 .btn {
   display: inline-block;
   padding: 15px 25px;
@@ -326,7 +402,6 @@ textarea:focus {
   margin-top: 25px;
 }
 
-/* 转账信息区域 */
 .bank-info {
   background: #fff9f9;
   padding: 20px;
@@ -362,7 +437,6 @@ textarea:focus {
   transform: scale(1.05);
 }
 
-/* 分类标题 */
 .category-title {
   font-size: 22px;
   font-weight: 700;
@@ -383,7 +457,6 @@ textarea:focus {
   background: var(--accent);
 }
 
-/* 总金额 */
 .total {
   background: white;
   padding: 15px 20px;
@@ -400,7 +473,6 @@ textarea:focus {
   font-size: 24px;
 }
 
-/* 加载动画 */
 .loading {
   display: inline-block;
   animation: spin 1s linear infinite;
@@ -411,8 +483,8 @@ textarea:focus {
   100% { transform: rotate(360deg); }
 }
 
-/* 订单确认弹窗 */
-#confirmationDialog {
+/* 弹窗样式修复 */
+#confirmationDialog, #successDialog {
   position: fixed;
   top: 0;
   left: 0;
@@ -421,72 +493,53 @@ textarea:focus {
   background: rgba(0,0,0,0.7);
   z-index: 1000;
   display: none;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  backdrop-filter: blur(5px);
-}
-
-#confirmationContent {
-  background: white;
-  padding: 30px;
-  border-radius: 15px;
-  max-width: 500px;
-  width: 90%;
-  max-height: 80vh;
-  margin: 0 auto;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  animation: fadeIn 0.3s ease;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   overflow-y: auto;
+  padding: 20px;
 }
 
-/* 成功消息弹窗 */
-#successDialog {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 1000;
-  display: none;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  backdrop-filter: blur(5px);
-}
-
-#successContent {
+.dialog-container {
   background: white;
-  padding: 30px;
+  padding: 20px;
   border-radius: 15px;
-  max-width: 400px;
-  width: 90%;
-  margin: 0 auto;
+  max-width: 100%;
+  width: 380px;
+  margin: 20px auto;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  animation: fadeIn 0.3s ease;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
 }
 
-.file-upload-label span.file-name {
-  display: block;
-  margin-top: 8px;
+.dialog-content h3 {
+  margin-top: 0;
   color: var(--primary);
-  font-weight: bold;
-  word-break: break-all;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+.dialog-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.dialog-buttons button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#cancelConfirm {
+  background: #ccc;
+  color: #333;
+}
+
+#submitConfirm, #successConfirm {
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: var(--shadow);
 }
 
 .whatsapp-preview {
@@ -500,53 +553,6 @@ textarea:focus {
   overflow-y: auto;
 }
 
-#confirmationContent h3,
-#successContent h3 {
-  margin-top: 0;
-  color: var(--primary);
-}
-
-#confirmationContent hr,
-#successContent hr {
-  border: none;
-  border-top: 1px solid #eee;
-  margin: 15px 0;
-}
-
-#confirmationContent ul {
-  padding-left: 20px;
-  margin-top: 0;
-}
-
-#confirmationContent button,
-#successContent button {
-  padding: 12px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-#cancelConfirm {
-  background: #ccc;
-  color: #333;
-}
-
-#submitConfirm,
-#successConfirm {
-  background: var(--primary);
-  color: white;
-}
-
-#confirmationContent button:hover,
-#successContent button:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-}
-
-/* 管理员区域 */
 .admin-section {
   margin-top: 40px;
   background: white;
@@ -559,7 +565,6 @@ textarea:focus {
   margin-bottom: 15px;
 }
 
-/* 响应式调整 */
 @media (max-width: 600px) {
   .header h1 {
     font-size: 24px;
@@ -582,8 +587,7 @@ textarea:focus {
     width: 80%;
   }
   
-  #confirmationContent,
-  #successContent {
+  .dialog-container {
     width: 95%;
     padding: 20px;
   }
@@ -595,6 +599,20 @@ textarea:focus {
   <h1>🍢 锋味派美食团购</h1>
 </div>
 <div class="container">
+
+<!-- 分类导航 -->
+<div class="category-nav">
+  <div class="category-links">
+    <a href="#烤肠系列" class="category-link">🌭 烤肠</a>
+    <a href="#虾肠系列" class="category-link">🦐 虾肠</a>
+    <a href="#披萨系列" class="category-link">🍕 披萨</a>
+    <a href="#小笼汤包系列" class="category-link">🥟 小笼包</a>
+    <a href="#酥饼系列" class="category-link">🥮 酥饼</a>
+    <a href="#鸡排系列" class="category-link">🍗 鸡排</a>
+    <a href="#鸡翅系列" class="category-link">🍗 鸡翅</a>
+    <a href="#纸皮烧卖系列" class="category-link">🥟 烧卖</a>
+  </div>
+</div>
 
 <form id="orderForm">
   <div class="disclaimer-box">
@@ -634,10 +652,10 @@ textarea:focus {
 
   <h2 class="category-title">🛒 请选择商品</h2>
 
-<!-- 商品清单：烤肠系列 -->
+  <!-- 产品列表将在这里插入 -->
 
 <!-- ============= 烤肠系列 (6 项) ============= -->
-<h3 class="category-title">🌭 烤肠系列</h3>
+<h3 class="category-title" id="烤肠系列">🌭 烤肠系列</h3>
 <div class="product">
   <div class="product-image-container">
     <img src="IMG_3859.jpeg" class="product-image" alt="原味烤肠">
@@ -716,8 +734,8 @@ textarea:focus {
   </div>
 </div>
 
-<h3 class="category-title">🦐 虾肠 & 虾饼系列</h3>
-
+<!-- ============= 虾肠系列 (3 项) ============= -->
+<h3 class="category-title" id="虾肠系列">🦐 虾肠 & 虾饼系列</h3>
 <div class="product">
   <div class="product-image-container">
     <img src="IMG_3853.jpeg" class="product-image" alt="原味虾肠">
@@ -757,8 +775,8 @@ textarea:focus {
   </div>
 </div>
 
-<h3 class="category-title">🍕 披萨系列</h3>
-
+<!-- ============= 披萨系列 (4 项) ============= -->
+<h3 class="category-title" id="披萨系列">🍕 披萨系列</h3>
 <div class="product">
   <div class="product-image-container">
     <img src="IMG_3841.jpeg" class="product-image" alt="玛格丽特披萨">
@@ -811,8 +829,8 @@ textarea:focus {
   </div>
 </div>
 
-<h3 class="category-title">🥟 小笼汤包系列</h3>
-
+<!-- ============= 小笼汤包系列 (3 项) ============= -->
+<h3 class="category-title" id="小笼汤包系列">🥟 小笼汤包系列</h3>
 <div class="product">
   <div class="product-image-container">
     <img src="IMG_3874.jpeg" class="product-image" alt="鲜肉小笼汤包">
@@ -852,8 +870,8 @@ textarea:focus {
   </div>
 </div>
 
-<h3 class="category-title">🥮 酥饼系列</h3>
-
+<!-- ============= 酥饼系列 (2 项) ============= -->
+<h3 class="category-title" id="酥饼系列">🥮 酥饼系列</h3>
 <div class="product">
   <div class="product-image-container">
     <img src="IMG_3837.jpeg" class="product-image" alt="黑猪肉酥饼">
@@ -880,8 +898,8 @@ textarea:focus {
   </div>
 </div>
 
-<h3 class="category-title">🍗 鸡排系列</h3>
-
+<!-- ============= 鸡排系列 (2 项) ============= -->
+<h3 class="category-title" id="鸡排系列">🍗 鸡排系列</h3>
 <div class="product">
   <div class="product-image-container">
     <img src="IMG_3835.jpeg" class="product-image" alt="原味鸡排">
@@ -908,8 +926,8 @@ textarea:focus {
   </div>
 </div>
 
-<h3 class="category-title">🍗 鸡翅系列</h3>
-
+<!-- ============= 鸡翅系列 (2 项) ============= -->
+<h3 class="category-title" id="鸡翅系列">🍗 鸡翅系列</h3>
 <div class="product">
   <div class="product-image-container">
     <img src="IMG_3865.jpeg" class="product-image" alt="奥尔良鸡翅">
@@ -936,8 +954,8 @@ textarea:focus {
   </div>
 </div>
 
-<h3 class="category-title">🥟 纸皮烧卖系列</h3>
-
+<!-- ============= 纸皮烧卖系列 (5 项) ============= -->
+<h3 class="category-title" id="纸皮烧卖系列">🥟 纸皮烧卖系列</h3>
 <div class="product">
   <div class="product-image-container">
     <img src="IMG_3843.jpeg" class="product-image" alt="黑猪三丁纸皮烧卖">
@@ -1015,30 +1033,32 @@ textarea:focus {
   </div>
 
   <!-- 转账信息 -->
-<div class="bank-info">
-  <h3>💳 转账信息 / Payment Info</h3>
-  <p><strong>银行名称 / Bank:</strong> Maybank</p>
-  <p><strong>户口名 / Account Name:</strong> Choong Sher Lee</p>
-  <p><strong>户口号码 / Account No.:</strong> 114209540438</p>
-  
-  <div class="qr-code-container">
-    <img src="IMG_4043.jpeg" alt="Maybank QR Code">
-    <img src="IMG_4042.png" alt="WeChat Pay QR Code">
+  <div class="bank-info">
+    <h3>💳 转账信息 / Payment Info</h3>
+    <p><strong>银行名称 / Bank:</strong> Maybank</p>
+    <p><strong>户口名 / Account Name:</strong> Choong Sher Lee</p>
+    <p><strong>户口号码 / Account No.:</strong> 114209540438</p>
+    
+    <div class="qr-code-container">
+      <img src="IMG_4043.jpeg" alt="Maybank QR Code">
+      <img src="IMG_4042.png" alt="WeChat Pay QR Code">
+    </div>
+    
+    <p style="margin-top:15px;font-size:14px;color:#666;">
+      ⚠️ 请上传转账凭证 / Please upload payment proof
+    </p>
   </div>
-  
-  <p style="margin-top:15px;font-size:14px;color:#666;">
-    ⚠️ 请上传转账凭证 / Please upload payment proof
-  </p>
-</div>
 
   <!-- 上传支付凭证 -->
   <div class="form-group">
     <label for="paymentProof">📎 请上传转账凭证 Upload Receipt *</label>
     <div class="file-upload">
-      <input type="file" id="paymentProof" accept="image/*,.pdf" required />
+      <input type="file" id="paymentProof" 
+             accept="image/*,.pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp,.heic,.heif" 
+             required />
       <label for="paymentProof" class="file-upload-label">
         <span>点击或拖拽文件到此处</span>
-        <small>支持图片或PDF文件</small>
+        <small>支持图片(JPG, JPEG, PNG, GIF, BMP, WEBP, HEIC)或PDF文件</small>
       </label>
     </div>
   </div>
@@ -1091,7 +1111,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // 数量加减按钮事件
   document.querySelectorAll('.quantity-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
+    btn.addEventListener('click', function() {
       const input = this.parentElement.querySelector('.quantity-input');
       let current = parseInt(input.value) || 0;
       if (this.classList.contains('plus')) {
@@ -1103,12 +1123,348 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // 数量输入框事件
-  document.querySelectorAll('.quantity-input').forEach(input => {
-    input.addEventListener('input', () => {
-      input.value = Math.max(0, parseInt(input.value) || 0);
-      calculateTotal();
+  // 增强版表单验证（修复跳转问题）
+  function validateForm() {
+    let isValid = true;
+    const requiredFields = [
+      { 
+        id: 'agreeCheckbox', 
+        message: '请同意条款',
+        scrollTo: function() {
+          const element = document.getElementById('agreeCheckbox');
+          const container = element.closest('.disclaimer-box');
+          container.classList.add('error-highlight');
+          const y = container.getBoundingClientRect().top + window.scrollY - 100;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      },
+      { 
+        id: 'delivery', 
+        message: '请选择取货方式',
+        scrollTo: function() {
+          const element = document.getElementById('delivery');
+          const container = element.closest('.form-group');
+          container.classList.add('error-highlight');
+          const y = container.getBoundingClientRect().top + window.scrollY - 100;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+          element.focus();
+        }
+      },
+      { 
+        id: 'name', 
+        message: '请输入姓名',
+        scrollTo: function() {
+          const element = document.getElementById('name');
+          const container = element.closest('.form-group');
+          container.classList.add('error-highlight');
+          const y = container.getBoundingClientRect().top + window.scrollY - 100;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+          element.focus();
+        }
+      },
+      { 
+        id: 'phone', 
+        message: '请输入电话号码',
+        scrollTo: function() {
+          const element = document.getElementById('phone');
+          const container = element.closest('.form-group');
+          container.classList.add('error-highlight');
+          const y = container.getBoundingClientRect().top + window.scrollY - 100;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+          element.focus();
+        }
+      },
+      { 
+        id: 'paymentProof', 
+        message: '请上传支付凭证',
+        scrollTo: function() {
+          const element = document.getElementById('paymentProof');
+          const container = element.closest('.form-group');
+          container.classList.add('error-highlight');
+          const y = container.getBoundingClientRect().top + window.scrollY - 100;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }
+    ];
+
+    // 清除错误状态
+    document.querySelectorAll('.error-highlight, .error-label').forEach(el => {
+      el.classList.remove('error-highlight');
+      if(el.classList.contains('error-label')) el.remove();
     });
+
+    // 验证每个字段
+    requiredFields.forEach(field => {
+      const element = document.getElementById(field.id);
+      let value = element.type === 'checkbox' ? element.checked : 
+                 element.type === 'file' ? element.files.length > 0 : 
+                 element.value.trim();
+
+      if (!value) {
+        isValid = false;
+        
+        // 添加错误提示
+        const errorLabel = document.createElement('span');
+        errorLabel.className = 'error-label';
+        errorLabel.textContent = field.message;
+        
+        if(element.type === 'checkbox') {
+          element.closest('.disclaimer-checkbox').appendChild(errorLabel);
+        } else {
+          element.parentNode.insertBefore(errorLabel, element.nextSibling);
+        }
+
+        // 执行滚动到错误位置
+        if(field.scrollTo) field.scrollTo();
+      }
+    });
+
+    // 电话格式验证
+    const phone = document.getElementById('phone').value.trim();
+    const phoneRegex = /^(\+?6?01)[0-46-9]-*[0-9]{7,8}$/;
+    if (!phoneRegex.test(phone.replace(/-/g, ''))) {
+      isValid = false;
+      const phoneElement = document.getElementById('phone');
+      const container = phoneElement.closest('.form-group');
+      container.classList.add('error-highlight');
+      
+      const errorLabel = document.createElement('span');
+      errorLabel.className = 'error-label';
+      errorLabel.textContent = '请输入有效的马来西亚电话号码 (如: 012-3456789 或 60123456789)';
+      phoneElement.parentNode.insertBefore(errorLabel, phoneElement.nextSibling);
+      
+      const y = container.getBoundingClientRect().top + window.scrollY - 100;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+      phoneElement.focus();
+    }
+
+    // 检查商品数量
+    if (calculateTotal() <= 0) {
+      isValid = false;
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-highlight';
+      errorDiv.style.cssText = 'color:red;padding:10px;margin:15px 0;background:#fff9f9;border-radius:8px;';
+      errorDiv.innerHTML = '⚠️ 请至少选择一件商品';
+      document.querySelector('.category-title').after(errorDiv);
+      
+      setTimeout(() => {
+        const y = errorDiv.getBoundingClientRect().top + window.scrollY - 120;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }, 100);
+    }
+
+    return isValid;
+  }
+
+  // 构建订单数据
+  function buildOrderData() {
+    const items = [];
+    document.querySelectorAll('.quantity-input').forEach(input => {
+      const quantity = parseInt(input.value);
+      if (quantity > 0) {
+        items.push({
+          product: input.dataset.name,
+          quantity,
+          price: parseFloat(input.dataset.price),
+        });
+      }
+    });
+
+    return {
+      orderId: `FW${Date.now().toString().slice(-6)}`,
+      name: document.getElementById('name').value.trim(),
+      phone: document.getElementById('phone').value.trim().replace(/-/g, ''),
+      delivery: document.getElementById('delivery').value,
+      remarks: document.getElementById('remarks').value.trim(),
+      items,
+      total: calculateTotal(),
+    };
+  }
+
+  // 构建WhatsApp消息
+  function buildWhatsAppMessage(order) {
+    let msg = `🛎️ *锋味派新订单 #${order.orderId}*\n\n`;
+    msg += `👤 *客户信息*\n`;
+    msg += `📛 姓名: ${order.name}\n`;
+    msg += `📱 电话: ${order.phone}\n`;
+    msg += `🚚 取货方式: ${order.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}\n\n`;
+    msg += `🛒 *订单明细*\n`;
+    order.items.forEach(item => {
+      msg += `▫️ ${item.product} × ${item.quantity} = RM${(item.quantity * item.price).toFixed(2)}\n`;
+    });
+    msg += `\n💰 *总金额: RM${order.total.toFixed(2)}*\n`;
+    msg += `📝 *备注*: ${order.remarks || '无'}\n`;
+    msg += `📅 *下单时间*: ${new Date().toLocaleString('zh-CN')}`;
+    
+    return encodeURIComponent(msg);
+  }
+
+  // 显示确认弹窗（修复滚动问题）
+  function showConfirmation(order) {
+    const dialog = document.getElementById('confirmationDialog');
+    const content = document.getElementById('confirmationContent');
+    const whatsappMsg = buildWhatsAppMessage(order);
+    const scrollPos = window.scrollY || window.pageYOffset;
+    
+    // 创建弹窗内容
+    content.innerHTML = `
+      <div class="dialog-container">
+        <h3 style="margin-top:0;color:var(--primary);">订单确认</h3>
+        <p><strong>姓名:</strong> ${order.name}</p>
+        <p><strong>电话:</strong> ${order.phone}</p>
+        <p><strong>配送方式:</strong> ${order.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}</p>
+        <p><strong>备注:</strong> ${order.remarks || '无'}</p>
+        <hr style="border:none;border-top:1px solid #eee;margin:15px 0;"/>
+        <h4 style="margin-bottom:10px;">订单明细</h4>
+        <ul style="padding-left:20px;margin-top:0;">
+          ${order.items.map(i => `<li>${i.product} × ${i.quantity} = RM${(i.quantity * i.price).toFixed(2)}</li>`).join('')}
+        </ul>
+        <p style="font-weight:bold;text-align:right;">总金额: RM${order.total.toFixed(2)}</p>
+        
+        <div class="whatsapp-preview">
+          <strong>将发送到WhatsApp的内容:</strong>
+          <div>${decodeURIComponent(whatsappMsg).replace(/\n/g, '<br>').replace(/\*/g, '')}</div>
+        </div>
+        
+        <hr style="border:none;border-top:1px solid #eee;margin:15px 0;"/>
+        <div class="dialog-buttons">
+          <button id="cancelConfirm">取消</button>
+          <button id="submitConfirm">确认并发送</button>
+        </div>
+      </div>
+    `;
+    
+    // 显示弹窗并处理滚动
+    document.documentElement.classList.add('dialog-open');
+    dialog.style.display = 'block';
+    
+    // 确保弹窗内容可以滚动
+    dialog.scrollTop = 0;
+
+    // 事件处理
+    document.getElementById('cancelConfirm').onclick = function() {
+      dialog.style.display = 'none';
+      document.documentElement.classList.remove('dialog-open');
+      window.scrollTo(0, scrollPos);
+    };
+
+    document.getElementById('submitConfirm').onclick = async function() {
+      dialog.style.display = 'none';
+      document.documentElement.classList.remove('dialog-open');
+      window.scrollTo(0, scrollPos);
+      await submitOrder(order, whatsappMsg);
+    };
+  }
+
+  // 提交订单到Supabase
+  async function submitOrder(order, whatsappMsg) {
+    const submitBtn = document.querySelector('.submit-btn');
+    try {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="loading">⏳ 提交中...</span>';
+      
+      // 文件上传处理
+      const file = document.getElementById('paymentProof').files[0];
+      let proofUrl = '';
+      if (file) {
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp', 'image/heic', 'image/heif', 'application/pdf'];
+        if (!validTypes.includes(file.type)) {
+          throw new Error('不支持的文件格式，请上传图片(JPG/PNG/GIF/BMP/WEBP/HEIC)或PDF');
+        }
+        
+        const ext = file.name.split('.').pop();
+        const { error: uploadError } = await supabase.storage
+          .from('payment-proofs')
+          .upload(`proofs/${order.orderId}.${ext}`, file, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: file.type
+          });
+        if (uploadError) throw uploadError;
+        
+        proofUrl = supabase.storage.from('payment-proofs').getPublicUrl(`proofs/${order.orderId}.${ext}`).data.publicUrl;
+      }
+
+      // 数据库插入
+      const { error: insertError } = await supabase.from('orders').insert([{
+        order_id: order.orderId,
+        name: order.name,
+        phone: order.phone,
+        delivery_method: order.delivery,
+        remarks: order.remarks,
+        order_items: order.items,
+        total_amount: order.total,
+        payment_proof_url: proofUrl,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      }]);
+      if (insertError) throw insertError;
+
+      // 成功处理
+      showSuccessMessage(whatsappMsg);
+
+      // 重置表单
+      document.getElementById('orderForm').reset();
+      document.querySelectorAll('.quantity-input').forEach(input => input.value = '0');
+      document.getElementById('totalAmount').textContent = '0.00';
+      const label = document.querySelector('.file-upload-label');
+      if (label.querySelector('.file-name')) label.removeChild(label.querySelector('.file-name'));
+      label.querySelector('span:not(.file-name)').textContent = '点击或拖拽文件到此处';
+      
+    } catch (error) {
+      console.error('提交错误:', error);
+      alert(`提交失败: ${error.message}\n请截图联系管理员。`);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '🚀 提交订单 Submit Order';
+    }
+  }
+
+  // 显示成功消息
+  function showSuccessMessage(whatsappMsg) {
+    const dialog = document.getElementById('successDialog');
+    const content = document.getElementById('successContent');
+    const scrollPos = window.scrollY || window.pageYOffset;
+    
+    document.documentElement.classList.add('dialog-open');
+    
+    content.innerHTML = `
+      <div class="dialog-container" style="text-align:center;">
+        <h3 style="margin-top:0;color:var(--primary);">订单提交成功</h3>
+        <p>点击下方按钮跳转到WhatsApp发送订单详情</p>
+        <hr style="border:none;border-top:1px solid #eee;margin:15px 0;"/>
+        <button id="successConfirm">跳转到WhatsApp</button>
+      </div>
+    `;
+    
+    dialog.style.display = 'block';
+
+    document.getElementById('successConfirm').onclick = function() {
+      dialog.style.display = 'none';
+      document.documentElement.classList.remove('dialog-open');
+      window.scrollTo(0, scrollPos);
+      window.location.href = `https://wa.me/60162327792?text=${whatsappMsg}`;
+    };
+  }
+
+  // 文件上传显示文件名
+  document.getElementById('paymentProof').addEventListener('change', function(e) {
+    const label = document.querySelector('.file-upload-label');
+    const fileNameDisplay = label.querySelector('.file-name') || document.createElement('span');
+    
+    if (this.files.length > 0) {
+      fileNameDisplay.className = 'file-name';
+      fileNameDisplay.textContent = this.files[0].name;
+      if (!label.querySelector('.file-name')) {
+        label.appendChild(fileNameDisplay);
+      }
+      label.querySelector('span:not(.file-name)').textContent = '已选择文件:';
+    } else {
+      label.querySelector('span:not(.file-name)').textContent = '点击或拖拽文件到此处';
+      if (label.querySelector('.file-name')) {
+        label.removeChild(label.querySelector('.file-name'));
+      }
+    }
   });
 
   // 导出 Excel 功能
@@ -1148,254 +1504,6 @@ document.addEventListener('DOMContentLoaded', function () {
     XLSX.writeFile(wb, `锋味派订单_${new Date().toISOString().slice(0,10)}.xlsx`);
   });
 
-  // 表单验证
-  function validateForm() {
-    const name = document.getElementById('name').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const delivery = document.getElementById('delivery').value;
-    const proof = document.getElementById('paymentProof').files[0];
-    const agreed = document.getElementById('agreeCheckbox').checked;
-    const total = calculateTotal();
-
-    if (!name || !phone || !delivery || !proof || !agreed) {
-      alert('请确保所有信息填写完整，并勾选同意条款');
-      return false;
-    }
-
-    // 验证电话号码格式
-    const phoneRegex = /^(\+?6?01)[0-46-9]-*[0-9]{7,8}$/;
-    if (!phoneRegex.test(phone.replace(/-/g, ''))) {
-      alert('请输入有效的马来西亚电话号码 (如: 012-3456789 或 60123456789)');
-      return false;
-    }
-
-    if (total <= 0) {
-      alert('请至少选择一项商品');
-      return false;
-    }
-
-    return true;
-  }
-
-  // 构建订单数据
-  function buildOrderData() {
-    const items = [];
-    document.querySelectorAll('.quantity-input').forEach(input => {
-      const quantity = parseInt(input.value);
-      if (quantity > 0) {
-        items.push({
-          product: input.dataset.name,
-          quantity,
-          price: parseFloat(input.dataset.price),
-        });
-      }
-    });
-
-    return {
-      orderId: `FW${Date.now().toString().slice(-6)}`,
-      name: document.getElementById('name').value.trim(),
-      phone: document.getElementById('phone').value.trim().replace(/-/g, ''),
-      delivery: document.getElementById('delivery').value,
-      remarks: document.getElementById('remarks').value.trim(),
-      items,
-      total: calculateTotal(),
-    };
-  }
-
-  // 文件上传显示文件名
-  document.getElementById('paymentProof').addEventListener('change', function(e) {
-    const label = document.querySelector('.file-upload-label');
-    const fileNameDisplay = label.querySelector('.file-name') || document.createElement('span');
-    
-    if (this.files.length > 0) {
-      fileNameDisplay.className = 'file-name';
-      fileNameDisplay.textContent = this.files[0].name;
-      if (!label.querySelector('.file-name')) {
-        label.appendChild(fileNameDisplay);
-      }
-      label.querySelector('span:not(.file-name)').textContent = '已选择文件:';
-    } else {
-      label.querySelector('span:not(.file-name)').textContent = '点击或拖拽文件到此处';
-      if (label.querySelector('.file-name')) {
-        label.removeChild(label.querySelector('.file-name'));
-      }
-    }
-  });
-
-  // 构建WhatsApp消息
-  function buildWhatsAppMessage(order) {
-    let msg = `*🛎️ 锋味派新订单 #${order.orderId}*%0A%0A`;
-    msg += `*👤 客户信息*%0A`;
-    msg += `姓名: ${order.name}%0A`;
-    msg += `电话: ${order.phone}%0A`;
-    msg += `取货方式: ${order.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}%0A%0A`;
-    msg += `*🛒 订单明细*%0A`;
-    order.items.forEach(item => {
-      msg += `${item.product} × ${item.quantity} = RM${(item.quantity * item.price).toFixed(2)}%0A`;
-    });
-    msg += `%0A*💰 总金额: RM${order.total.toFixed(2)}*%0A`;
-    msg += `*📝 备注*: ${order.remarks || '无'}%0A`;
-    msg += `*📅 下单时间*: ${new Date().toLocaleString('zh-CN')}`;
-    return msg;
-  }
-
-  // 显示确认弹窗 - 在提交按钮附近显示
-  function showConfirmation(order) {
-    const dialog = document.getElementById('confirmationDialog');
-    const content = document.getElementById('confirmationContent');
-    const whatsappMsg = buildWhatsAppMessage(order);
-    
-    content.innerHTML = `
-      <h3 style="margin-top:0;color:var(--primary);">订单确认</h3>
-      <p><strong>姓名:</strong> ${order.name}</p>
-      <p><strong>电话:</strong> ${order.phone}</p>
-      <p><strong>配送方式:</strong> ${order.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}</p>
-      <p><strong>备注:</strong> ${order.remarks || '无'}</p>
-      <hr style="border:none;border-top:1px solid #eee;margin:15px 0;"/>
-      <h4 style="margin-bottom:10px;">订单明细</h4>
-      <ul style="padding-left:20px;margin-top:0;">
-        ${order.items.map(i => `<li>${i.product} × ${i.quantity} = RM${(i.quantity * i.price).toFixed(2)}</li>`).join('')}
-      </ul>
-      <p style="font-weight:bold;text-align:right;">总金额: RM${order.total.toFixed(2)}</p>
-      
-      <div class="whatsapp-preview">
-        <strong>将发送到WhatsApp的内容:</strong>
-        <div>${whatsappMsg.replace(/%0A/g, '<br>')}</div>
-      </div>
-      
-      <hr style="border:none;border-top:1px solid #eee;margin:15px 0;"/>
-      <div style="margin-top:20px;display:flex;justify-content:space-between;gap:10px;">
-        <button id="cancelConfirm" style="flex:1;padding:10px;background:#ccc;border:none;border-radius:5px;cursor:pointer;">取消</button>
-        <button id="submitConfirm" style="flex:1;padding:10px;background:var(--primary);color:white;border:none;border-radius:5px;cursor:pointer;">确认并发送</button>
-      </div>
-    `;
-    
-    dialog.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-
-    // 确保弹窗在可视区域内
-    dialog.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-    document.getElementById('cancelConfirm').onclick = () => {
-      dialog.style.display = 'none';
-      document.body.style.overflow = 'auto';
-    };
-
-    document.getElementById('submitConfirm').onclick = async () => {
-      dialog.style.display = 'none';
-      document.body.style.overflow = 'auto';
-      await submitOrder(order, whatsappMsg);
-    };
-  }
-
-  // 显示成功消息
-  function showSuccessMessage() {
-    const dialog = document.getElementById('successDialog');
-    const content = document.getElementById('successContent');
-    
-    content.innerHTML = `
-      <h3 style="margin-top:0;color:var(--primary);">订单提交成功</h3>
-      <p>订单已成功提交，即将跳转到WhatsApp...</p>
-      <hr style="border:none;border-top:1px solid #eee;margin:15px 0;"/>
-      <button id="successConfirm" style="padding:10px;background:var(--primary);color:white;border:none;border-radius:5px;cursor:pointer;width:100%;">好的 (OK)</button>
-    `;
-    
-    dialog.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-
-    document.getElementById('successConfirm').onclick = () => {
-      dialog.style.display = 'none';
-      document.body.style.overflow = 'auto';
-    };
-  }
-
-  // 提交订单到Supabase
-  async function submitOrder(order, whatsappMsg) {
-    const submitBtn = document.querySelector('.submit-btn');
-    try {
-      // 显示加载状态
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="loading">⏳ 提交中...</span>';
-      
-      const file = document.getElementById('paymentProof').files[0];
-      let proofUrl = '';
-      
-      if (file) {
-        // 上传支付凭证
-        const ext = file.name.split('.').pop();
-        const filename = `proofs/${order.orderId}.${ext}`;
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('payment-proofs')
-          .upload(filename, file, {
-            cacheControl: '3600',
-            upsert: false
-          });
-        
-        if (uploadError) {
-          console.error('文件上传错误:', uploadError);
-          throw uploadError;
-        }
-        
-        // 获取公开URL
-        const { data: urlData } = supabase.storage
-          .from('payment-proofs')
-          .getPublicUrl(filename);
-        
-        proofUrl = urlData.publicUrl;
-        console.log('支付凭证URL:', proofUrl);
-      }
-
-      // 插入订单数据
-      const { data: insertData, error: insertError } = await supabase.from('orders').insert([{
-        order_id: order.orderId,
-        name: order.name,
-        phone: order.phone,
-        delivery_method: order.delivery,
-        remarks: order.remarks,
-        order_items: order.items,
-        total_amount: order.total,
-        payment_proof_url: proofUrl,
-        status: 'pending',
-        created_at: new Date().toISOString()
-      }]).select();
-
-      if (insertError) {
-        console.error('数据库插入错误:', insertError);
-        throw insertError;
-      }
-
-      console.log('订单创建成功:', insertData);
-      
-      // 显示成功消息
-      showSuccessMessage();
-      
-      // 跳转WhatsApp - 延迟1秒让用户看到成功消息
-      setTimeout(() => {
-        const whatsappUrl = `https://wa.me/60162327792?text=${encodeURIComponent(whatsappMsg)}`;
-        window.location.href = whatsappUrl;
-      }, 1000);
-      
-      // 重置表单
-      document.getElementById('orderForm').reset();
-      document.querySelectorAll('.quantity-input').forEach(input => input.value = '0');
-      document.getElementById('totalAmount').textContent = '0.00';
-      const label = document.querySelector('.file-upload-label');
-      label.querySelector('span:not(.file-name)').textContent = '点击或拖拽文件到此处';
-      if (label.querySelector('.file-name')) {
-        label.removeChild(label.querySelector('.file-name'));
-      }
-      
-    } catch (error) {
-      console.error('订单提交错误:', error);
-      alert(`提交失败: ${error.message}\n请截图此错误并联系管理员。`);
-    } finally {
-      // 恢复按钮状态
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '🚀 提交订单 Submit Order';
-    }
-  }
-
   // 表单提交事件
   document.getElementById('orderForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -1403,7 +1511,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!validateForm()) return;
     
     const order = buildOrderData();
-    showConfirmation(order);
+    const whatsappMsg = buildWhatsAppMessage(order);
+    
+    showConfirmation(order, whatsappMsg);
   });
 });
 </script>
