@@ -9,41 +9,41 @@
   <style>
     :root {
       --primary: #d10000;
-      --secondary: #000000;
+      -[span_0](start_span)-secondary: #000000;[span_0](end_span)
       --accent: #f8b500;
       --light: #f8f8f8;
       --dark: #333333;
       --bg-gradient: linear-gradient(135deg, #f9f9f9 0%, #eeeeee 100%);
       --section-bg: rgba(255, 255, 255, 0.9);
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      --shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.12);
+      -[span_1](start_span)-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);[span_1](end_span)
+      -[span_2](start_span)-shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.12);[span_2](end_span)
     }
 
     body {
       font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
       max-width: 700px;
-      margin: 0 auto;
+      [span_3](start_span)margin: 0 auto;[span_3](end_span)
       padding: 0;
       background: var(--bg-gradient); /* Use gradient background */
       color: var(--dark);
-      line-height: 1.6;
+      [span_4](start_span)line-height: 1.6;[span_4](end_span)
       /* background-image: url('IMG_3847.jpeg'); /* 已移除 */
       background-size: cover;
       background-attachment: fixed;
       background-position: center;
-      background-blend-mode: overlay;
+      [span_5](start_span)background-blend-mode: overlay;[span_5](end_span)
     }
 
     .header {
       text-align: center;
       padding: 20px;
-      background: linear-gradient(to right, var(--primary), var(--secondary));
+      [span_6](start_span)background: linear-gradient(to right, var(--primary), var(--secondary));[span_6](end_span)
       color: white;
       border-radius: 0 0 20px 20px;
       margin-bottom: 25px;
       box-shadow: var(--shadow);
       position: relative;
-      overflow: hidden;
+      [span_7](start_span)overflow: hidden;[span_7](end_span)
     }
 
     .header::before {
@@ -51,20 +51,20 @@
       position: absolute;
       top: 0;
       left: 0;
-      right: 0;
+      [span_8](start_span)right: 0;[span_8](end_span)
       bottom: 0;
       /* background: url('IMG_3848.jpeg') no-repeat center center; /* 已移除 */
       background-size: contain;
-      opacity: 0.2;
+      [span_9](start_span)opacity: 0.2;[span_9](end_span)
     }
 
     .header h1 {
       margin: 0;
       font-size: 28px;
       font-weight: 700;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+      [span_10](start_span)text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);[span_10](end_span)
       position: relative;
-      letter-spacing: 1px;
+      [span_11](start_span)letter-spacing: 1px;[span_11](end_span)
     }
 
     .container {
@@ -72,20 +72,20 @@
       background: var(--section-bg);
       border-radius: 15px;
       box-shadow: var(--shadow);
-      margin-bottom: 30px;
+      [span_12](start_span)margin-bottom: 30px;[span_12](end_span)
       backdrop-filter: blur(5px);
     }
 
     /* 新增：分类导航栏 */
     .category-nav {
       position: sticky;
-      top: 0;
+      [span_13](start_span)top: 0;[span_13](end_span)
       background: white;
       z-index: 100;
       padding: 10px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       margin-bottom: 15px;
-      border-radius: 10px;
+      [span_14](start_span)border-radius: 10px;[span_14](end_span)
     }
 
     .category-links {
@@ -93,28 +93,29 @@
       overflow-x: auto;
       gap: 10px;
       padding-bottom: 5px;
-      scrollbar-width: none; /* For Firefox */
+      [span_15](start_span)scrollbar-width: none;[span_15](end_span) /* For Firefox */
     }
 
     .category-links::-webkit-scrollbar {
-      display: none; /* For Chrome, Safari, and Opera */
+      [span_16](start_span)display: none;[span_16](end_span)
+      /* For Chrome, Safari, and Opera */
     }
 
     .category-link {
       white-space: nowrap;
-      padding: 5px 10px;
+      [span_17](start_span)padding: 5px 10px;[span_17](end_span)
       background: #f0f0f0;
       border-radius: 20px;
       text-decoration: none;
       color: #333;
       font-size: 14px;
-      transition: all 0.3s;
+      [span_18](start_span)transition: all 0.3s;[span_18](end_span)
     }
 
     .category-link.active,
     .category-link:hover {
       background: var(--primary);
-      color: white;
+      [span_19](start_span)color: white;[span_19](end_span)
     }
 
     .product {
@@ -122,16 +123,16 @@
       border-radius: 12px;
       padding: 18px;
       margin-bottom: 18px;
-      box-shadow: var(--shadow);
+      [span_20](start_span)box-shadow: var(--shadow);[span_20](end_span)
       border-left: 4px solid var(--primary);
       transition: all 0.3s ease;
       position: relative;
-      overflow: hidden;
+      [span_21](start_span)overflow: hidden;[span_21](end_span)
     }
 
     .product:hover {
       transform: translateY(-5px);
-      box-shadow: var(--shadow-hover);
+      [span_22](start_span)box-shadow: var(--shadow-hover);[span_22](end_span)
     }
 
     .product::after {
@@ -139,14 +140,14 @@
       position: absolute;
       bottom: 5px;
       right: 5px;
-      font-size: 12px;
+      [span_23](start_span)font-size: 12px;[span_23](end_span)
       color: rgba(0, 0, 0, 0.1);
       font-weight: bold;
     }
 
     .product-image-container {
       width: 100%;
-      height: 200px;
+      [span_24](start_span)height: 200px;[span_24](end_span)
       overflow: hidden;
       border-radius: 10px;
       margin-bottom: 15px;
@@ -154,38 +155,38 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      border: 1px solid #eee;
+      [span_25](start_span)border: 1px solid #eee;[span_25](end_span)
     }
 
     .product-image {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
-      transition: transform 0.3s;
+      [span_26](start_span)transition: transform 0.3s;[span_26](end_span)
     }
 
     .product:hover .product-image {
-      transform: scale(1.05);
+      [span_27](start_span)transform: scale(1.05);[span_27](end_span)
     }
 
     .product-name {
       font-size: 18px;
       font-weight: 700;
       margin-bottom: 8px;
-      color: var(--dark);
+      [span_28](start_span)color: var(--dark);[span_28](end_span)
     }
 
     .product-price {
       color: var(--primary);
       font-size: 18px;
       font-weight: 700;
-      margin-bottom: 15px;
+      [span_29](start_span)margin-bottom: 15px;[span_29](end_span)
     }
 
     .quantity-control {
       display: flex;
       align-items: center;
-      gap: 10px;
+      [span_30](start_span)gap: 10px;[span_30](end_span)
     }
 
     .quantity-btn {
@@ -193,7 +194,7 @@
       height: 40px;
       border: none;
       border-radius: 8px;
-      background: var(--primary);
+      [span_31](start_span)background: var(--primary);[span_31](end_span)
       color: white;
       font-size: 18px;
       font-weight: bold;
@@ -201,22 +202,22 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s;
+      [span_32](start_span)transition: all 0.2s;[span_32](end_span)
     }
 
     .quantity-btn:hover {
       background: var(--secondary);
-      transform: scale(1.1);
+      [span_33](start_span)transform: scale(1.1);[span_33](end_span)
     }
 
     .quantity-input {
       width: 60px;
       height: 40px;
       text-align: center;
-      border: 2px solid #e0e0e0;
+      [span_34](start_span)border: 2px solid #e0e0e0;[span_34](end_span)
       border-radius: 8px;
       font-size: 16px;
-      font-weight: bold;
+      [span_35](start_span)font-weight: bold;[span_35](end_span)
     }
 
     .form-group {
@@ -224,41 +225,43 @@
       background: white;
       padding: 20px;
       border-radius: 12px;
-      box-shadow: var(--shadow);
+      [span_36](start_span)box-shadow: var(--shadow);[span_36](end_span)
       position: relative; /* For error message positioning */
     }
 
     .disclaimer-box {
       background: #fff9f9;
-      padding: 20px;
+      [span_37](start_span)padding: 20px;[span_37](end_span)
       border-radius: 12px;
       margin-bottom: 25px;
       border-left: 4px solid var(--primary);
       box-shadow: var(--shadow);
-      position: relative; /* For error message positioning */
+      [span_38](start_span)position: relative;[span_38](end_span)
+      /* For error message positioning */
     }
 
     .disclaimer-box h3 {
       margin-top: 0;
-      color: var(--primary);
+      [span_39](start_span)color: var(--primary);[span_39](end_span)
     }
 
     .disclaimer-checkbox {
       margin-top: 15px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      [span_40](start_span)gap: 10px;[span_40](end_span)
     }
 
     .disclaimer-checkbox input {
       width: 20px;
       height: 20px;
-      flex-shrink: 0; /* Prevent checkbox from shrinking */
+      [span_41](start_span)flex-shrink: 0;[span_41](end_span)
+      /* Prevent checkbox from shrinking */
     }
 
     .form-group label {
       display: block;
-      margin-bottom: 10px;
+      [span_42](start_span)margin-bottom: 10px;[span_42](end_span)
       font-weight: 600;
       font-size: 17px;
       color: var(--dark);
@@ -271,26 +274,26 @@
     select,
     textarea {
       width: 100%;
-      max-width: 100%;
+      [span_43](start_span)max-width: 100%;[span_43](end_span)
       padding: 13px 15px;
       border: 2px solid #e0e0e0;
       border-radius: 10px;
       font-size: 16px;
       transition: all 0.3s;
-      box-sizing: border-box;
+      [span_44](start_span)box-sizing: border-box;[span_44](end_span)
     }
 
     textarea {
       min-height: 100px;
-      resize: vertical;
+      [span_45](start_span)resize: vertical;[span_45](end_span)
     }
 
     input:focus,
     select:focus,
     textarea:focus {
       border-color: var(--primary);
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(209, 0, 0, 0.2);
+      [span_46](start_span)outline: none;[span_46](end_span)
+      [span_47](start_span)box-shadow: 0 0 0 3px rgba(209, 0, 0, 0.2);[span_47](end_span)
     }
 
     /* Error highlighting */
@@ -298,29 +301,30 @@
     .form-group.error select,
     .form-group.error textarea,
     .disclaimer-box.error .disclaimer-checkbox input {
-      border-color: red !important;
-      box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2) !important;
+      [span_48](start_span)border-color: red !important;[span_48](end_span)
+      [span_49](start_span)box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2) !important;[span_49](end_span)
     }
 
     .form-group.error .file-upload-label {
-        border-color: red !important;
-        box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2) !important;
+        [span_50](start_span)border-color: red !important;[span_50](end_span)
+        [span_51](start_span)box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2) !important;[span_51](end_span)
     }
 
     .error-message {
       color: red;
       font-size: 13px;
       margin-top: 5px;
-      display: none; /* Hidden by default */
+      [span_52](start_span)display: none;[span_52](end_span)
+      /* Hidden by default */
     }
     .form-group.error .error-message,
     .disclaimer-box.error .error-message {
-        display: block;
+        [span_53](start_span)display: block;[span_53](end_span)
     }
 
     .file-upload {
       position: relative;
-      display: block;
+      [span_54](start_span)display: block;[span_54](end_span)
     }
 
     .file-upload input[type="file"] {
@@ -328,46 +332,46 @@
       left: 0;
       top: 0;
       opacity: 0;
-      width: 100%;
+      [span_55](start_span)width: 100%;[span_55](end_span)
       height: 100%;
       cursor: pointer;
     }
 
     .file-upload-label {
       display: block;
-      padding: 15px;
+      [span_56](start_span)padding: 15px;[span_56](end_span)
       background: var(--light);
       border: 2px dashed #e0e0e0;
       border-radius: 10px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.3s;
+      [span_57](start_span)transition: all 0.3s;[span_57](end_span)
     }
 
     .file-upload-label:hover {
       border-color: var(--primary);
-      background: #fff9f9;
+      [span_58](start_span)background: #fff9f9;[span_58](end_span)
     }
 
     .file-upload-label i {
       display: block;
       font-size: 24px;
       margin-bottom: 10px;
-      color: var(--primary);
+      [span_59](start_span)color: var(--primary);[span_59](end_span)
     }
 
     .file-upload-label span.file-name {
       display: block;
       margin-top: 8px;
       color: var(--primary);
-      font-weight: bold;
+      [span_60](start_span)font-weight: bold;[span_60](end_span)
       word-break: break-all;
     }
 
     .btn {
       display: inline-block;
       padding: 15px 25px;
-      background: linear-gradient(to right, var(--primary), var(--secondary));
+      [span_61](start_span)background: linear-gradient(to right, var(--primary), var(--secondary));[span_61](end_span)
       color: white;
       border: none;
       border-radius: 10px;
@@ -375,26 +379,26 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
-      box-shadow: var(--shadow);
+      [span_62](start_span)box-shadow: var(--shadow);[span_62](end_span)
       text-align: center;
       text-decoration: none;
     }
 
     .btn:hover {
-      transform: translateY(-3px);
+      [span_63](start_span)transform: translateY(-3px);[span_63](end_span)
       box-shadow: var(--shadow-hover);
       opacity: 0.9;
     }
 
     .btn-secondary {
-      background: var(--dark);
+      [span_64](start_span)background: var(--dark);[span_64](end_span)
     }
 
     .submit-btn {
       width: 100%;
       padding: 16px;
       font-size: 18px;
-      margin-top: 25px;
+      [span_65](start_span)margin-top: 25px;[span_65](end_span)
     }
 
     .bank-info {
@@ -402,44 +406,44 @@
       padding: 20px;
       border-radius: 12px;
       margin: 30px 0;
-      border-left: 4px solid var(--primary);
+      [span_66](start_span)border-left: 4px solid var(--primary);[span_66](end_span)
       box-shadow: var(--shadow);
     }
 
     .bank-info h3 {
       margin-top: 0;
-      color: var(--primary);
+      [span_67](start_span)color: var(--primary);[span_67](end_span)
     }
 
     .qr-code-container {
       display: flex;
       gap: 20px;
       justify-content: center;
-      margin-top: 15px;
+      [span_68](start_span)margin-top: 15px;[span_68](end_span)
       flex-wrap: wrap;
     }
 
     .qr-code-container img {
       width: 45%;
       max-width: 200px;
-      border-radius: 10px;
+      [span_69](start_span)border-radius: 10px;[span_69](end_span)
       border: 1px solid #eee;
       box-shadow: var(--shadow);
-      transition: transform 0.3s;
+      [span_70](start_span)transition: transform 0.3s;[span_70](end_span)
     }
 
     .qr-code-container img:hover {
-      transform: scale(1.05);
+      [span_71](start_span)transform: scale(1.05);[span_71](end_span)
     }
 
     .category-title {
       font-size: 22px;
       font-weight: 700;
       margin: 35px 0 20px;
-      padding-bottom: 8px;
+      [span_72](start_span)padding-bottom: 8px;[span_72](end_span)
       border-bottom: 3px solid var(--primary);
       color: var(--dark);
-      position: relative;
+      [span_73](start_span)position: relative;[span_73](end_span)
     }
 
     .category-title::after {
@@ -447,216 +451,208 @@
       position: absolute;
       bottom: -3px;
       left: 0;
-      width: 100px;
+      [span_74](start_span)width: 100px;[span_74](end_span)
       height: 3px;
       background: var(--accent);
     }
 
     .total {
       background: white;
-      padding: 15px 20px;
+      [span_75](start_span)padding: 15px 20px;[span_75](end_span)
       border-radius: 10px;
       margin: 20px 0;
       text-align: right;
       font-size: 18px;
       font-weight: bold;
-      box-shadow: var(--shadow);
+      [span_76](start_span)box-shadow: var(--shadow);[span_76](end_span)
     }
 
     .total span {
       color: var(--primary);
-      font-size: 24px;
+      [span_77](start_span)font-size: 24px;[span_77](end_span)
     }
 
     .loading {
       display: inline-block;
-      animation: spin 1s linear infinite;
+      [span_78](start_span)animation: spin 1s linear infinite;[span_78](end_span)
     }
 
     @keyframes spin {
       0% {
-        transform: rotate(0deg);
+        [span_79](start_span)transform: rotate(0deg);[span_79](end_span)
       }
       100% {
-        transform: rotate(360deg);
+        [span_80](start_span)transform: rotate(360deg);[span_80](end_span)
       }
     }
 
     /* Modal dialog styles for confirmation and success popups */
     #confirmationDialog, #successDialog {
-      position: fixed;
-      top: 0;
+      [span_81](start_span)position: fixed;[span_81](end_span)
+      [span_82](start_span)top: 0;[span_82](end_span)
       left: 0;
       right: 0;
       bottom: 0;
       background: rgba(0, 0, 0, 0.7);
       z-index: 1000;
-      display: flex; /* Use flexbox for centering */
-      align-items: center; /* Center vertically */
-      justify-content: center; /* Center horizontally */
+      [span_83](start_span)display: flex;[span_83](end_span) /* Use flexbox for centering */
+      [span_84](start_span)align-items: center;[span_84](end_span) /* Center vertically */
+      [span_85](start_span)justify-content: center;[span_85](end_span) /* Center horizontally */
       width: 100%;
       height: 100%;
-      overflow-y: auto; /* Allow dialog to scroll if content is long */
+      [span_86](start_span)overflow-y: auto;[span_86](end_span) /* Allow dialog to scroll if content is long */
       backdrop-filter: blur(5px);
-      display: none; /* Hidden by default, JS will show */
+      [span_87](start_span)display: none;[span_87](end_span) /* Hidden by default, JS will show */
     }
 
     #confirmationContent, #successContent {
       background: white;
-      padding: 30px;
+      [span_88](start_span)padding: 30px;[span_88](end_span)
       border-radius: 15px;
       max-width: 500px;
       width: 90%;
-      max-height: 90vh; /* Limit height to 90% of viewport height */
-      margin: 20px auto; /* Add margin to prevent sticking to edges on smaller screens */
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      [span_89](start_span)max-height: 90vh;[span_89](end_span) /* Limit height to 90% of viewport height */
+      [span_90](start_span)margin: 20px auto;[span_90](end_span) /* Add margin to prevent sticking to edges on smaller screens */
+      [span_91](start_span)box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);[span_91](end_span)
       animation: fadeIn 0.3s ease;
       overflow-y: auto; /* Allow content inside dialog to scroll */
     }
 
     #successContent {
         max-width: 400px;
-        text-align: center;
+        [span_92](start_span)text-align: center;[span_92](end_span)
     }
 
     .whatsapp-preview {
       background: #f5f5f5;
       padding: 15px;
       border-radius: 10px;
-      margin-top: 15px;
+      [span_93](start_span)margin-top: 15px;[span_93](end_span)
       font-family: monospace;
       white-space: pre-wrap;
       max-height: 200px;
       overflow-y: auto;
-      text-align: left;
+      [span_94](start_span)text-align: left;[span_94](end_span)
     }
 
     #confirmationContent h3,
     #successContent h3 {
       margin-top: 0;
-      color: var(--primary);
+      [span_95](start_span)color: var(--primary);[span_95](end_span)
     }
 
     #confirmationContent hr,
     #successContent hr {
       border: none;
-      border-top: 1px solid #eee;
+      [span_96](start_span)border-top: 1px solid #eee;[span_96](end_span)
       margin: 15px 0;
     }
 
     #confirmationContent ul {
       padding-left: 20px;
-      margin-top: 0;
+      [span_97](start_span)margin-top: 0;[span_97](end_span)
     }
 
     #confirmationContent button,
     #successContent button {
       padding: 12px 20px;
-      border: none;
+      [span_98](start_span)border: none;[span_98](end_span)
       border-radius: 8px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
+      [span_99](start_span)transition: all 0.3s;[span_99](end_span)
     }
 
     #cancelConfirm {
       background: #ccc;
-      color: #333;
+      [span_100](start_span)color: #333;[span_100](end_span)
     }
 
     #submitConfirm,
     #successConfirm {
       background: var(--primary);
-      color: white;
+      [span_101](start_span)color: white;[span_101](end_span)
     }
 
     #confirmationContent button:hover,
     #successContent button:hover {
       opacity: 0.9;
-      transform: translateY(-2px);
+      [span_102](start_span)transform: translateY(-2px);[span_102](end_span)
     }
 
     .admin-section {
       margin-top: 40px;
       background: white;
       padding: 20px;
-      border-radius: 12px;
+      [span_103](start_span)border-radius: 12px;[span_103](end_span)
       box-shadow: var(--shadow);
     }
 
     .admin-section input[type="password"] {
-      margin-bottom: 15px;
+      [span_104](start_span)margin-bottom: 15px;[span_104](end_span)
     }
 
     /* Self-pickup address display */
     #selfPickupAddress {
-        display: none; /* Hidden by default */
+        [span_105](start_span)display: none;[span_105](end_span) /* Hidden by default */
         background: #f0f8ff;
         padding: 15px;
         border-radius: 8px;
         margin-top: 15px;
-        border-left: 4px solid #2196f3;
+        [span_106](start_span)border-left: 4px solid #2196f3;[span_106](end_span)
         font-size: 15px;
         line-height: 1.6; /* Adjusted line height for better spacing */
     }
     #selfPickupAddress p {
         margin: 5px 0;
-        word-break: break-word; /* Allow long words to break */
+        [span_107](start_span)word-break: break-word;[span_107](end_span) /* Allow long words to break */
     }
     /* Specific adjustment for mobile layout to ensure address lines */
     @media (max-width: 600px) {
         #selfPickupAddress p {
-            line-height: 1.5; /* Slightly tighter line height on mobile */
+            [span_108](start_span)line-height: 1.5;[span_108](end_span)
+            /* Slightly tighter line height on mobile */
         }
     }
 
 
     @media (max-width: 600px) {
       .header h1 {
-        font-size: 24px;
+        [span_109](start_span)font-size: 24px;[span_109](end_span)
       }
 
       .container {
-        padding: 15px;
+        [span_110](start_span)padding: 15px;[span_110](end_span)
       }
 
       .product {
-        padding: 15px;
+        [span_111](start_span)padding: 15px;[span_111](end_span)
       }
 
       .qr-code-container {
         flex-direction: column;
-        align-items: center;
+        [span_112](start_span)align-items: center;[span_112](end_span)
       }
 
       .qr-code-container img {
-        width: 80%;
+        [span_113](start_span)width: 80%;[span_113](end_span)
       }
 
       /* Adjust modal for small screens */
       #confirmationContent,
       #successContent {
         width: 95%;
-        padding: 20px;
+        [span_114](start_span)padding: 20px;[span_114](end_span)
         margin: 10px auto; /* More compact margin */
       }
     }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translate(-50%, -60%); /* Original animation start point */
+        from { opacity: 0;
+        transform: scale(0.95); [span_115](start_span)}
+        to { opacity: 1; transform: scale(1);[span_115](end_span)
       }
-      to {
-        opacity: 1;
-        transform: translate(-50%, -50%); /* Original animation end point */
-      }
-    }
-    /* Updated keyframes for new flexbox centering */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
     }
   </style>
 </head>
@@ -674,12 +670,17 @@
     <form id="orderForm">
       <div class="disclaimer-box" id="disclaimerBox">
         <h3>⚠️ 重要声明 / Important Notice</h3>
-        <p>1. 此为预购商品，订单汇总后统一向供应商订购。</p>
-        <p>1. This is a pre-order. We will place the bulk order after collecting all purchases.</p>
-        <p>2. 预计等待时间：30-60天（从下单日起计算）。</p>
+        <p>1.
+        [span_116](start_span)此为预购商品，订单汇总后统一向供应商订购。</p>[span_116](end_span)
+        <p>1. This is a pre-order.
+        [span_117](start_span)We will place the bulk order after collecting all purchases.</p>[span_117](end_span)
+        <p>2.
+        [span_118](start_span)预计等待时间：30-60天（从下单日起计算）。</p>[span_118](end_span)
         <p>2. Estimated waiting time: 30-60 days (from order date).</p>
-        <p>3. 当前价格<strong>不包含</strong>国际运费，运费将根据实际物流成本后续通知收取。</p>
-        <p>3. Current prices <strong>DO NOT INCLUDE</strong> international shipping fees. Fees will be calculated later.</p>
+        <p>3.
+        [span_119](start_span)当前价格<strong>不包含</strong>国际运费，运费将根据实际物流成本后续通知收取。</p>[span_119](end_span)
+        <p>3. Current prices <strong>DO NOT INCLUDE</strong> international shipping fees.
+        [span_120](start_span)Fees will be calculated later.</p>[span_120](end_span)
 
         <div class="disclaimer-checkbox">
           <input type="checkbox" id="agreeCheckbox" />
@@ -690,7 +691,7 @@
 
       <div class="form-group" id="nameGroup">
         <label for="name">👤 姓名 Name *</label>
-        <input type="text" id="name" />
+        [span_121](start_span)<input type="text" id="name" />[span_121](end_span)
         <div class="error-message" id="nameError">请输入姓名 / Please enter your name</div>
       </div>
 
@@ -701,7 +702,7 @@
       </div>
 
       <div class="form-group" id="deliveryGroup">
-        <label for="delivery">🚚 取货方式 Delivery Method *</label>
+        [span_122](start_span)<label for="delivery">🚚 取货方式 Delivery Method *</label>[span_122](end_span)
         <select id="delivery">
           <option value="">请选择 / Please select</option>
           <option value="self-pickup">自取 Self pickup</option>
@@ -710,7 +711,7 @@
         <div id="selfPickupAddress">
             <p><strong>自取地址：</strong></p>
             <p>667, Jalan 24,</p>
-            <p>Taman Perindustrian Ehsan Jaya, Kepong,</p>
+            [span_123](start_span)<p>Taman Perindustrian Ehsan Jaya, Kepong,</p>[span_123](end_span)
             <p>52100, Kuala Lumpur.</p>
             <p><strong>取货时间：</strong> 另行通知</p>
             <p><strong>联络号码：</strong> 0162327792</p>
@@ -721,7 +722,7 @@
       <h2 class="category-title">🛒 请选择商品</h2>
 
       <div id="productsList">
-        </div>
+      [span_124](start_span)</div>[span_124](end_span)
 
       <div class="total">
         共计：RM<span id="totalAmount">0.00</span>
@@ -735,7 +736,7 @@
       <div class="bank-info">
         <h3>💳 转账信息 / Payment Info</h3>
         <p><strong>银行名称 / Bank:</strong> Maybank</p>
-        <p><strong>户口名 / Account Name:</strong> Choong Sher Lee</p>
+        [span_125](start_span)<p><strong>户口名 / Account Name:</strong> Choong Sher Lee</p>[span_125](end_span)
         <p><strong>户口号码 / Account No.:</strong> 114209540438</p>
 
         <div class="qr-code-container">
@@ -746,7 +747,7 @@
         <p style="margin-top:15px;font-size:14px;color:#666;">
           ⚠️ 请上传转账凭证 / Please upload payment proof
         </p>
-      </div>
+      [span_126](start_span)</div>[span_126](end_span)
 
       <div class="form-group" id="paymentProofGroup">
         <label for="paymentProof">📎 请上传转账凭证 Upload Receipt *</label>
@@ -756,7 +757,7 @@
              />
           <label for="paymentProof" class="file-upload-label">
             <span id="fileUploadInitialText">点击或拖拽文件到此处</span>
-            <span class="file-name"></span>
+            [span_127](start_span)<span class="file-name"></span>[span_127](end_span)
             <small>支持图片(JPG, JPEG, PNG, GIF, BMP, WEBP, HEIC)或PDF文件</small>
           </label>
         </div>
@@ -768,7 +769,7 @@
       </button>
     </form>
 
-    <div id="confirmationDialog">
+    [span_128](start_span)<div id="confirmationDialog">[span_128](end_span)
       <div id="confirmationContent"></div>
     </div>
 
@@ -788,72 +789,69 @@
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         // Supabase Configuration
-        const SUPABASE_URL = 'https://edfnhhthztskuuosuasw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampLyr-KgqVwXsKoAo';
+        [span_129](start_span)const SUPABASE_URL = 'https://edfnhhthztskuuosuasw.supabase.co';[span_129](end_span)
+        [span_130](start_span)const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampLyr-KgqVwXsKoAo';[span_130](end_span)
         const WHATSAPP_NUMBER = '60162327792'; // Your WhatsApp number for orders
-        const ADMIN_PASSWORD = 'fengweipaiadmin'; // Admin password for export
+        [span_131](start_span)const ADMIN_PASSWORD = 'fengweipaiadmin';[span_131](end_span)
         // Updated SELF_PICKUP_ADDRESS for display
-        const SELF_PICKUP_ADDRESS_DISPLAY = `667, Jalan 24,\nTaman Perindustrian Ehsan Jaya, Kepong,\n52100, Kuala Lumpur.`;
+        [span_132](start_span)const SELF_PICKUP_ADDRESS_DISPLAY = `667, Jalan 24,\nTaman Perindustrian Ehsan Jaya, Kepong,\n52100, Kuala Lumpur.`;[span_132](end_span)
         // Use a single line for WhatsApp message if preferred for concatenation
-        const SELF_PICKUP_ADDRESS_WHATSAPP = `667, Jalan 24, Taman Perindustrian Ehsan Jaya, Kepong, 52100, Kuala Lumpur.`;
-        const CONTACT_PHONE = '0162327792'; // Your contact phone number for self-pickup
+        [span_133](start_span)const SELF_PICKUP_ADDRESS_WHATSAPP = `667, Jalan 24, Taman Perindustrian Ehsan Jaya, Kepong, 52100, Kuala Lumpur.`;[span_133](end_span)
+        const CONTACT_PHONE = '0162327792'; [span_134](start_span)// Your contact phone number for self-pickup[span_134](end_span)
 
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         // Centralized Product Data
         const productsData = [
           { name: '原味烤肠', price: 28, image: 'IMG_3859.jpeg', category: '烤肠系列', emoji: '🌭' },
           { name: '烟熏蜜汁烤肠', price: 28, image: 'IMG_3864.jpeg', category: '烤肠系列', emoji: '🌭' },
           { name: '法式香草烤肠', price: 28, image: 'IMG_3863.jpeg', category: '烤肠系列', emoji: '🌭' },
           { name: '黑胡椒烤肠', price: 28, image: 'IMG_3860.jpeg', category: '烤肠系列', emoji: '🌭' },
-          { name: '孜然脆骨烤肠', price: 28, image: 'IMG_3862.jpeg', category: '烤肠系列', emoji: '🌭' },
+          [span_135](start_span){ name: '孜然脆骨烤肠', price: 28, image: 'IMG_3862.jpeg', category: '烤肠系列', emoji: '🌭' },[span_135](end_span)
           { name: '芝士玉米烤肠', price: 28, image: 'IMG_3861.jpeg', category: '烤肠系列', emoji: '🌭' },
 
           { name: '原味虾肠', price: 33, image: 'IMG_3853.jpeg', category: '虾肠系列', emoji: '🦐' },
           { name: '辣味虾肠', price: 33, image: 'IMG_3854.jpeg', category: '虾肠系列', emoji: '🦐' },
-          { name: '原味虾饼', price: 28, image: 'IMG_3873.jpeg', category: '虾肠系列', emoji: '🍤' },
+          [span_136](start_span){ name: '原味虾饼', price: 28, image: 'IMG_3873.jpeg', category: '虾肠系列', emoji: '🍤' },[span_136](end_span)
 
           { name: '玛格丽特披萨', price: 25, image: 'IMG_3841.jpeg', category: '披萨系列', emoji: '🍕' },
           { name: '黑椒牛肉披萨', price: 25, image: 'IMG_3839.jpeg', category: '披萨系列', emoji: '🍕' },
           { name: '奥尔良鸡肉披萨', price: 25, image: 'IMG_3840.jpeg', category: '披萨系列', emoji: '🍕' },
           { name: '双料榴莲披萨', price: 40, image: 'IMG_3852.jpeg', category: '披萨系列', emoji: '🍕' },
 
-          { name: '鲜肉小笼汤包', price: 12, image: 'IMG_3874.jpeg', category: '小笼汤包系列', emoji: '🥟' },
+          [span_137](start_span){ name: '鲜肉小笼汤包', price: 12, image: 'IMG_3874.jpeg', category: '小笼汤包系列', emoji: '🥟' },[span_137](end_span)
           { name: '菌菇小笼汤包', price: 12, image: 'IMG_3875.jpeg', category: '小笼汤包系列', emoji: '🥟' },
           { name: '黑松露小笼汤包', price: 12, image: 'IMG_3876.jpeg', category: '小笼汤包系列', emoji: '🥟' },
 
           { name: '黑猪肉酥饼', price: 55, image: 'IMG_3837.jpeg', category: '酥饼系列', emoji: '🥮' },
           { name: '安格斯牛肉酥饼', price: 55, image: 'IMG_3838.jpeg', category: '酥饼系列', emoji: '🥮' },
 
-          { name: '原味鸡排', price: 20, image: 'IMG_3835.jpeg', category: '鸡排系列', emoji: '🍗' },
+          [span_138](start_span){ name: '原味鸡排', price: 20, image: 'IMG_3835.jpeg', category: '鸡排系列', emoji: '🍗' },[span_138](end_span)
           { name: '奥尔良鸡排', price: 20, image: 'IMG_3836.jpeg', category: '鸡排系列', emoji: '🍗' },
 
           { name: '奥尔良鸡翅', price: 25, image: 'IMG_3865.jpeg', category: '鸡翅系列', emoji: '🍗' },
           { name: '青花椒鸡翅', price: 25, image: 'IMG_3866.jpeg', category: '鸡翅系列', emoji: '🍗' },
 
           { name: '黑猪三丁纸皮烧卖', price: 15, image: 'IMG_3843.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
-          { name: '黑椒牛肉纸皮烧卖', price: 15, image: 'IMG_3842.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
+          [span_139](start_span){ name: '黑椒牛肉纸皮烧卖', price: 15, image: 'IMG_3842.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },[span_139](end_span)
           { name: '黑猪梅菜干纸皮烧卖', price: 15, image: 'IMG_3844.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
           { name: '三丁芝士纸皮烧卖', price: 15, image: 'IMG_3845.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
           { name: '乌米腊味纸皮烧卖', price: 15, image: 'IMG_3846.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
         ];
-
         // Function to render products based on category
         function renderProducts() {
           const productsListDiv = document.getElementById('productsList');
-          productsListDiv.innerHTML = ''; // Clear existing products
+          [span_140](start_span)productsListDiv.innerHTML = '';[span_140](end_span) // Clear existing products
 
           // Get unique categories and sort them for consistent display
           const uniqueCategories = [...new Set(productsData.map(p => p.category))];
-
-          uniqueCategories.forEach(category => {
+          [span_141](start_span)uniqueCategories.forEach(category => {[span_141](end_span)
             const categoryEmoji = productsData.find(p => p.category === category)?.emoji || '✨';
             const categoryHtmlId = category.replace(/\s/g, ''); // Remove spaces for ID
             const categoryTitle = document.createElement('h3');
             categoryTitle.className = 'category-title';
             categoryTitle.id = categoryHtmlId;
-            categoryTitle.textContent = `${categoryEmoji} ${category}`;
+            [span_142](start_span)categoryTitle.textContent = `${categoryEmoji} ${category}`;[span_142](end_span)
             productsListDiv.appendChild(categoryTitle);
 
             // Filter products for the current category and append them
@@ -866,42 +864,42 @@
                 </div>
                 <div class="product-name">${product.name}</div>
                 <div class="product-price">RM${product.price.toFixed(2)}</div>
-                <div class="quantity-control">
+                [span_143](start_span)<div class="quantity-control">[span_143](end_span)
                   <button type="button" class="quantity-btn minus">-</button>
                   <input type="number" class="quantity-input" data-name="${product.name}" data-price="${product.price}" value="0" min="0">
                   <button type="button" class="quantity-btn plus">+</button>
                 </div>
-              `;
+              [span_144](start_span)`;[span_144](end_span)
               productsListDiv.appendChild(productDiv);
             });
           });
 
           // Re-attach event listeners for newly rendered quantity controls
           attachQuantityControlListeners();
-          calculateTotal(); // Recalculate total after rendering
+          [span_145](start_span)calculateTotal();[span_145](end_span) // Recalculate total after rendering
         }
 
         // Function to render category navigation links
         function renderCategoryNav() {
           const categoryLinksDiv = document.getElementById('categoryLinks');
-          categoryLinksDiv.innerHTML = '';
+          [span_146](start_span)categoryLinksDiv.innerHTML = '';[span_146](end_span)
 
           // Add an "All" category link first
           const allLink = document.createElement('a');
-          allLink.href = '#';
+          [span_147](start_span)allLink.href = '#';[span_147](end_span)
           allLink.className = 'category-link active'; // Active by default
           allLink.textContent = '全部商品';
-          allLink.addEventListener('click', (e) => {
+          [span_148](start_span)allLink.addEventListener('click', (e) => {[span_148](end_span)
             e.preventDefault();
             // Scroll to the products list instead of filtering here if all products are always rendered
             const targetElement = document.getElementById('productsList');
             if (targetElement) {
               targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            [span_149](start_span)}
             document.querySelectorAll('.category-link').forEach(link => link.classList.remove('active'));
             allLink.classList.add('active');
           });
-          categoryLinksDiv.appendChild(allLink);
+          categoryLinksDiv.appendChild(allLink);[span_149](end_span)
 
 
           const uniqueCategories = [...new Set(productsData.map(p => p.category))].sort(); // Sort categories alphabetically
@@ -911,35 +909,35 @@
             const link = document.createElement('a');
             const categoryHtmlId = category.replace(/\s/g, ''); // Remove spaces for ID
             link.href = `#${categoryHtmlId}`;
-            link.className = 'category-link';
+            [span_150](start_span)link.className = 'category-link';[span_150](end_span)
             link.textContent = `${categoryEmoji} ${category}`;
             link.addEventListener('click', (e) => {
               e.preventDefault();
               // Scroll to the category title instead of filtering
               const targetElement = document.getElementById(categoryHtmlId);
-              if (targetElement) {
+              [span_151](start_span)if (targetElement) {[span_151](end_span)
                 targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }
               document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
               link.classList.add('active');
             });
-            categoryLinksDiv.appendChild(link);
+            [span_152](start_span)categoryLinksDiv.appendChild(link);[span_152](end_span)
           });
         }
 
         // Initialize rendering
         renderCategoryNav();
-        renderProducts(); // Render all products initially
+        [span_153](start_span)renderProducts();[span_153](end_span) // Render all products initially
 
         // Calculate total amount
         function calculateTotal() {
           let total = 0;
-          document.querySelectorAll('.quantity-input').forEach(input => {
+          [span_154](start_span)document.querySelectorAll('.quantity-input').forEach(input => {[span_154](end_span)
             const quantity = parseInt(input.value) || 0;
             const price = parseFloat(input.dataset.price);
             total += quantity * price;
           });
-          document.getElementById('totalAmount').textContent = total.toFixed(2);
+          [span_155](start_span)document.getElementById('totalAmount').textContent = total.toFixed(2);[span_155](end_span)
           return total;
         }
 
@@ -948,183 +946,180 @@
           document.querySelectorAll('.quantity-btn').forEach(btn => {
             btn.onclick = function () { // Use onclick to easily overwrite for dynamic elements
               const input = this.parentElement.querySelector('.quantity-input');
-              let current = parseInt(input.value) || 0;
+              [span_156](start_span)let current = parseInt(input.value) || 0;[span_156](end_span)
               if (this.classList.contains('plus')) {
                 input.value = current + 1;
               } else if (this.classList.contains('minus')) {
                 input.value = Math.max(0, current - 1);
               }
-              calculateTotal();
+              [span_157](start_span)calculateTotal();[span_157](end_span)
             };
           });
-
-          document.querySelectorAll('.quantity-input').forEach(input => {
+          [span_158](start_span)document.querySelectorAll('.quantity-input').forEach(input => {[span_158](end_span)
             input.oninput = () => { // Use oninput
               input.value = Math.max(0, parseInt(input.value) || 0);
               calculateTotal();
             };
-          });
+          [span_159](start_span)});[span_159](end_span)
         }
 
         // Initial attachment of listeners (for products rendered at start)
         attachQuantityControlListeners();
-
         // --- Form Validation and Error Display ---
         function showError(elementId, message) {
             const group = document.getElementById(elementId);
-            if (group) {
+            [span_160](start_span)if (group) {[span_160](end_span)
                 group.classList.add('error');
-                const errorMessage = group.querySelector('.error-message');
+                [span_161](start_span)const errorMessage = group.querySelector('.error-message');[span_161](end_span)
                 if (errorMessage) {
                     errorMessage.textContent = message;
-                    errorMessage.style.display = 'block';
+                    [span_162](start_span)errorMessage.style.display = 'block';[span_162](end_span)
                 }
             }
         }
 
         function clearError(elementId) {
             const group = document.getElementById(elementId);
-            if (group) {
+            [span_163](start_span)if (group) {[span_163](end_span)
                 group.classList.remove('error');
-                const errorMessage = group.querySelector('.error-message');
+                [span_164](start_span)const errorMessage = group.querySelector('.error-message');[span_164](end_span)
                 if (errorMessage) {
-                    errorMessage.style.display = 'none';
+                    [span_165](start_span)errorMessage.style.display = 'none';[span_165](end_span)
                 }
             }
         }
 
         // Clear errors on input/change
         document.getElementById('name').addEventListener('input', () => clearError('nameGroup'));
-        document.getElementById('phone').addEventListener('input', () => clearError('phoneGroup'));
+        [span_166](start_span)document.getElementById('phone').addEventListener('input', () => clearError('phoneGroup'));[span_166](end_span)
         document.getElementById('delivery').addEventListener('change', () => {
             clearError('deliveryGroup');
             // Show/hide self-pickup address based on selection
             const selfPickupAddressDiv = document.getElementById('selfPickupAddress');
             if (document.getElementById('delivery').value === 'self-pickup') {
                 selfPickupAddressDiv.style.display = 'block';
-            } else {
+            [span_167](start_span)} else {[span_167](end_span)
                 selfPickupAddressDiv.style.display = 'none';
             }
         });
-        document.getElementById('paymentProof').addEventListener('change', () => clearError('paymentProofGroup'));
+        [span_168](start_span)document.getElementById('paymentProof').addEventListener('change', () => clearError('paymentProofGroup'));[span_168](end_span)
         document.getElementById('agreeCheckbox').addEventListener('change', () => clearError('disclaimerBox'));
 
 
         function validateForm() {
             let isValid = true;
-            let firstErrorElement = null;
+            [span_169](start_span)let firstErrorElement = null;[span_169](end_span)
 
             // 1. Disclaimer checkbox
             const agreed = document.getElementById('agreeCheckbox').checked;
-            if (!agreed) {
+            [span_170](start_span)if (!agreed) {[span_170](end_span)
                 showError('disclaimerBox', '请勾选此项以继续 / Please check this box to continue');
-                isValid = false;
+                [span_171](start_span)isValid = false;[span_171](end_span)
                 if (!firstErrorElement) firstErrorElement = document.getElementById('disclaimerBox');
             } else {
-                clearError('disclaimerBox');
+                [span_172](start_span)clearError('disclaimerBox');[span_172](end_span)
             }
 
             // 2. Name
             const name = document.getElementById('name').value.trim();
-            if (!name) {
+            [span_173](start_span)if (!name) {[span_173](end_span)
                 showError('nameGroup', '请输入姓名 / Please enter your name');
-                isValid = false;
+                [span_174](start_span)isValid = false;[span_174](end_span)
                 if (!firstErrorElement) firstErrorElement = document.getElementById('nameGroup');
             } else {
-                clearError('nameGroup');
+                [span_175](start_span)clearError('nameGroup');[span_175](end_span)
             }
 
             // 3. Phone
             const phone = document.getElementById('phone').value.trim();
-            const phoneRegex = /^(\+?6?01)[0-46-9]-?[0-9]{7,8}$/; // Basic Malaysian phone number regex
+            [span_176](start_span)const phoneRegex = /^(\+?6?01)[0-46-9]-?[0-9]{7,8}$/;[span_176](end_span) // Basic Malaysian phone number regex
             if (!phoneRegex.test(phone.replace(/-/g, ''))) {
                 showError('phoneGroup', '请输入有效的马来西亚电话号码 (e.g., 012-3456789 or 60123456789)');
-                isValid = false;
+                [span_177](start_span)isValid = false;[span_177](end_span)
                 if (!firstErrorElement) firstErrorElement = document.getElementById('phoneGroup');
             } else {
-                clearError('phoneGroup');
+                [span_178](start_span)clearError('phoneGroup');[span_178](end_span)
             }
 
             // 4. Delivery method
             const delivery = document.getElementById('delivery').value;
-            if (!delivery) {
+            [span_179](start_span)if (!delivery) {[span_179](end_span)
                 showError('deliveryGroup', '请选择取货方式 / Please select delivery method');
-                isValid = false;
+                [span_180](start_span)isValid = false;[span_180](end_span)
                 if (!firstErrorElement) firstErrorElement = document.getElementById('deliveryGroup');
             } else {
-                clearError('deliveryGroup');
+                [span_181](start_span)clearError('deliveryGroup');[span_181](end_span)
             }
 
             // 5. Minimum items
             const total = calculateTotal();
-            if (total <= 0) {
-                alert('请至少选择一项商品 / Please select at least one item'); // Still use alert for this general check
-                isValid = false;
+            [span_182](start_span)if (total <= 0) {[span_182](end_span)
+                alert('请至少选择一项商品 / Please select at least one item');
+                [span_183](start_span)isValid = false;[span_183](end_span)
             }
 
             // 6. Payment proof - now check after total as it's a critical field
             const proof = document.getElementById('paymentProof').files[0];
-            if (!proof) {
+            [span_184](start_span)if (!proof) {[span_184](end_span)
                 showError('paymentProofGroup', '请上传支付凭证 / Please upload payment proof');
-                isValid = false;
+                [span_185](start_span)isValid = false;[span_185](end_span)
                 if (!firstErrorElement) firstErrorElement = document.getElementById('paymentProofGroup');
             } else {
-                clearError('paymentProofGroup');
+                [span_186](start_span)clearError('paymentProofGroup');[span_186](end_span)
             }
 
 
             // Scroll to the first error if any
             if (!isValid && firstErrorElement) {
-                firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                [span_187](start_span)firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });[span_187](end_span)
             }
 
-            return isValid;
+            [span_188](start_span)return isValid;[span_188](end_span)
         }
 
         // Build order data
         async function buildOrderData() {
           const items = [];
-          document.querySelectorAll('.quantity-input').forEach(input => {
+          [span_189](start_span)document.querySelectorAll('.quantity-input').forEach(input => {[span_189](end_span)
             const quantity = parseInt(input.value);
             if (quantity > 0) {
               items.push({
                 product: input.dataset.name,
                 quantity,
                 price: parseFloat(input.dataset.price),
-              });
+              [span_190](start_span)});[span_190](end_span)
             }
           });
-
           // Generate order ID: FW + YYMMDD + NNN (day's sequence)
-          const today = new Date();
-          const year = today.getFullYear();
+          [span_191](start_span)const today = new Date();[span_191](end_span)
+          [span_192](start_span)const year = today.getFullYear();[span_192](end_span)
           const month = String(today.getMonth() + 1).padStart(2, '0');
           const day = String(today.getDate()).padStart(2, '0');
           const datePrefix = `${year}${month}${day}`;
-
           // Fetch count of orders for today to generate sequence number
-          const { count, error: countError } = await supabase
+          [span_193](start_span)const { count, error: countError } = await supabase[span_193](end_span)
             .from('orders')
             .select('order_id', { count: 'exact' })
-            .ilike('order_id', `FW${datePrefix}%`); // Filter orders for today's date prefix
+            .ilike('order_id', `FW${datePrefix}%`);
+            [span_194](start_span)// Filter orders for today's date prefix[span_194](end_span)
 
           if (countError) {
             console.error('Error fetching today\'s order count:', countError);
-            // Fallback to timestamp if fetching count fails
+            [span_195](start_span)// Fallback to timestamp if fetching count fails[span_195](end_span)
             console.warn('Falling back to timestamp-based order ID.');
-            return {
+            [span_196](start_span)return {[span_196](end_span)
                 orderId: `FW${Date.now().toString().slice(-10)}`, // Using slice(-10) for a slightly longer, more unique timestamp
                 name: document.getElementById('name').value.trim(),
                 phone: document.getElementById('phone').value.trim().replace(/-/g, ''),
                 delivery: document.getElementById('delivery').value,
                 remarks: document.getElementById('remarks').value.trim(),
-                items,
+                [span_197](start_span)items,[span_197](end_span)
                 total: calculateTotal(),
-            };
+            [span_198](start_span)};[span_198](end_span)
           }
 
           const sequence = String(count + 1).padStart(3, '0');
-          const orderId = `FW${datePrefix}${sequence}`;
+          [span_199](start_span)const orderId = `FW${datePrefix}${sequence}`;[span_199](end_span)
 
           return {
             orderId: orderId,
@@ -1134,35 +1129,34 @@
             remarks: document.getElementById('remarks').value.trim(),
             items,
             total: calculateTotal(),
-          };
+          [span_200](start_span)};[span_200](end_span)
         }
 
         // Build WhatsApp message - use different emoji per product category
         function buildWhatsAppMessage(order) {
           let msg = `🛎️ *锋味派新订单 #${order.orderId}*\n\n`;
-          msg += `👤 *客户信息*\n`;
+          [span_201](start_span)msg += `👤 *客户信息*\n`;[span_201](end_span)
           msg += `📛 姓名: ${order.name}\n`;
           msg += `📱 电话: ${order.phone}\n`;
-          msg += `🚚 取货方式: ${order.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}\n`;
-          if (order.delivery === 'self-pickup') {
-              msg += `📍 自取地址: ${SELF_PICKUP_ADDRESS_WHATSAPP}\n`; // Use single-line address for WhatsApp
+          msg += `🚚 取货方式: ${order.delivery === 'self-pickup' ? [span_202](start_span)'自取' : 'Lalamove送货'}\n`;[span_202](end_span)
+          [span_203](start_span)if (order.delivery === 'self-pickup') {[span_203](end_span)
+              msg += `📍 自取地址: ${SELF_PICKUP_ADDRESS_WHATSAPP}\n`;
+              [span_204](start_span)// Use single-line address for WhatsApp[span_204](end_span)
               msg += `⏰ 取货时间: 另行通知\n`;
-              msg += `📞 联络号码: ${CONTACT_PHONE}\n`; // Add contact phone
+              [span_205](start_span)msg += `📞 联络号码: ${CONTACT_PHONE}\n`;[span_205](end_span) // Add contact phone
           }
           msg += `\n🛒 *订单明细*\n`;
-
-          order.items.forEach(item => {
+          [span_206](start_span)order.items.forEach(item => {[span_206](end_span)
             // Find the corresponding product in productsData to get the emoji
             const productInfo = productsData.find(p => p.name === item.product);
             const emoji = productInfo ? productInfo.emoji : '▫️'; // Default emoji if not found
             msg += `${emoji} ${item.product} × ${item.quantity} = RM${(item.quantity * item.price).toFixed(2)}\n`;
           });
-
-          msg += `\n💰 *总金额: RM${order.total.toFixed(2)}*\n`;
+          [span_207](start_span)msg += `\n💰 *总金额: RM${order.total.toFixed(2)}*\n`;[span_207](end_span)
           msg += `📝 *备注*: ${order.remarks || '无'}\n`;
           msg += `📅 *下单时间*: ${new Date().toLocaleString('zh-CN')}`;
 
-          return msg;
+          [span_208](start_span)return msg;[span_208](end_span)
         }
 
         // File upload display file name
@@ -1173,25 +1167,23 @@
 
           if (this.files.length > 0) {
             if (!fileNameDisplay) {
-              fileNameDisplay = document.createElement('span');
+              [span_209](start_span)fileNameDisplay = document.createElement('span');[span_209](end_span)
               fileNameDisplay.className = 'file-name';
               label.appendChild(fileNameDisplay);
             }
             fileNameDisplay.textContent = this.files[0].name;
             initialTextSpan.style.display = 'none'; // Hide initial text
           } else {
-            initialTextSpan.style.display = 'block'; // Show initial text
+            [span_210](start_span)initialTextSpan.style.display = 'block';[span_210](end_span) // Show initial text
             if (fileNameDisplay) {
               label.removeChild(fileNameDisplay); // Remove file name display if no file
             }
           }
         });
-
-
         // Show confirmation dialog
         function showConfirmation(order) {
           const dialog = document.getElementById('confirmationDialog');
-          const content = document.getElementById('confirmationContent');
+          [span_211](start_span)const content = document.getElementById('confirmationContent');[span_211](end_span)
           const whatsappMsg = buildWhatsAppMessage(order);
 
           content.innerHTML = `
@@ -1199,10 +1191,10 @@
             <p><strong>订单号:</strong> ${order.orderId}</p>
             <p><strong>姓名:</strong> ${order.name}</p>
             <p><strong>电话:</strong> ${order.phone}</p>
-            <p><strong>配送方式:</strong> ${order.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}</p>
+            <p><strong>配送方式:</strong> ${order.delivery === 'self-pickup' ? [span_212](start_span)'自取' : 'Lalamove送货'}</p>[span_212](end_span)
             ${order.delivery === 'self-pickup' ? `<p><strong>自取地址：</strong> ${SELF_PICKUP_ADDRESS_DISPLAY.replace(/\n/g, '<br>')}</p>
-            <p><strong>联络号码：</strong> ${CONTACT_PHONE}</p>` : ''}
-            <p><strong>备注:</strong> ${order.remarks || '无'}</p>
+            [span_213](start_span)<p><strong>联络号码：</strong> ${CONTACT_PHONE}</p>` : ''}[span_213](end_span)
+            <p><strong>备注:</strong> ${order.remarks || [span_214](start_span)'无'}</p>[span_214](end_span)
             <hr/>
             <h4 style="margin-bottom:10px;">订单明细</h4>
             <ul>
@@ -1210,26 +1202,26 @@
             </ul>
             <p style="font-weight:bold;text-align:right;">总金额: RM${order.total.toFixed(2)}</p>
             
-            <div class="whatsapp-preview">
+            [span_215](start_span)<div class="whatsapp-preview">[span_215](end_span)
               <strong>将发送到WhatsApp的内容:</strong>
               <p style="color:red; font-weight:bold;">请务必复制以下信息，并在跳转WhatsApp后点击发送！</p>
               <button id="copyWhatsappMsg" style="padding: 8px 15px; background: #25D366; color: white; border-radius: 5px; cursor: pointer; margin-bottom: 10px;">复制WhatsApp消息</button>
               <div id="whatsappMessageContent">${whatsappMsg.replace(/\n/g, '<br>').replace(/\*/g, '')}</div>
             </div>
             
-            <hr/>
+            [span_216](start_span)<hr/>[span_216](end_span)
             <div style="margin-top:20px;display:flex;justify-content:space-between;gap:10px;">
               <button id="cancelConfirm" style="flex:1;">取消</button>
               <button id="submitConfirm" style="flex:1;">确认并发送</button>
             </div>
           `;
-
-          dialog.style.display = 'flex'; // Use flex to center
-          // document.body.style.overflow = 'hidden'; // Removed to allow background scroll
+          [span_217](start_span)dialog.style.display = 'flex';[span_217](end_span) // Use flex to center
+          [span_218](start_span)// document.body.style.overflow = 'hidden';[span_218](end_span)
+          // Removed to allow background scroll
 
           document.getElementById('copyWhatsappMsg').onclick = () => {
             const tempTextArea = document.createElement('textarea');
-            tempTextArea.value = whatsappMsg;
+            [span_219](start_span)tempTextArea.value = whatsappMsg;[span_219](end_span)
             document.body.appendChild(tempTextArea);
             tempTextArea.select();
             document.execCommand('copy');
@@ -1239,20 +1231,19 @@
 
           document.getElementById('cancelConfirm').onclick = () => {
             dialog.style.display = 'none';
-            // document.body.style.overflow = 'auto'; // Removed
+            // document.body.style.overflow = 'auto'; [span_220](start_span)// Removed[span_220](end_span)
           };
-
-          document.getElementById('submitConfirm').onclick = async () => {
+          [span_221](start_span)document.getElementById('submitConfirm').onclick = async () => {[span_221](end_span)
             dialog.style.display = 'none';
-            // document.body.style.overflow = 'auto'; // Removed
+            // document.body.style.overflow = 'auto'; [span_222](start_span)// Removed[span_222](end_span)
             await submitOrder(order, whatsappMsg);
-          };
+          [span_223](start_span)};[span_223](end_span)
         }
 
         // Show success message
         function showSuccessMessage(whatsappMsg) {
           const dialog = document.getElementById('successDialog');
-          const content = document.getElementById('successContent');
+          [span_224](start_span)const content = document.getElementById('successContent');[span_224](end_span)
 
           content.innerHTML = `
             <h3 style="margin-top:0;color:var(--primary);">订单提交成功</h3>
@@ -1260,61 +1251,60 @@
             <hr/>
             <button id="successConfirm">好的 (OK)</button>
           `;
-
-          dialog.style.display = 'flex'; // Use flex to center
-          // document.body.style.overflow = 'hidden'; // Removed
+          [span_225](start_span)dialog.style.display = 'flex';[span_225](end_span) // Use flex to center
+          [span_226](start_span)// document.body.style.overflow = 'hidden';[span_226](end_span)
+          // Removed
 
           let hasRedirected = false;
-
-          const redirectToWhatsApp = () => {
+          [span_227](start_span)const redirectToWhatsApp = () => {[span_227](end_span)
             if (!hasRedirected) {
               hasRedirected = true;
-              window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMsg)}`;
+              [span_228](start_span)window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMsg)}`;[span_228](end_span)
             }
           };
-
-          document.getElementById('successConfirm').onclick = () => {
+          [span_229](start_span)document.getElementById('successConfirm').onclick = () => {[span_229](end_span)
             dialog.style.display = 'none';
-            // document.body.style.overflow = 'auto'; // Removed
-            redirectToWhatsApp(); // Redirect when user clicks OK
+            // document.body.style.overflow = 'auto'; [span_230](start_span)// Removed[span_230](end_span)
+            redirectToWhatsApp();
+            [span_231](start_span)// Redirect when user clicks OK[span_231](end_span)
           };
-        }
+        [span_232](start_span)}
 
         // Submit order to Supabase
         async function submitOrder(order, whatsappMsg) {
           const submitBtn = document.querySelector('.submit-btn');
-          try {
+          try {[span_232](end_span)
             // Show loading state
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="loading">⏳ 提交中...</span>';
+            [span_233](start_span)submitBtn.innerHTML = '<span class="loading">⏳ 提交中...</span>';[span_233](end_span)
 
             const file = document.getElementById('paymentProof').files[0];
-            let paymentProofUrl = ''; // Changed variable name to match column
+            let paymentProofUrl = '';
+            [span_234](start_span)// Changed variable name to match column[span_234](end_span)
 
             if (file) {
               // Upload payment proof
               const ext = file.name.split('.').pop();
-              const filename = `proofs/${order.orderId}.${ext}`;
+              [span_235](start_span)const filename = `proofs/${order.orderId}.${ext}`;[span_235](end_span)
 
               const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('payment-proofs')
+                .from('order-proofs') // MODIFIED: Use the 'order-proofs' bucket
                 .upload(filename, file, {
                   cacheControl: '3600',
                   upsert: false
-                });
+                [span_236](start_span)});[span_236](end_span)
 
               if (uploadError) {
                 console.error('文件上传错误:', uploadError);
-                throw new Error('文件上传失败。请重试或联系管理员。');
+                [span_237](start_span)throw new Error('文件上传失败。请重试或联系管理员。');[span_237](end_span)
               }
 
               // Get public URL
               const { data: urlData } = supabase.storage
-                .from('payment-proofs')
+                .from('order-proofs') // MODIFIED: Use the 'order-proofs' bucket
                 .getPublicUrl(filename);
-
-              paymentProofUrl = urlData.publicUrl; // Assign to correct variable
-              console.log('支付凭证URL:', paymentProofUrl);
+              [span_238](start_span)paymentProofUrl = urlData.publicUrl;[span_238](end_span) // Assign to correct variable
+              [span_239](start_span)console.log('支付凭证URL:', paymentProofUrl);[span_239](end_span)
             }
 
             // Insert order data
@@ -1323,44 +1313,44 @@
               name: order.name,
               phone: order.phone,
               delivery_method: order.delivery,
-              remarks: order.remarks,
+              [span_240](start_span)remarks: order.remarks,[span_240](end_span)
               order_items: order.items,
               total_amount: order.total,
               payment_proof_url: paymentProofUrl, // Use correct variable
               status: 'pending', // Default status
               created_at: new Date().toISOString()
-            }]).select();
+            [span_241](start_span)}]).select();[span_241](end_span)
 
             if (insertError) {
               console.error('数据库插入错误:', insertError);
-              throw new Error('订单数据保存失败。请重试或联系管理员。');
+              [span_242](start_span)throw new Error('订单数据保存失败。请重试或联系管理员。');[span_242](end_span)
             }
 
             console.log('订单创建成功:', insertData);
-
-            // Show success message
+            [span_243](start_span)// Show success message[span_243](end_span)
             showSuccessMessage(whatsappMsg);
-
-            // Reset form
+            [span_244](start_span)// Reset form[span_244](end_span)
             document.getElementById('orderForm').reset();
             document.querySelectorAll('.quantity-input').forEach(input => input.value = '0');
-            document.getElementById('totalAmount').textContent = '0.00';
+            [span_245](start_span)document.getElementById('totalAmount').textContent = '0.00';[span_245](end_span)
             const fileUploadLabel = document.querySelector('.file-upload-label');
             const fileNameSpan = fileUploadLabel.querySelector('.file-name');
             const initialTextSpan = document.getElementById('fileUploadInitialText');
-
-            if (fileNameSpan) {
+            [span_246](start_span)if (fileNameSpan) {[span_246](end_span)
               fileUploadLabel.removeChild(fileNameSpan);
-            }
-            initialTextSpan.style.display = 'block'; // Show original text
-            clearError('paymentProofGroup'); // Clear error for payment proof
-            document.getElementById('selfPickupAddress').style.display = 'none'; // Hide self-pickup address
+            [span_247](start_span)}
+            initialTextSpan.style.display = 'block';
+            // Show original text[span_247](end_span)
+            clearError('paymentProofGroup');
+            [span_248](start_span)// Clear error for payment proof[span_248](end_span)
+            document.getElementById('selfPickupAddress').style.display = 'none';
+            [span_249](start_span)// Hide self-pickup address[span_249](end_span)
           } catch (error) {
             console.error('提交订单错误:', error);
-            alert(`提交失败: ${error.message || '未知错误'}\n请截图此错误并联系管理员。`);
+            [span_250](start_span)alert(`提交失败: ${error.message || '未知错误'}\n请截图此错误并联系管理员。`);[span_250](end_span)
           } finally {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '🚀 提交订单 Submit Order';
+            [span_251](start_span)submitBtn.innerHTML = '🚀 提交订单 Submit Order';[span_251](end_span)
           }
         }
 
@@ -1372,17 +1362,15 @@
             return;
           }
 
-          const order = await buildOrderData(); // Await order data including orderId generation
+          [span_252](start_span)const order = await buildOrderData(); // Await order data including orderId generation[span_252](end_span)
           showConfirmation(order);
         });
-
         // Admin export function
-        document.getElementById('showExportBtn').addEventListener('click', function () {
+        [span_253](start_span)document.getElementById('showExportBtn').addEventListener('click', function () {[span_253](end_span)
           const panel = document.getElementById('adminPanel');
           panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
         });
-
-        document.getElementById('realExportBtn').addEventListener('click', async function () {
+        [span_254](start_span)document.getElementById('realExportBtn').addEventListener('click', async function () {[span_254](end_span)
           const password = document.getElementById('adminPassword').value;
           if (password !== ADMIN_PASSWORD) { // Use constant for admin password
             alert('管理员密码错误 / Incorrect admin password');
@@ -1390,7 +1378,7 @@
           }
 
           try {
-            // Get all orders
+            [span_255](start_span)// Get all orders[span_255](end_span)
             const { data: orders, error: ordersError } = await supabase
               .from('orders')
               .select('*')
@@ -1398,7 +1386,7 @@
 
             if (ordersError) {
               throw ordersError;
-            }
+            [span_256](start_span)}
 
             // Prepare Excel data
             const wb = XLSX.utils.book_new();
@@ -1406,33 +1394,34 @@
               ['订单号', '姓名', '电话', '配送方式', '备注', '总金额', '状态', '下单时间', '支付凭证URL', '产品明细']
             ];
 
-            orders.forEach(order => {
+            orders.forEach(order => {[span_256](end_span)
               // Ensure order_items is an array before mapping
               const productDetails = Array.isArray(order.order_items)
-                ? order.order_items.map(item => `${item.product} x ${item.quantity} (RM${item.price.toFixed(2)})`).join('; ')
-                : 'N/A'; // Handle cases where order_items might not be an array
+                [span_257](start_span)? order.order_items.map(item => `${item.product} x ${item.quantity} (RM${item.price.toFixed(2)})`).join('; ')[span_257](end_span)
+                : 'N/A';
+                [span_258](start_span)// Handle cases where order_items might not be an array[span_258](end_span)
 
               wsData.push([
                 order.order_id,
                 order.name,
                 order.phone,
                 order.delivery_method === 'self-pickup' ? '自取' : 'Lalamove送货',
-                order.remarks || '无',
+                [span_259](start_span)order.remarks || '无',[span_259](end_span)
                 `RM${order.total_amount.toFixed(2)}`,
                 order.status === 'pending' ? '待处理' : (order.status === 'completed' ? '已完成' : order.status), // More robust status display
                 order.payment_proof_url || '无', // Ensure payment_proof_url is included
                 productDetails
-              ]);
+              [span_260](start_span)]);[span_260](end_span)
             });
 
             const ws = XLSX.utils.aoa_to_sheet(wsData);
-            XLSX.utils.book_append_sheet(wb, ws, '订单数据');
+            [span_261](start_span)XLSX.utils.book_append_sheet(wb, ws, '订单数据');[span_261](end_span)
             XLSX.writeFile(wb, `锋味派订单_${new Date().toISOString().slice(0, 10)}.xlsx`);
 
             alert('导出成功 / Export successful');
-          } catch (error) {
+          [span_262](start_span)} catch (error) {[span_262](end_span)
             console.error('导出错误:', error);
-            alert(`导出订单时出错: ${error.message || '未知错误'}`);
+            [span_263](start_span)alert(`导出订单时出错: ${error.message || '未知错误'}`);[span_263](end_span)
           }
         });
       });
