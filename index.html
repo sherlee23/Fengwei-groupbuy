@@ -27,7 +27,6 @@
       background: var(--bg-gradient); /* Use gradient background */
       color: var(--dark);
       line-height: 1.6;
-      /* background-image: url('IMG_3847.jpeg'); /* 已移除 */
       background-size: cover;
       background-attachment: fixed;
       background-position: center;
@@ -53,7 +52,6 @@
       left: 0;
       right: 0;
       bottom: 0;
-      /* background: url('IMG_3848.jpeg') no-repeat center center; /* 已移除 */
       background-size: contain;
       opacity: 0.2;
     }
@@ -97,7 +95,8 @@
     }
 
     .category-links::-webkit-scrollbar {
-      display: none; /* For Chrome, Safari, and Opera */
+      display: none;
+      /* For Chrome, Safari, and Opera */
     }
 
     .category-link {
@@ -235,7 +234,8 @@
       margin-bottom: 25px;
       border-left: 4px solid var(--primary);
       box-shadow: var(--shadow);
-      position: relative; /* For error message positioning */
+      position: relative;
+      /* For error message positioning */
     }
 
     .disclaimer-box h3 {
@@ -253,7 +253,8 @@
     .disclaimer-checkbox input {
       width: 20px;
       height: 20px;
-      flex-shrink: 0; /* Prevent checkbox from shrinking */
+      flex-shrink: 0;
+      /* Prevent checkbox from shrinking */
     }
 
     .form-group label {
@@ -311,7 +312,8 @@
       color: red;
       font-size: 13px;
       margin-top: 5px;
-      display: none; /* Hidden by default */
+      display: none;
+      /* Hidden by default */
     }
     .form-group.error .error-message,
     .disclaimer-box.error .error-message {
@@ -607,7 +609,8 @@
     /* Specific adjustment for mobile layout to ensure address lines */
     @media (max-width: 600px) {
         #selfPickupAddress p {
-            line-height: 1.5; /* Slightly tighter line height on mobile */
+            line-height: 1.5;
+            /* Slightly tighter line height on mobile */
         }
     }
 
@@ -644,19 +647,10 @@
     }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translate(-50%, -60%); /* Original animation start point */
+        from { opacity: 0;
+        transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1);
       }
-      to {
-        opacity: 1;
-        transform: translate(-50%, -50%); /* Original animation end point */
-      }
-    }
-    /* Updated keyframes for new flexbox centering */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
     }
   </style>
 </head>
@@ -674,12 +668,17 @@
     <form id="orderForm">
       <div class="disclaimer-box" id="disclaimerBox">
         <h3>⚠️ 重要声明 / Important Notice</h3>
-        <p>1. 此为预购商品，订单汇总后统一向供应商订购。</p>
-        <p>1. This is a pre-order. We will place the bulk order after collecting all purchases.</p>
-        <p>2. 预计等待时间：30-60天（从下单日起计算）。</p>
+        <p>1.
+        此为预购商品，订单汇总后统一向供应商订购。</p>
+        <p>1. This is a pre-order.
+        We will place the bulk order after collecting all purchases.</p>
+        <p>2.
+        预计等待时间：30-60天（从下单日起计算）。</p>
         <p>2. Estimated waiting time: 30-60 days (from order date).</p>
-        <p>3. 当前价格<strong>不包含</strong>国际运费，运费将根据实际物流成本后续通知收取。</p>
-        <p>3. Current prices <strong>DO NOT INCLUDE</strong> international shipping fees. Fees will be calculated later.</p>
+        <p>3.
+        当前价格<strong>不包含</strong>国际运费，运费将根据实际物流成本后续通知收取。</p>
+        <p>3. Current prices <strong>DO NOT INCLUDE</strong> international shipping fees.
+        Fees will be calculated later.</p>
 
         <div class="disclaimer-checkbox">
           <input type="checkbox" id="agreeCheckbox" />
@@ -690,7 +689,8 @@
 
       <div class="form-group" id="nameGroup">
         <label for="name">👤 姓名 Name *</label>
-        <input type="text" id="name" />
+   
+     <input type="text" id="name" />
         <div class="error-message" id="nameError">请输入姓名 / Please enter your name</div>
       </div>
 
@@ -701,6 +701,7 @@
       </div>
 
       <div class="form-group" id="deliveryGroup">
+       
         <label for="delivery">🚚 取货方式 Delivery Method *</label>
         <select id="delivery">
           <option value="">请选择 / Please select</option>
@@ -710,6 +711,7 @@
         <div id="selfPickupAddress">
             <p><strong>自取地址：</strong></p>
             <p>667, Jalan 24,</p>
+   
             <p>Taman Perindustrian Ehsan Jaya, Kepong,</p>
             <p>52100, Kuala Lumpur.</p>
             <p><strong>取货时间：</strong> 另行通知</p>
@@ -721,7 +723,8 @@
       <h2 class="category-title">🛒 请选择商品</h2>
 
       <div id="productsList">
-        </div>
+  
+       </div>
 
       <div class="total">
         共计：RM<span id="totalAmount">0.00</span>
@@ -735,6 +738,7 @@
       <div class="bank-info">
         <h3>💳 转账信息 / Payment Info</h3>
         <p><strong>银行名称 / Bank:</strong> Maybank</p>
+        
         <p><strong>户口名 / Account Name:</strong> Choong Sher Lee</p>
         <p><strong>户口号码 / Account No.:</strong> 114209540438</p>
 
@@ -746,7 +750,8 @@
         <p style="margin-top:15px;font-size:14px;color:#666;">
           ⚠️ 请上传转账凭证 / Please upload payment proof
         </p>
-      </div>
+   
+       </div>
 
       <div class="form-group" id="paymentProofGroup">
         <label for="paymentProof">📎 请上传转账凭证 Upload Receipt *</label>
@@ -756,6 +761,7 @@
              />
           <label for="paymentProof" class="file-upload-label">
             <span id="fileUploadInitialText">点击或拖拽文件到此处</span>
+     
             <span class="file-name"></span>
             <small>支持图片(JPG, JPEG, PNG, GIF, BMP, WEBP, HEIC)或PDF文件</small>
           </label>
@@ -768,7 +774,8 @@
       </button>
     </form>
 
-    <div id="confirmationDialog">
+    <div 
+ id="confirmationDialog">
       <div id="confirmationContent"></div>
     </div>
 
@@ -787,11 +794,13 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', function () {
+ 
         // Supabase Configuration
         const SUPABASE_URL = 'https://edfnhhthztskuuosuasw.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampLyr-KgqVwXsKoAo';
         const WHATSAPP_NUMBER = '60162327792'; // Your WhatsApp number for orders
-        const ADMIN_PASSWORD = 'fengweipaiadmin'; // Admin password for export
+        const ADMIN_PASSWORD = 'fengweipaiadmin';
+        // Admin password for export
         // Updated SELF_PICKUP_ADDRESS for display
         const SELF_PICKUP_ADDRESS_DISPLAY = `667, Jalan 24,\nTaman Perindustrian Ehsan Jaya, Kepong,\n52100, Kuala Lumpur.`;
         // Use a single line for WhatsApp message if preferred for concatenation
@@ -800,32 +809,35 @@
 
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         // Centralized Product Data
         const productsData = [
           { name: '原味烤肠', price: 28, image: 'IMG_3859.jpeg', category: '烤肠系列', emoji: '🌭' },
           { name: '烟熏蜜汁烤肠', price: 28, image: 'IMG_3864.jpeg', category: '烤肠系列', emoji: '🌭' },
           { name: '法式香草烤肠', price: 28, image: 'IMG_3863.jpeg', category: '烤肠系列', emoji: '🌭' },
           { name: '黑胡椒烤肠', price: 28, image: 'IMG_3860.jpeg', category: '烤肠系列', emoji: '🌭' },
+  
           { name: '孜然脆骨烤肠', price: 28, image: 'IMG_3862.jpeg', category: '烤肠系列', emoji: '🌭' },
           { name: '芝士玉米烤肠', price: 28, image: 'IMG_3861.jpeg', category: '烤肠系列', emoji: '🌭' },
 
           { name: '原味虾肠', price: 33, image: 'IMG_3853.jpeg', category: '虾肠系列', emoji: '🦐' },
           { name: '辣味虾肠', price: 33, image: 'IMG_3854.jpeg', category: '虾肠系列', emoji: '🦐' },
-          { name: '原味虾饼', price: 28, image: 'IMG_3873.jpeg', category: '虾肠系列', emoji: '🍤' },
+          { name: '原味虾饼', price: 28, image: 'IMG_3873.jpeg', category: 
+'虾肠系列', emoji: '🍤' },
 
           { name: '玛格丽特披萨', price: 25, image: 'IMG_3841.jpeg', category: '披萨系列', emoji: '🍕' },
           { name: '黑椒牛肉披萨', price: 25, image: 'IMG_3839.jpeg', category: '披萨系列', emoji: '🍕' },
           { name: '奥尔良鸡肉披萨', price: 25, image: 'IMG_3840.jpeg', category: '披萨系列', emoji: '🍕' },
           { name: '双料榴莲披萨', price: 40, image: 'IMG_3852.jpeg', category: '披萨系列', emoji: '🍕' },
 
-          { name: '鲜肉小笼汤包', price: 12, image: 'IMG_3874.jpeg', category: '小笼汤包系列', emoji: '🥟' },
+          { name: '鲜肉小笼汤包', 
+ price: 12, image: 'IMG_3874.jpeg', category: '小笼汤包系列', emoji: '🥟' },
           { name: '菌菇小笼汤包', price: 12, image: 'IMG_3875.jpeg', category: '小笼汤包系列', emoji: '🥟' },
           { name: '黑松露小笼汤包', price: 12, image: 'IMG_3876.jpeg', category: '小笼汤包系列', emoji: '🥟' },
 
           { name: '黑猪肉酥饼', price: 55, image: 'IMG_3837.jpeg', category: '酥饼系列', emoji: '🥮' },
           { name: '安格斯牛肉酥饼', price: 55, image: 'IMG_3838.jpeg', category: '酥饼系列', emoji: '🥮' },
 
+        
           { name: '原味鸡排', price: 20, image: 'IMG_3835.jpeg', category: '鸡排系列', emoji: '🍗' },
           { name: '奥尔良鸡排', price: 20, image: 'IMG_3836.jpeg', category: '鸡排系列', emoji: '🍗' },
 
@@ -833,12 +845,12 @@
           { name: '青花椒鸡翅', price: 25, image: 'IMG_3866.jpeg', category: '鸡翅系列', emoji: '🍗' },
 
           { name: '黑猪三丁纸皮烧卖', price: 15, image: 'IMG_3843.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
+   
           { name: '黑椒牛肉纸皮烧卖', price: 15, image: 'IMG_3842.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
           { name: '黑猪梅菜干纸皮烧卖', price: 15, image: 'IMG_3844.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
           { name: '三丁芝士纸皮烧卖', price: 15, image: 'IMG_3845.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
           { name: '乌米腊味纸皮烧卖', price: 15, image: 'IMG_3846.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
         ];
-
         // Function to render products based on category
         function renderProducts() {
           const productsListDiv = document.getElementById('productsList');
@@ -846,32 +858,35 @@
 
           // Get unique categories and sort them for consistent display
           const uniqueCategories = [...new Set(productsData.map(p => p.category))];
-
           uniqueCategories.forEach(category => {
             const categoryEmoji = productsData.find(p => p.category === category)?.emoji || '✨';
             const categoryHtmlId = category.replace(/\s/g, ''); // Remove spaces for ID
             const categoryTitle = document.createElement('h3');
             categoryTitle.className = 'category-title';
             categoryTitle.id = categoryHtmlId;
-            categoryTitle.textContent = `${categoryEmoji} ${category}`;
+            categoryTitle.textContent 
+ = `${categoryEmoji} ${category}`;
             productsListDiv.appendChild(categoryTitle);
 
             // Filter products for the current category and append them
             productsData.filter(p => p.category === category).forEach(product => {
               const productDiv = document.createElement('div');
               productDiv.className = 'product';
+              
               productDiv.innerHTML = `
                 <div class="product-image-container">
                   <img src="${product.image}" class="product-image" alt="${product.name}">
                 </div>
                 <div class="product-name">${product.name}</div>
                 <div class="product-price">RM${product.price.toFixed(2)}</div>
+          
                 <div class="quantity-control">
                   <button type="button" class="quantity-btn minus">-</button>
                   <input type="number" class="quantity-input" data-name="${product.name}" data-price="${product.price}" value="0" min="0">
                   <button type="button" class="quantity-btn plus">+</button>
                 </div>
-              `;
+           
+               `;
               productsListDiv.appendChild(productDiv);
             });
           });
@@ -897,6 +912,7 @@
             const targetElement = document.getElementById('productsList');
             if (targetElement) {
               targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          
             }
             document.querySelectorAll('.category-link').forEach(link => link.classList.remove('active'));
             allLink.classList.add('active');
@@ -911,12 +927,14 @@
             const link = document.createElement('a');
             const categoryHtmlId = category.replace(/\s/g, ''); // Remove spaces for ID
             link.href = `#${categoryHtmlId}`;
+      
             link.className = 'category-link';
             link.textContent = `${categoryEmoji} ${category}`;
             link.addEventListener('click', (e) => {
               e.preventDefault();
               // Scroll to the category title instead of filtering
               const targetElement = document.getElementById(categoryHtmlId);
+         
               if (targetElement) {
                 targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }
@@ -948,16 +966,17 @@
           document.querySelectorAll('.quantity-btn').forEach(btn => {
             btn.onclick = function () { // Use onclick to easily overwrite for dynamic elements
               const input = this.parentElement.querySelector('.quantity-input');
-              let current = parseInt(input.value) || 0;
+              let current = parseInt(input.value) || 
+ 0;
               if (this.classList.contains('plus')) {
                 input.value = current + 1;
               } else if (this.classList.contains('minus')) {
                 input.value = Math.max(0, current - 1);
               }
-              calculateTotal();
+           
+               calculateTotal();
             };
           });
-
           document.querySelectorAll('.quantity-input').forEach(input => {
             input.oninput = () => { // Use oninput
               input.value = Math.max(0, parseInt(input.value) || 0);
@@ -968,7 +987,6 @@
 
         // Initial attachment of listeners (for products rendered at start)
         attachQuantityControlListeners();
-
         // --- Form Validation and Error Display ---
         function showError(elementId, message) {
             const group = document.getElementById(elementId);
@@ -1002,7 +1020,8 @@
             const selfPickupAddressDiv = document.getElementById('selfPickupAddress');
             if (document.getElementById('delivery').value === 'self-pickup') {
                 selfPickupAddressDiv.style.display = 'block';
-            } else {
+            } else 
+ {
                 selfPickupAddressDiv.style.display = 'none';
             }
         });
@@ -1058,7 +1077,8 @@
             // 5. Minimum items
             const total = calculateTotal();
             if (total <= 0) {
-                alert('请至少选择一项商品 / Please select at least one item'); // Still use alert for this general check
+                alert('请至少选择一项商品 / Please select at least one item');
+                // Still use alert for this general check
                 isValid = false;
             }
 
@@ -1091,22 +1111,22 @@
                 product: input.dataset.name,
                 quantity,
                 price: parseFloat(input.dataset.price),
-              });
+   
+               });
             }
           });
-
           // Generate order ID: FW + YYMMDD + NNN (day's sequence)
           const today = new Date();
           const year = today.getFullYear();
           const month = String(today.getMonth() + 1).padStart(2, '0');
           const day = String(today.getDate()).padStart(2, '0');
           const datePrefix = `${year}${month}${day}`;
-
           // Fetch count of orders for today to generate sequence number
           const { count, error: countError } = await supabase
             .from('orders')
             .select('order_id', { count: 'exact' })
-            .ilike('order_id', `FW${datePrefix}%`); // Filter orders for today's date prefix
+            .ilike('order_id', `FW${datePrefix}%`);
+            // Filter orders for today's date prefix
 
           if (countError) {
             console.error('Error fetching today\'s order count:', countError);
@@ -1118,6 +1138,7 @@
                 phone: document.getElementById('phone').value.trim().replace(/-/g, ''),
                 delivery: document.getElementById('delivery').value,
                 remarks: document.getElementById('remarks').value.trim(),
+   
                 items,
                 total: calculateTotal(),
             };
@@ -1134,7 +1155,8 @@
             remarks: document.getElementById('remarks').value.trim(),
             items,
             total: calculateTotal(),
-          };
+    
+           };
         }
 
         // Build WhatsApp message - use different emoji per product category
@@ -1145,19 +1167,18 @@
           msg += `📱 电话: ${order.phone}\n`;
           msg += `🚚 取货方式: ${order.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}\n`;
           if (order.delivery === 'self-pickup') {
-              msg += `📍 自取地址: ${SELF_PICKUP_ADDRESS_WHATSAPP}\n`; // Use single-line address for WhatsApp
+              msg += `📍 自取地址: ${SELF_PICKUP_ADDRESS_WHATSAPP}\n`;
+              // Use single-line address for WhatsApp
               msg += `⏰ 取货时间: 另行通知\n`;
               msg += `📞 联络号码: ${CONTACT_PHONE}\n`; // Add contact phone
           }
           msg += `\n🛒 *订单明细*\n`;
-
           order.items.forEach(item => {
             // Find the corresponding product in productsData to get the emoji
             const productInfo = productsData.find(p => p.name === item.product);
             const emoji = productInfo ? productInfo.emoji : '▫️'; // Default emoji if not found
             msg += `${emoji} ${item.product} × ${item.quantity} = RM${(item.quantity * item.price).toFixed(2)}\n`;
           });
-
           msg += `\n💰 *总金额: RM${order.total.toFixed(2)}*\n`;
           msg += `📝 *备注*: ${order.remarks || '无'}\n`;
           msg += `📅 *下单时间*: ${new Date().toLocaleString('zh-CN')}`;
@@ -1173,6 +1194,7 @@
 
           if (this.files.length > 0) {
             if (!fileNameDisplay) {
+         
               fileNameDisplay = document.createElement('span');
               fileNameDisplay.className = 'file-name';
               label.appendChild(fileNameDisplay);
@@ -1180,14 +1202,13 @@
             fileNameDisplay.textContent = this.files[0].name;
             initialTextSpan.style.display = 'none'; // Hide initial text
           } else {
-            initialTextSpan.style.display = 'block'; // Show initial text
+       
+             initialTextSpan.style.display = 'block'; // Show initial text
             if (fileNameDisplay) {
               label.removeChild(fileNameDisplay); // Remove file name display if no file
             }
           }
         });
-
-
         // Show confirmation dialog
         function showConfirmation(order) {
           const dialog = document.getElementById('confirmationDialog');
@@ -1199,10 +1220,13 @@
             <p><strong>订单号:</strong> ${order.orderId}</p>
             <p><strong>姓名:</strong> ${order.name}</p>
             <p><strong>电话:</strong> ${order.phone}</p>
-            <p><strong>配送方式:</strong> ${order.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}</p>
-            ${order.delivery === 'self-pickup' ? `<p><strong>自取地址：</strong> ${SELF_PICKUP_ADDRESS_DISPLAY.replace(/\n/g, '<br>')}</p>
+            <p><strong>配送方式:</strong> ${order.delivery === 'self-pickup' ?
+ '自取' : 'Lalamove送货'}</p>
+            ${order.delivery === 'self-pickup' ?
+ `<p><strong>自取地址：</strong> ${SELF_PICKUP_ADDRESS_DISPLAY.replace(/\n/g, '<br>')}</p>
             <p><strong>联络号码：</strong> ${CONTACT_PHONE}</p>` : ''}
-            <p><strong>备注:</strong> ${order.remarks || '无'}</p>
+            <p><strong>备注:</strong> ${order.remarks ||
+ '无'}</p>
             <hr/>
             <h4 style="margin-bottom:10px;">订单明细</h4>
             <ul>
@@ -1210,22 +1234,24 @@
             </ul>
             <p style="font-weight:bold;text-align:right;">总金额: RM${order.total.toFixed(2)}</p>
             
-            <div class="whatsapp-preview">
+   
+             <div class="whatsapp-preview">
               <strong>将发送到WhatsApp的内容:</strong>
               <p style="color:red; font-weight:bold;">请务必复制以下信息，并在跳转WhatsApp后点击发送！</p>
               <button id="copyWhatsappMsg" style="padding: 8px 15px; background: #25D366; color: white; border-radius: 5px; cursor: pointer; margin-bottom: 10px;">复制WhatsApp消息</button>
               <div id="whatsappMessageContent">${whatsappMsg.replace(/\n/g, '<br>').replace(/\*/g, '')}</div>
             </div>
-            
+   
+             
             <hr/>
             <div style="margin-top:20px;display:flex;justify-content:space-between;gap:10px;">
               <button id="cancelConfirm" style="flex:1;">取消</button>
               <button id="submitConfirm" style="flex:1;">确认并发送</button>
             </div>
           `;
-
           dialog.style.display = 'flex'; // Use flex to center
-          // document.body.style.overflow = 'hidden'; // Removed to allow background scroll
+          // document.body.style.overflow = 'hidden';
+          // Removed to allow background scroll
 
           document.getElementById('copyWhatsappMsg').onclick = () => {
             const tempTextArea = document.createElement('textarea');
@@ -1241,7 +1267,6 @@
             dialog.style.display = 'none';
             // document.body.style.overflow = 'auto'; // Removed
           };
-
           document.getElementById('submitConfirm').onclick = async () => {
             dialog.style.display = 'none';
             // document.body.style.overflow = 'auto'; // Removed
@@ -1260,23 +1285,22 @@
             <hr/>
             <button id="successConfirm">好的 (OK)</button>
           `;
-
           dialog.style.display = 'flex'; // Use flex to center
-          // document.body.style.overflow = 'hidden'; // Removed
+          // document.body.style.overflow = 'hidden';
+          // Removed
 
           let hasRedirected = false;
-
           const redirectToWhatsApp = () => {
             if (!hasRedirected) {
               hasRedirected = true;
               window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMsg)}`;
             }
           };
-
           document.getElementById('successConfirm').onclick = () => {
             dialog.style.display = 'none';
             // document.body.style.overflow = 'auto'; // Removed
-            redirectToWhatsApp(); // Redirect when user clicks OK
+            redirectToWhatsApp();
+            // Redirect when user clicks OK
           };
         }
 
@@ -1289,7 +1313,8 @@
             submitBtn.innerHTML = '<span class="loading">⏳ 提交中...</span>';
 
             const file = document.getElementById('paymentProof').files[0];
-            let paymentProofUrl = ''; // Changed variable name to match column
+            let paymentProofUrl = '';
+            // Changed variable name to match column
 
             if (file) {
               // Upload payment proof
@@ -1297,11 +1322,12 @@
               const filename = `proofs/${order.orderId}.${ext}`;
 
               const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('payment-proofs')
+                .from('order-proofs') // MODIFIED: Use the 'order-proofs' bucket
                 .upload(filename, file, {
                   cacheControl: '3600',
                   upsert: false
-                });
+               
+                 });
 
               if (uploadError) {
                 console.error('文件上传错误:', uploadError);
@@ -1310,9 +1336,8 @@
 
               // Get public URL
               const { data: urlData } = supabase.storage
-                .from('payment-proofs')
+                .from('order-proofs') // MODIFIED: Use the 'order-proofs' bucket
                 .getPublicUrl(filename);
-
               paymentProofUrl = urlData.publicUrl; // Assign to correct variable
               console.log('支付凭证URL:', paymentProofUrl);
             }
@@ -1323,12 +1348,14 @@
               name: order.name,
               phone: order.phone,
               delivery_method: order.delivery,
+    
               remarks: order.remarks,
               order_items: order.items,
               total_amount: order.total,
               payment_proof_url: paymentProofUrl, // Use correct variable
               status: 'pending', // Default status
               created_at: new Date().toISOString()
+      
             }]).select();
 
             if (insertError) {
@@ -1337,10 +1364,8 @@
             }
 
             console.log('订单创建成功:', insertData);
-
             // Show success message
             showSuccessMessage(whatsappMsg);
-
             // Reset form
             document.getElementById('orderForm').reset();
             document.querySelectorAll('.quantity-input').forEach(input => input.value = '0');
@@ -1348,13 +1373,15 @@
             const fileUploadLabel = document.querySelector('.file-upload-label');
             const fileNameSpan = fileUploadLabel.querySelector('.file-name');
             const initialTextSpan = document.getElementById('fileUploadInitialText');
-
             if (fileNameSpan) {
               fileUploadLabel.removeChild(fileNameSpan);
             }
-            initialTextSpan.style.display = 'block'; // Show original text
-            clearError('paymentProofGroup'); // Clear error for payment proof
-            document.getElementById('selfPickupAddress').style.display = 'none'; // Hide self-pickup address
+            initialTextSpan.style.display = 'block';
+            // Show original text
+            clearError('paymentProofGroup');
+            // Clear error for payment proof
+            document.getElementById('selfPickupAddress').style.display = 'none';
+            // Hide self-pickup address
           } catch (error) {
             console.error('提交订单错误:', error);
             alert(`提交失败: ${error.message || '未知错误'}\n请截图此错误并联系管理员。`);
@@ -1372,16 +1399,14 @@
             return;
           }
 
-          const order = await buildOrderData(); // Await order data including orderId generation
+          const order = await buildOrderData(); // Await order data 
           showConfirmation(order);
         });
-
         // Admin export function
         document.getElementById('showExportBtn').addEventListener('click', function () {
           const panel = document.getElementById('adminPanel');
           panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
         });
-
         document.getElementById('realExportBtn').addEventListener('click', async function () {
           const password = document.getElementById('adminPassword').value;
           if (password !== ADMIN_PASSWORD) { // Use constant for admin password
@@ -1390,7 +1415,7 @@
           }
 
           try {
-            // Get all orders
+            // Get 
             const { data: orders, error: ordersError } = await supabase
               .from('orders')
               .select('*')
@@ -1398,7 +1423,8 @@
 
             if (ordersError) {
               throw ordersError;
-            }
+   
+             }
 
             // Prepare Excel data
             const wb = XLSX.utils.book_new();
@@ -1406,22 +1432,27 @@
               ['订单号', '姓名', '电话', '配送方式', '备注', '总金额', '状态', '下单时间', '支付凭证URL', '产品明细']
             ];
 
-            orders.forEach(order => {
+           
+             orders.forEach(order => {
               // Ensure order_items is an array before mapping
               const productDetails = Array.isArray(order.order_items)
-                ? order.order_items.map(item => `${item.product} x ${item.quantity} (RM${item.price.toFixed(2)})`).join('; ')
-                : 'N/A'; // Handle cases where order_items might not be an array
+                ?
+ order.order_items.map(item => `${item.product} x ${item.quantity} (RM${item.price.toFixed(2)})`).join('; ')
+                : 'N/A';
+                // Handle cases where order_items might not be an array
 
               wsData.push([
                 order.order_id,
                 order.name,
                 order.phone,
                 order.delivery_method === 'self-pickup' ? '自取' : 'Lalamove送货',
-                order.remarks || '无',
+       
+                 order.remarks || '无',
                 `RM${order.total_amount.toFixed(2)}`,
                 order.status === 'pending' ? '待处理' : (order.status === 'completed' ? '已完成' : order.status), // More robust status display
                 order.payment_proof_url || '无', // Ensure payment_proof_url is included
                 productDetails
+ 
               ]);
             });
 
