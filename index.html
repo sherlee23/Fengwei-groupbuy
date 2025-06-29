@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>锋味派美食团购</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --primary: #d10000;
+      --secondary: #000000;
+      --accent: #f8b500;
+      --light: #f8f8f8;
+      --dark: #333333;
+      --bg-gradient: linear-gradient(135deg, #f9f9f9 0%, #eeeeee 100%);
+      --section-bg: rgba(255, 255, 255, 0.9);
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 0;
+      background: var(--bg-gradient); /* Use gradient background */
+      color: var(--dark);
+      line-height: 1.6;
+      /* background-image: url('IMG_3847.jpeg'); /* 已移除 */
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      background-blend-mode: overlay;
+    }
+
+    .header {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      border-radius: 0 0 20px 20px;
+      margin-bottom: 25px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      /* background: url('IMG_3848.jpeg') no-repeat center center; /* 已移除 */
+      background-size: contain;
+      opacity: 0.2;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+      position: relative;
+      letter-spacing: 1px;
+    }
+
+    .container {
+      padding: 25px;
+      background: var(--section-bg);
+      border-radius: 15px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      backdrop-filter: blur(5px);
+    }
+
+    /* 新增：分类导航栏 */
+    .category-nav {
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 100;
+      padding: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 15px;
+      border-radius: 10px;
+    }
+
+    .category-links {
+      display: flex;
+      overflow-x: auto;
+      gap: 10px;
+      padding-bottom: 5px;
+      scrollbar-width: none; /* For Firefox */
+    }
+
+    .category-links::-webkit-scrollbar {
+      display: none; /* For Chrome, Safari, and Opera */
+    }
+
+    .category-link {
+      white-space: nowrap;
+      padding: 5px 10px;
+      background: #f0f0f0;
+      border-radius: 20px;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .category-link.active,
+    .category-link:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .product {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--primary);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .product:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .product::after {
+      content: "锋味派";
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.1);
+      font-weight: bold;
+    }
+
+    .product-image-container {
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid #eee;
+    }
+
+    .product-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transition: transform 0.3s;
+    }
+
+    .product:hover .product-image {
+      transform: scale(1.05);
+    }
+
+    .product-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--dark);
+    }
+
+    .product-price {
+      color: var(--primary);
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quantity-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .quantity-btn:hover {
+      background: var(--secondary);
+      transform: scale(1.1);
+    }
+
+    .quantity-input {
+      width: 60px;
+      height: 40px;
+      text-align: center;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      position: relative; /* For error message positioning */
+    }
+
+    .disclaimer-box {
+      background: #fff9f9;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      border-left: 4px solid var(--primary);
+      box-shadow: var(--shadow);
+      position: relative; /* For error message positioning */
+    }
+
+    .disclaimer-box h3 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+
+    .disclaimer-checkbox {
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .disclaimer-checkbox input {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0; /* Prevent checkbox from shrinking */
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 17px;
+      color: var(--dark);
+    }
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="password"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      max-width: 100%;
+      padding: 13px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: all 0.3s;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(209, 0, 0, 0.2);
+    }
+
+    /* Error highlighting */
+    .form-group.error input,
+    .form-group.error select,
+    .form-group.error textarea,
+    .disclaimer-box.error .disclaimer-checkbox input {
+      border-color: red !important;
+      box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2) !important;
+    }
+
+    .form-group.error .file-upload-label {
+        border-color: red !important;
+        box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2) !important;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 13px;
+      margin-top: 5px;
+      display: none; /* Hidden by default */
+    }
+    .form-group.error .error-message,
+    .disclaimer-box.error .error-message {
+        display: block;
+    }
+
+    .file-upload {
+      position: relative;
+      display: block;
+    }
+
+    .file-upload input[type="file"] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .file-upload-label {
+      display: block;
+      padding: 15px;
+      background: var(--light);
+      border: 2px dashed #e0e0e0;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .file-upload-label:hover {
+      border-color: var(--primary);
+      background: #fff9f9;
+    }
+
+    .file-upload-label i {
+      display: block;
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+
+    .file-upload-label span.file-name {
+      display: block;
+      margin-top: 8px;
+      color: var(--primary);
+      font-weight: bold;
+      word-break: break-all;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 15px 25px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: var(--shadow);
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+      opacity: 0.9;
+    }
+
+    .btn-secondary {
+      background: var(--dark);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 18px;
+      margin-top: 25px;
+    }
+
+    .bank-info {
+      background: #fff9f9;
+      padding: 20px;
+      border-radius: 12px;
+      margin: 30px 0;
+      border-left: 4px solid var(--primary);
+      box-shadow: var(--shadow);
+    }
+
+    .bank-info h3 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+
+    .qr-code-container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .qr-code-container img {
+      width: 45%;
+      max-width: 200px;
+      border-radius: 10px;
+      border: 1px solid #eee;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s;
+    }
+
+    .qr-code-container img:hover {
+      transform: scale(1.05);
+    }
+
+    .category-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 35px 0 20px;
+      padding-bottom: 8px;
+      border-bottom: 3px solid var(--primary);
+      color: var(--dark);
+      position: relative;
+    }
+
+    .category-title::after {
+      content: "";
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 100px;
+      height: 3px;
+      background: var(--accent);
+    }
+
+    .total {
+      background: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      text-align: right;
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: var(--shadow);
+    }
+
+    .total span {
+      color: var(--primary);
+      font-size: 24px;
+    }
+
+    .loading {
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Modal dialog styles for confirmation and success popups */
+    #confirmationDialog, #successDialog {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      display: flex; /* Use flexbox for centering */
+      align-items: center; /* Center vertically */
+      justify-content: center; /* Center horizontally */
+      width: 100%;
+      height: 100%;
+      overflow-y: auto; /* Allow dialog to scroll if content is long */
+      backdrop-filter: blur(5px);
+      display: none; /* Hidden by default, JS will show */
+    }
+
+    #confirmationContent, #successContent {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh; /* Limit height to 90% of viewport height */
+      margin: 20px auto; /* Add margin to prevent sticking to edges on smaller screens */
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 0.3s ease;
+      overflow-y: auto; /* Allow content inside dialog to scroll */
+    }
+
+    #successContent {
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .whatsapp-preview {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+      text-align: left;
+    }
+
+    #confirmationContent h3,
+    #successContent h3 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+
+    #confirmationContent hr,
+    #successContent hr {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 15px 0;
+    }
+
+    #confirmationContent ul {
+      padding-left: 20px;
+      margin-top: 0;
+    }
+
+    #confirmationContent button,
+    #successContent button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    #cancelConfirm {
+      background: #ccc;
+      color: #333;
+    }
+
+    #submitConfirm,
+    #successConfirm {
+      background: var(--primary);
+      color: white;
+    }
+
+    #confirmationContent button:hover,
+    #successContent button:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .admin-section {
+      margin-top: 40px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .admin-section input[type="password"] {
+      margin-bottom: 15px;
+    }
+
+    /* Self-pickup address display */
+    #selfPickupAddress {
+        display: none; /* Hidden by default */
+        background: #f0f8ff;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        border-left: 4px solid #2196f3;
+        font-size: 15px;
+        line-height: 1.6; /* Adjusted line height for better spacing */
+    }
+    #selfPickupAddress p {
+        margin: 5px 0;
+        word-break: break-word; /* Allow long words to break */
+    }
+    /* Specific adjustment for mobile layout to ensure address lines */
+    @media (max-width: 600px) {
+        #selfPickupAddress p {
+            line-height: 1.5; /* Slightly tighter line height on mobile */
+        }
+    }
+
+
+    @media (max-width: 600px) {
+      .header h1 {
+        font-size: 24px;
+      }
+
+      .container {
+        padding: 15px;
+      }
+
+      .product {
+        padding: 15px;
+      }
+
+      .qr-code-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .qr-code-container img {
+        width: 80%;
+      }
+
+      /* Adjust modal for small screens */
+      #confirmationContent,
+      #successContent {
+        width: 95%;
+        padding: 20px;
+        margin: 10px auto; /* More compact margin */
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -60%); /* Original animation start point */
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%); /* Original animation end point */
+      }
+    }
+    /* Updated keyframes for new flexbox centering */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🍢 锋味派美食团购</h1>
+  </div>
+  <div class="container">
+
+    <div class="category-nav">
+      <div class="category-links" id="categoryLinks">
+        </div>
+    </div>
+
+    <form id="orderForm">
+      <div class="disclaimer-box" id="disclaimerBox">
+        <h3>⚠️ 重要声明 / Important Notice</h3>
+        <p>1. 此为预购商品，订单汇总后统一向供应商订购。</p>
+        <p>1. This is a pre-order. We will place the bulk order after collecting all purchases.</p>
+        <p>2. 预计等待时间：30-60天（从下单日起计算）。</p>
+        <p>2. Estimated waiting time: 30-60 days (from order date).</p>
+        <p>3. 当前价格<strong>不包含</strong>国际运费，运费将根据实际物流成本后续通知收取。</p>
+        <p>3. Current prices <strong>DO NOT INCLUDE</strong> international shipping fees. Fees will be calculated later.</p>
+
+        <div class="disclaimer-checkbox">
+          <input type="checkbox" id="agreeCheckbox" />
+          <label for="agreeCheckbox">我已阅读并同意上述条款 / I have read and agree to the terms</label>
+        </div>
+        <div class="error-message" id="agreeCheckboxError">请勾选此项以继续 / Please check this box to continue</div>
+      </div>
+
+      <div class="form-group" id="nameGroup">
+        <label for="name">👤 姓名 Name *</label>
+        <input type="text" id="name" />
+        <div class="error-message" id="nameError">请输入姓名 / Please enter your name</div>
+      </div>
+
+      <div class="form-group" id="phoneGroup">
+        <label for="phone">📱 电话 Phone *</label>
+        <input type="tel" id="phone" placeholder="e.g. 0123456789" />
+        <div class="error-message" id="phoneError">请输入有效的电话号码 / Please enter a valid phone number</div>
+      </div>
+
+      <div class="form-group" id="deliveryGroup">
+        <label for="delivery">🚚 取货方式 Delivery Method *</label>
+        <select id="delivery">
+          <option value="">请选择 / Please select</option>
+          <option value="self-pickup">自取 Self pickup</option>
+          <option value="lalamove">Lalamove 送货</option>
+        </select>
+        <div id="selfPickupAddress">
+            <p><strong>自取地址：</strong></p>
+            <p>667, Jalan 24,</p>
+            <p>Taman Perindustrian Ehsan Jaya, Kepong,</p>
+            <p>52100, Kuala Lumpur.</p>
+            <p><strong>取货时间：</strong> 另行通知</p>
+            <p><strong>联络号码：</strong> 0162327792</p>
+        </div>
+        <div class="error-message" id="deliveryError">请选择取货方式 / Please select a delivery method</div>
+      </div>
+
+      <h2 class="category-title">🛒 请选择商品</h2>
+
+      <div id="productsList">
+        </div>
+
+      <div class="total">
+        共计：RM<span id="totalAmount">0.00</span>
+      </div>
+
+      <div class="form-group">
+        <label for="remarks">📝 备注（如有）Remarks</label>
+        <textarea id="remarks" rows="3" placeholder="可填写特殊需求、配送说明等..."></textarea>
+      </div>
+
+      <div class="bank-info">
+        <h3>💳 转账信息 / Payment Info</h3>
+        <p><strong>银行名称 / Bank:</strong> Maybank</p>
+        <p><strong>户口名 / Account Name:</strong> Choong Sher Lee</p>
+        <p><strong>户口号码 / Account No.:</strong> 114209540438</p>
+
+        <div class="qr-code-container">
+          <img src="IMG_4043.jpeg" alt="Maybank QR Code">
+          <img src="IMG_4042.png" alt="WeChat Pay QR Code">
+        </div>
+
+        <p style="margin-top:15px;font-size:14px;color:#666;">
+          ⚠️ 请上传转账凭证 / Please upload payment proof
+        </p>
+      </div>
+
+      <div class="form-group" id="paymentProofGroup">
+        <label for="paymentProof">📎 请上传转账凭证 Upload Receipt *</label>
+        <div class="file-upload">
+          <input type="file" id="paymentProof"
+            accept="image/*,.pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp,.heic,.heif"
+             />
+          <label for="paymentProof" class="file-upload-label">
+            <span id="fileUploadInitialText">点击或拖拽文件到此处</span>
+            <span class="file-name"></span>
+            <small>支持图片(JPG, JPEG, PNG, GIF, BMP, WEBP, HEIC)或PDF文件</small>
+          </label>
+        </div>
+        <div class="error-message" id="paymentProofError">请上传支付凭证 / Please upload payment proof</div>
+      </div>
+
+      <button type="submit" class="submit-btn btn">
+        🚀 提交订单 Submit Order
+      </button>
+    </form>
+
+    <div id="confirmationDialog">
+      <div id="confirmationContent"></div>
+    </div>
+
+    <div id="successDialog">
+      <div id="successContent"></div>
+    </div>
+
+    <div class="admin-section">
+      <button class="btn btn-secondary" id="showExportBtn">📤 管理员导出订单 (需密码)</button>
+
+      <div id="adminPanel" style="display:none;">
+        <input type="password" id="adminPassword" placeholder="请输入管理员密码" />
+        <button class="btn btn-secondary" id="realExportBtn">📥 导出 Excel</button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://edfnhhthztskuuosuasw.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampLyr-KgqVwXsKoAo';
+        const WHATSAPP_NUMBER = '60162327792'; // Your WhatsApp number for orders
+        const ADMIN_PASSWORD = 'fengweipaiadmin'; // Admin password for export
+        // Updated SELF_PICKUP_ADDRESS for display
+        const SELF_PICKUP_ADDRESS_DISPLAY = `667, Jalan 24,\nTaman Perindustrian Ehsan Jaya, Kepong,\n52100, Kuala Lumpur.`;
+        // Use a single line for WhatsApp message if preferred for concatenation
+        const SELF_PICKUP_ADDRESS_WHATSAPP = `667, Jalan 24, Taman Perindustrian Ehsan Jaya, Kepong, 52100, Kuala Lumpur.`;
+        const CONTACT_PHONE = '0162327792'; // Your contact phone number for self-pickup
+
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Centralized Product Data
+        const productsData = [
+          { name: '原味烤肠', price: 28, image: 'IMG_3859.jpeg', category: '烤肠系列', emoji: '🌭' },
+          { name: '烟熏蜜汁烤肠', price: 28, image: 'IMG_3864.jpeg', category: '烤肠系列', emoji: '🌭' },
+          { name: '法式香草烤肠', price: 28, image: 'IMG_3863.jpeg', category: '烤肠系列', emoji: '🌭' },
+          { name: '黑胡椒烤肠', price: 28, image: 'IMG_3860.jpeg', category: '烤肠系列', emoji: '🌭' },
+          { name: '孜然脆骨烤肠', price: 28, image: 'IMG_3862.jpeg', category: '烤肠系列', emoji: '🌭' },
+          { name: '芝士玉米烤肠', price: 28, image: 'IMG_3861.jpeg', category: '烤肠系列', emoji: '🌭' },
+
+          { name: '原味虾肠', price: 33, image: 'IMG_3853.jpeg', category: '虾肠系列', emoji: '🦐' },
+          { name: '辣味虾肠', price: 33, image: 'IMG_3854.jpeg', category: '虾肠系列', emoji: '🦐' },
+          { name: '原味虾饼', price: 28, image: 'IMG_3873.jpeg', category: '虾肠系列', emoji: '🍤' },
+
+          { name: '玛格丽特披萨', price: 25, image: 'IMG_3841.jpeg', category: '披萨系列', emoji: '🍕' },
+          { name: '黑椒牛肉披萨', price: 25, image: 'IMG_3839.jpeg', category: '披萨系列', emoji: '🍕' },
+          { name: '奥尔良鸡肉披萨', price: 25, image: 'IMG_3840.jpeg', category: '披萨系列', emoji: '🍕' },
+          { name: '双料榴莲披萨', price: 40, image: 'IMG_3852.jpeg', category: '披萨系列', emoji: '🍕' },
+
+          { name: '鲜肉小笼汤包', price: 12, image: 'IMG_3874.jpeg', category: '小笼汤包系列', emoji: '🥟' },
+          { name: '菌菇小笼汤包', price: 12, image: 'IMG_3875.jpeg', category: '小笼汤包系列', emoji: '🥟' },
+          { name: '黑松露小笼汤包', price: 12, image: 'IMG_3876.jpeg', category: '小笼汤包系列', emoji: '🥟' },
+
+          { name: '黑猪肉酥饼', price: 55, image: 'IMG_3837.jpeg', category: '酥饼系列', emoji: '🥮' },
+          { name: '安格斯牛肉酥饼', price: 55, image: 'IMG_3838.jpeg', category: '酥饼系列', emoji: '🥮' },
+
+          { name: '原味鸡排', price: 20, image: 'IMG_3835.jpeg', category: '鸡排系列', emoji: '🍗' },
+          { name: '奥尔良鸡排', price: 20, image: 'IMG_3836.jpeg', category: '鸡排系列', emoji: '🍗' },
+
+          { name: '奥尔良鸡翅', price: 25, image: 'IMG_3865.jpeg', category: '鸡翅系列', emoji: '🍗' },
+          { name: '青花椒鸡翅', price: 25, image: 'IMG_3866.jpeg', category: '鸡翅系列', emoji: '🍗' },
+
+          { name: '黑猪三丁纸皮烧卖', price: 15, image: 'IMG_3843.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
+          { name: '黑椒牛肉纸皮烧卖', price: 15, image: 'IMG_3842.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
+          { name: '黑猪梅菜干纸皮烧卖', price: 15, image: 'IMG_3844.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
+          { name: '三丁芝士纸皮烧卖', price: 15, image: 'IMG_3845.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
+          { name: '乌米腊味纸皮烧卖', price: 15, image: 'IMG_3846.jpeg', category: '纸皮烧卖系列', emoji: '🥟' },
+        ];
+
+        // Function to render products based on category
+        function renderProducts() {
+          const productsListDiv = document.getElementById('productsList');
+          productsListDiv.innerHTML = ''; // Clear existing products
+
+          // Get unique categories and sort them for consistent display
+          const uniqueCategories = [...new Set(productsData.map(p => p.category))];
+
+          uniqueCategories.forEach(category => {
+            const categoryEmoji = productsData.find(p => p.category === category)?.emoji || '✨';
+            const categoryHtmlId = category.replace(/\s/g, ''); // Remove spaces for ID
+            const categoryTitle = document.createElement('h3');
+            categoryTitle.className = 'category-title';
+            categoryTitle.id = categoryHtmlId;
+            categoryTitle.textContent = `${categoryEmoji} ${category}`;
+            productsListDiv.appendChild(categoryTitle);
+
+            // Filter products for the current category and append them
+            productsData.filter(p => p.category === category).forEach(product => {
+              const productDiv = document.createElement('div');
+              productDiv.className = 'product';
+              productDiv.innerHTML = `
+                <div class="product-image-container">
+                  <img src="${product.image}" class="product-image" alt="${product.name}">
+                </div>
+                <div class="product-name">${product.name}</div>
+                <div class="product-price">RM${product.price.toFixed(2)}</div>
+                <div class="quantity-control">
+                  <button type="button" class="quantity-btn minus">-</button>
+                  <input type="number" class="quantity-input" data-name="${product.name}" data-price="${product.price}" value="0" min="0">
+                  <button type="button" class="quantity-btn plus">+</button>
+                </div>
+              `;
+              productsListDiv.appendChild(productDiv);
+            });
+          });
+
+          // Re-attach event listeners for newly rendered quantity controls
+          attachQuantityControlListeners();
+          calculateTotal(); // Recalculate total after rendering
+        }
+
+        // Function to render category navigation links
+        function renderCategoryNav() {
+          const categoryLinksDiv = document.getElementById('categoryLinks');
+          categoryLinksDiv.innerHTML = '';
+
+          // Add an "All" category link first
+          const allLink = document.createElement('a');
+          allLink.href = '#';
+          allLink.className = 'category-link active'; // Active by default
+          allLink.textContent = '全部商品';
+          allLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Scroll to the products list instead of filtering here if all products are always rendered
+            const targetElement = document.getElementById('productsList');
+            if (targetElement) {
+              targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            document.querySelectorAll('.category-link').forEach(link => link.classList.remove('active'));
+            allLink.classList.add('active');
+          });
+          categoryLinksDiv.appendChild(allLink);
+
+
+          const uniqueCategories = [...new Set(productsData.map(p => p.category))].sort(); // Sort categories alphabetically
+
+          uniqueCategories.forEach(category => {
+            const categoryEmoji = productsData.find(p => p.category === category)?.emoji || '✨';
+            const link = document.createElement('a');
+            const categoryHtmlId = category.replace(/\s/g, ''); // Remove spaces for ID
+            link.href = `#${categoryHtmlId}`;
+            link.className = 'category-link';
+            link.textContent = `${categoryEmoji} ${category}`;
+            link.addEventListener('click', (e) => {
+              e.preventDefault();
+              // Scroll to the category title instead of filtering
+              const targetElement = document.getElementById(categoryHtmlId);
+              if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+              document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+              link.classList.add('active');
+            });
+            categoryLinksDiv.appendChild(link);
+          });
+        }
+
+        // Initialize rendering
+        renderCategoryNav();
+        renderProducts(); // Render all products initially
+
+        // Calculate total amount
+        function calculateTotal() {
+          let total = 0;
+          document.querySelectorAll('.quantity-input').forEach(input => {
+            const quantity = parseInt(input.value) || 0;
+            const price = parseFloat(input.dataset.price);
+            total += quantity * price;
+          });
+          document.getElementById('totalAmount').textContent = total.toFixed(2);
+          return total;
+        }
+
+        // Attach quantity control listeners
+        function attachQuantityControlListeners() {
+          document.querySelectorAll('.quantity-btn').forEach(btn => {
+            btn.onclick = function () { // Use onclick to easily overwrite for dynamic elements
+              const input = this.parentElement.querySelector('.quantity-input');
+              let current = parseInt(input.value) || 0;
+              if (this.classList.contains('plus')) {
+                input.value = current + 1;
+              } else if (this.classList.contains('minus')) {
+                input.value = Math.max(0, current - 1);
+              }
+              calculateTotal();
+            };
+          });
+
+          document.querySelectorAll('.quantity-input').forEach(input => {
+            input.oninput = () => { // Use oninput
+              input.value = Math.max(0, parseInt(input.value) || 0);
+              calculateTotal();
+            };
+          });
+        }
+
+        // Initial attachment of listeners (for products rendered at start)
+        attachQuantityControlListeners();
+
+        // --- Form Validation and Error Display ---
+        function showError(elementId, message) {
+            const group = document.getElementById(elementId);
+            if (group) {
+                group.classList.add('error');
+                const errorMessage = group.querySelector('.error-message');
+                if (errorMessage) {
+                    errorMessage.textContent = message;
+                    errorMessage.style.display = 'block';
+                }
+            }
+        }
+
+        function clearError(elementId) {
+            const group = document.getElementById(elementId);
+            if (group) {
+                group.classList.remove('error');
+                const errorMessage = group.querySelector('.error-message');
+                if (errorMessage) {
+                    errorMessage.style.display = 'none';
+                }
+            }
+        }
+
+        // Clear errors on input/change
+        document.getElementById('name').addEventListener('input', () => clearError('nameGroup'));
+        document.getElementById('phone').addEventListener('input', () => clearError('phoneGroup'));
+        document.getElementById('delivery').addEventListener('change', () => {
+            clearError('deliveryGroup');
+            // Show/hide self-pickup address based on selection
+            const selfPickupAddressDiv = document.getElementById('selfPickupAddress');
+            if (document.getElementById('delivery').value === 'self-pickup') {
+                selfPickupAddressDiv.style.display = 'block';
+            } else {
+                selfPickupAddressDiv.style.display = 'none';
+            }
+        });
+        document.getElementById('paymentProof').addEventListener('change', () => clearError('paymentProofGroup'));
+        document.getElementById('agreeCheckbox').addEventListener('change', () => clearError('disclaimerBox'));
+
+
+        function validateForm() {
+            let isValid = true;
+            let firstErrorElement = null;
+
+            // 1. Disclaimer checkbox
+            const agreed = document.getElementById('agreeCheckbox').checked;
+            if (!agreed) {
+                showError('disclaimerBox', '请勾选此项以继续 / Please check this box to continue');
+                isValid = false;
+                if (!firstErrorElement) firstErrorElement = document.getElementById('disclaimerBox');
+            } else {
+                clearError('disclaimerBox');
+            }
+
+            // 2. Name
+            const name = document.getElementById('name').value.trim();
+            if (!name) {
+                showError('nameGroup', '请输入姓名 / Please enter your name');
+                isValid = false;
+                if (!firstErrorElement) firstErrorElement = document.getElementById('nameGroup');
+            } else {
+                clearError('nameGroup');
+            }
+
+            // 3. Phone
+            const phone = document.getElementById('phone').value.trim();
+            const phoneRegex = /^(\+?6?01)[0-46-9]-?[0-9]{7,8}$/; // Basic Malaysian phone number regex
+            if (!phoneRegex.test(phone.replace(/-/g, ''))) {
+                showError('phoneGroup', '请输入有效的马来西亚电话号码 (e.g., 012-3456789 or 60123456789)');
+                isValid = false;
+                if (!firstErrorElement) firstErrorElement = document.getElementById('phoneGroup');
+            } else {
+                clearError('phoneGroup');
+            }
+
+            // 4. Delivery method
+            const delivery = document.getElementById('delivery').value;
+            if (!delivery) {
+                showError('deliveryGroup', '请选择取货方式 / Please select delivery method');
+                isValid = false;
+                if (!firstErrorElement) firstErrorElement = document.getElementById('deliveryGroup');
+            } else {
+                clearError('deliveryGroup');
+            }
+
+            // 5. Minimum items
+            const total = calculateTotal();
+            if (total <= 0) {
+                alert('请至少选择一项商品 / Please select at least one item'); // Still use alert for this general check
+                isValid = false;
+            }
+
+            // 6. Payment proof - now check after total as it's a critical field
+            const proof = document.getElementById('paymentProof').files[0];
+            if (!proof) {
+                showError('paymentProofGroup', '请上传支付凭证 / Please upload payment proof');
+                isValid = false;
+                if (!firstErrorElement) firstErrorElement = document.getElementById('paymentProofGroup');
+            } else {
+                clearError('paymentProofGroup');
+            }
+
+
+            // Scroll to the first error if any
+            if (!isValid && firstErrorElement) {
+                firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            return isValid;
+        }
+
+        // Build order data
+        async function buildOrderData() {
+          const items = [];
+          document.querySelectorAll('.quantity-input').forEach(input => {
+            const quantity = parseInt(input.value);
+            if (quantity > 0) {
+              items.push({
+                product: input.dataset.name,
+                quantity,
+                price: parseFloat(input.dataset.price),
+              });
+            }
+          });
+
+          // Generate order ID: FW + YYMMDD + NNN (day's sequence)
+          const today = new Date();
+          const year = today.getFullYear();
+          const month = String(today.getMonth() + 1).padStart(2, '0');
+          const day = String(today.getDate()).padStart(2, '0');
+          const datePrefix = `${year}${month}${day}`;
+
+          // Fetch count of orders for today to generate sequence number
+          const { count, error: countError } = await supabase
+            .from('orders')
+            .select('order_id', { count: 'exact' })
+            .ilike('order_id', `FW${datePrefix}%`); // Filter orders for today's date prefix
+
+          if (countError) {
+            console.error('Error fetching today\'s order count:', countError);
+            // Fallback to timestamp if fetching count fails
+            console.warn('Falling back to timestamp-based order ID.');
+            return {
+                orderId: `FW${Date.now().toString().slice(-10)}`, // Using slice(-10) for a slightly longer, more unique timestamp
+                name: document.getElementById('name').value.trim(),
+                phone: document.getElementById('phone').value.trim().replace(/-/g, ''),
+                delivery: document.getElementById('delivery').value,
+                remarks: document.getElementById('remarks').value.trim(),
+                items,
+                total: calculateTotal(),
+            };
+          }
+
+          const sequence = String(count + 1).padStart(3, '0');
+          const orderId = `FW${datePrefix}${sequence}`;
+
+          return {
+            orderId: orderId,
+            name: document.getElementById('name').value.trim(),
+            phone: document.getElementById('phone').value.trim().replace(/-/g, ''),
+            delivery: document.getElementById('delivery').value,
+            remarks: document.getElementById('remarks').value.trim(),
+            items,
+            total: calculateTotal(),
+          };
+        }
+
+        // Build WhatsApp message - use different emoji per product category
+        function buildWhatsAppMessage(order) {
+          let msg = `🛎️ *锋味派新订单 #${order.orderId}*\n\n`;
+          msg += `👤 *客户信息*\n`;
+          msg += `📛 姓名: ${order.name}\n`;
+          msg += `📱 电话: ${order.phone}\n`;
+          msg += `🚚 取货方式: ${order.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}\n`;
+          if (order.delivery === 'self-pickup') {
+              msg += `📍 自取地址: ${SELF_PICKUP_ADDRESS_WHATSAPP}\n`; // Use single-line address for WhatsApp
+              msg += `⏰ 取货时间: 另行通知\n`;
+              msg += `📞 联络号码: ${CONTACT_PHONE}\n`; // Add contact phone
+          }
+          msg += `\n🛒 *订单明细*\n`;
+
+          order.items.forEach(item => {
+            // Find the corresponding product in productsData to get the emoji
+            const productInfo = productsData.find(p => p.name === item.product);
+            const emoji = productInfo ? productInfo.emoji : '▫️'; // Default emoji if not found
+            msg += `${emoji} ${item.product} × ${item.quantity} = RM${(item.quantity * item.price).toFixed(2)}\n`;
+          });
+
+          msg += `\n💰 *总金额: RM${order.total.toFixed(2)}*\n`;
+          msg += `📝 *备注*: ${order.remarks || '无'}\n`;
+          msg += `📅 *下单时间*: ${new Date().toLocaleString('zh-CN')}`;
+
+          return msg;
+        }
+
+        // File upload display file name
+        document.getElementById('paymentProof').addEventListener('change', function (e) {
+          const label = document.querySelector('.file-upload-label');
+          const initialTextSpan = document.getElementById('fileUploadInitialText');
+          let fileNameDisplay = label.querySelector('.file-name');
+
+          if (this.files.length > 0) {
+            if (!fileNameDisplay) {
+              fileNameDisplay = document.createElement('span');
+              fileNameDisplay.className = 'file-name';
+              label.appendChild(fileNameDisplay);
+            }
+            fileNameDisplay.textContent = this.files[0].name;
+            initialTextSpan.style.display = 'none'; // Hide initial text
+          } else {
+            initialTextSpan.style.display = 'block'; // Show initial text
+            if (fileNameDisplay) {
+              label.removeChild(fileNameDisplay); // Remove file name display if no file
+            }
+          }
+        });
+
+
+        // Show confirmation dialog
+        function showConfirmation(order) {
+          const dialog = document.getElementById('confirmationDialog');
+          const content = document.getElementById('confirmationContent');
+          const whatsappMsg = buildWhatsAppMessage(order);
+
+          content.innerHTML = `
+            <h3 style="margin-top:0;color:var(--primary);">订单确认</h3>
+            <p><strong>订单号:</strong> ${order.orderId}</p>
+            <p><strong>姓名:</strong> ${order.name}</p>
+            <p><strong>电话:</strong> ${order.phone}</p>
+            <p><strong>配送方式:</strong> ${order.delivery === 'self-pickup' ? '自取' : 'Lalamove送货'}</p>
+            ${order.delivery === 'self-pickup' ? `<p><strong>自取地址：</strong> ${SELF_PICKUP_ADDRESS_DISPLAY.replace(/\n/g, '<br>')}</p>
+            <p><strong>联络号码：</strong> ${CONTACT_PHONE}</p>` : ''}
+            <p><strong>备注:</strong> ${order.remarks || '无'}</p>
+            <hr/>
+            <h4 style="margin-bottom:10px;">订单明细</h4>
+            <ul>
+              ${order.items.map(i => `<li>${i.product} × ${i.quantity} = RM${(i.quantity * i.price).toFixed(2)}</li>`).join('')}
+            </ul>
+            <p style="font-weight:bold;text-align:right;">总金额: RM${order.total.toFixed(2)}</p>
+            
+            <div class="whatsapp-preview">
+              <strong>将发送到WhatsApp的内容:</strong>
+              <p style="color:red; font-weight:bold;">请务必复制以下信息，并在跳转WhatsApp后点击发送！</p>
+              <button id="copyWhatsappMsg" style="padding: 8px 15px; background: #25D366; color: white; border-radius: 5px; cursor: pointer; margin-bottom: 10px;">复制WhatsApp消息</button>
+              <div id="whatsappMessageContent">${whatsappMsg.replace(/\n/g, '<br>').replace(/\*/g, '')}</div>
+            </div>
+            
+            <hr/>
+            <div style="margin-top:20px;display:flex;justify-content:space-between;gap:10px;">
+              <button id="cancelConfirm" style="flex:1;">取消</button>
+              <button id="submitConfirm" style="flex:1;">确认并发送</button>
+            </div>
+          `;
+
+          dialog.style.display = 'flex'; // Use flex to center
+          // document.body.style.overflow = 'hidden'; // Removed to allow background scroll
+
+          document.getElementById('copyWhatsappMsg').onclick = () => {
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = whatsappMsg;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+            alert('WhatsApp消息已复制到剪贴板！');
+          };
+
+          document.getElementById('cancelConfirm').onclick = () => {
+            dialog.style.display = 'none';
+            // document.body.style.overflow = 'auto'; // Removed
+          };
+
+          document.getElementById('submitConfirm').onclick = async () => {
+            dialog.style.display = 'none';
+            // document.body.style.overflow = 'auto'; // Removed
+            await submitOrder(order, whatsappMsg);
+          };
+        }
+
+        // Show success message
+        function showSuccessMessage(whatsappMsg) {
+          const dialog = document.getElementById('successDialog');
+          const content = document.getElementById('successContent');
+
+          content.innerHTML = `
+            <h3 style="margin-top:0;color:var(--primary);">订单提交成功</h3>
+            <p>订单已成功保存，请点击“好的”跳转到WhatsApp发送订单信息。</p>
+            <hr/>
+            <button id="successConfirm">好的 (OK)</button>
+          `;
+
+          dialog.style.display = 'flex'; // Use flex to center
+          // document.body.style.overflow = 'hidden'; // Removed
+
+          let hasRedirected = false;
+
+          const redirectToWhatsApp = () => {
+            if (!hasRedirected) {
+              hasRedirected = true;
+              window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMsg)}`;
+            }
+          };
+
+          document.getElementById('successConfirm').onclick = () => {
+            dialog.style.display = 'none';
+            // document.body.style.overflow = 'auto'; // Removed
+            redirectToWhatsApp(); // Redirect when user clicks OK
+          };
+        }
+
+        // Submit order to Supabase
+        async function submitOrder(order, whatsappMsg) {
+          const submitBtn = document.querySelector('.submit-btn');
+          try {
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading">⏳ 提交中...</span>';
+
+            const file = document.getElementById('paymentProof').files[0];
+            let paymentProofUrl = ''; // Changed variable name to match column
+
+            if (file) {
+              // Upload payment proof
+              const ext = file.name.split('.').pop();
+              const filename = `proofs/${order.orderId}.${ext}`;
+
+              const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('payment-proofs')
+                .upload(filename, file, {
+                  cacheControl: '3600',
+                  upsert: false
+                });
+
+              if (uploadError) {
+                console.error('文件上传错误:', uploadError);
+                throw new Error('文件上传失败。请重试或联系管理员。');
+              }
+
+              // Get public URL
+              const { data: urlData } = supabase.storage
+                .from('payment-proofs')
+                .getPublicUrl(filename);
+
+              paymentProofUrl = urlData.publicUrl; // Assign to correct variable
+              console.log('支付凭证URL:', paymentProofUrl);
+            }
+
+            // Insert order data
+            const { data: insertData, error: insertError } = await supabase.from('orders').insert([{
+              order_id: order.orderId,
+              name: order.name,
+              phone: order.phone,
+              delivery_method: order.delivery,
+              remarks: order.remarks,
+              order_items: order.items,
+              total_amount: order.total,
+              payment_proof_url: paymentProofUrl, // Use correct variable
+              status: 'pending', // Default status
+              created_at: new Date().toISOString()
+            }]).select();
+
+            if (insertError) {
+              console.error('数据库插入错误:', insertError);
+              throw new Error('订单数据保存失败。请重试或联系管理员。');
+            }
+
+            console.log('订单创建成功:', insertData);
+
+            // Show success message
+            showSuccessMessage(whatsappMsg);
+
+            // Reset form
+            document.getElementById('orderForm').reset();
+            document.querySelectorAll('.quantity-input').forEach(input => input.value = '0');
+            document.getElementById('totalAmount').textContent = '0.00';
+            const fileUploadLabel = document.querySelector('.file-upload-label');
+            const fileNameSpan = fileUploadLabel.querySelector('.file-name');
+            const initialTextSpan = document.getElementById('fileUploadInitialText');
+
+            if (fileNameSpan) {
+              fileUploadLabel.removeChild(fileNameSpan);
+            }
+            initialTextSpan.style.display = 'block'; // Show original text
+            clearError('paymentProofGroup'); // Clear error for payment proof
+            document.getElementById('selfPickupAddress').style.display = 'none'; // Hide self-pickup address
+          } catch (error) {
+            console.error('提交订单错误:', error);
+            alert(`提交失败: ${error.message || '未知错误'}\n请截图此错误并联系管理员。`);
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '🚀 提交订单 Submit Order';
+          }
+        }
+
+        // Form submission event
+        document.getElementById('orderForm').addEventListener('submit', async function (e) {
+          e.preventDefault();
+
+          if (!validateForm()) {
+            return;
+          }
+
+          const order = await buildOrderData(); // Await order data including orderId generation
+          showConfirmation(order);
+        });
+
+        // Admin export function
+        document.getElementById('showExportBtn').addEventListener('click', function () {
+          const panel = document.getElementById('adminPanel');
+          panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        });
+
+        document.getElementById('realExportBtn').addEventListener('click', async function () {
+          const password = document.getElementById('adminPassword').value;
+          if (password !== ADMIN_PASSWORD) { // Use constant for admin password
+            alert('管理员密码错误 / Incorrect admin password');
+            return;
+          }
+
+          try {
+            // Get all orders
+            const { data: orders, error: ordersError } = await supabase
+              .from('orders')
+              .select('*')
+              .order('created_at', { ascending: false });
+
+            if (ordersError) {
+              throw ordersError;
+            }
+
+            // Prepare Excel data
+            const wb = XLSX.utils.book_new();
+            const wsData = [
+              ['订单号', '姓名', '电话', '配送方式', '备注', '总金额', '状态', '下单时间', '支付凭证URL', '产品明细']
+            ];
+
+            orders.forEach(order => {
+              // Ensure order_items is an array before mapping
+              const productDetails = Array.isArray(order.order_items)
+                ? order.order_items.map(item => `${item.product} x ${item.quantity} (RM${item.price.toFixed(2)})`).join('; ')
+                : 'N/A'; // Handle cases where order_items might not be an array
+
+              wsData.push([
+                order.order_id,
+                order.name,
+                order.phone,
+                order.delivery_method === 'self-pickup' ? '自取' : 'Lalamove送货',
+                order.remarks || '无',
+                `RM${order.total_amount.toFixed(2)}`,
+                order.status === 'pending' ? '待处理' : (order.status === 'completed' ? '已完成' : order.status), // More robust status display
+                order.payment_proof_url || '无', // Ensure payment_proof_url is included
+                productDetails
+              ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            XLSX.utils.book_append_sheet(wb, ws, '订单数据');
+            XLSX.writeFile(wb, `锋味派订单_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+            alert('导出成功 / Export successful');
+          } catch (error) {
+            console.error('导出错误:', error);
+            alert(`导出订单时出错: ${error.message || '未知错误'}`);
+          }
+        });
+      });
+    </script>
+</body>
+</html>
