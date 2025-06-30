@@ -1,5 +1,3 @@
-Gemini pro amended anon
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -1170,15 +1168,23 @@ Gemini pro amended anon
 
             if (file) {
               const ext = file.name.split('.').pop();
-              const filename = `proofs/${order.orderId}.${ext}`;
-              const { data, error } = await supabase.storage
-                .from('order-proofs')
-                .upload(filename, file, { cacheControl: '3600', upsert: true });
+const filename = `proofs/${order.orderId}.${ext}`;  // 确保路径以proofs/开头
+
+const { data, error } = await supabase.storage
+  .from('order-proofs')
+  .upload(filename, file, { 
+    cacheControl: '3600', 
+    upsert: true 
+  });
 
               if (error) {
-                console.error('文件上传错误:', error);
-                throw new Error('文件上传失败。请重试或联系管理员。');
-              }
+  console.error('文件上传错误详情:', {
+    status: error.status,
+    message: error.message,
+    details: error.error_description
+  });
+  throw new Error(`文件上传失败 (${error.status}): ${error.message}`);
+}
               paymentProofUrl = supabase.storage.from('order-proofs').getPublicUrl(filename).data.publicUrl;
             }
 
