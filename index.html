@@ -1,3 +1,5 @@
+Gemini pro amended anon
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -778,7 +780,10 @@
         const SELF_PICKUP_ADDRESS_WHATSAPP = `667, Jalan 24, Taman Perindustrian Ehsan Jaya, Kepong, 52100, Kuala Lumpur.`;
         const CONTACT_PHONE = '0162327792';
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabase = createClient(
+  'https://edfnhhthztskuuosuasw.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampvLYJr-KgqVwXsKoAo'
+);
 
         const productsData = [
           { name: '原味烤肠', price: 28, image: 'IMG_3859.jpeg', category: '烤肠系列', emoji: '🌭' },
