@@ -1168,7 +1168,7 @@
               const filename = `proofs/${order.orderId}.${ext}`;
               const { data, error } = await supabase.storage
                 .from('order-proofs')
-                .upload(filename, file, { cacheControl: '3600', upsert: false });
+                .upload(filename, file, { cacheControl: '3600', upsert: true });
 
               if (error) {
                 console.error('文件上传错误:', error);
