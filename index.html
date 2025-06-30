@@ -1155,91 +1155,59 @@
         }
 
         async function submitOrder(order, whatsappMsg) {
-  const submitBtn = document.querySelector('.submit-btn');
-  try {
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="loading">⏳ 提交中...</span>';
+          const submitBtn = document.querySelector('.submit-btn');
+          try {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading">⏳ 提交中...</span>';
 
-    const file = document.getElementById('paymentProof').files[0];
-    let paymentProofUrl = '';
+            const file = document.getElementById('paymentProof').files[0];
+            let paymentProofUrl = '';
 
-    if (file) {
-      // 关键修改1：更安全的文件名生成
-      const ext = file.name.split('.').pop().toLowerCase();
-      const filename = `proofs/${order.orderId}_${Date.now()}.${ext}`;
-      
-      console.log("准备上传文件：", {
-        name: filename,
-        size: (file.size / 1024).toFixed(2) + "KB",
-        type: file.type
-      });
+            if (file) {
+              const ext = file.name.split('.').pop();
+              const filename = `proofs/${order.orderId}.${ext}`;
+              const { data, error } = await supabase.storage
+                .from('order-proofs')
+                .upload(filename, file, { cacheControl: '3600', upsert: false });
 
-      // 关键修改2：明确Content-Type和错误处理
-      const { data, error } = await supabase.storage
-        .from('order-proofs')
-        .upload(filename, file, {
-          cacheControl: '3600',
-          upsert: false,
-          contentType: file.type || 'image/jpeg' // 默认类型
-        });
+              if (error) {
+                console.error('文件上传错误:', error);
+                throw new Error('文件上传失败。请重试或联系管理员。');
+              }
+              paymentProofUrl = supabase.storage.from('order-proofs').getPublicUrl(filename).data.publicUrl;
+            }
 
-      if (error) {
-        console.error('上传失败详情：', {
-          code: error.code,
-          message: error.message,
-          details: error
-        });
-        throw new Error(`文件上传失败：${error.message}`);
-      }
+            const { error: insertError } = await supabase.from('orders').insert([{
+              order_id: order.orderId,
+              name: order.name,
+              phone: order.phone,
+              delivery_method: order.delivery,
+              remarks: order.remarks,
+              order_items: order.items,
+              total_amount: order.total,
+              payment_proof_url: paymentProofUrl,
+              status: 'pending',
+              created_at: new Date().toISOString()
+            }]);
 
-      // 关键修改3：获取公开URL的新方法
-      const { data: { publicUrl } } = supabase.storage
-        .from('order-proofs')
-        .getPublicUrl(filename);
-      paymentProofUrl = publicUrl;
-    }
+            if (insertError) {
+              console.error('数据库插入错误:', insertError);
+              throw new Error('订单数据保存失败。请重试或联系管理员。');
+            }
 
-    // 订单数据提交（保持不变）
-    const { error: insertError } = await supabase.from('orders').insert([{
-      order_id: order.orderId,
-      name: order.name,
-      phone: order.phone,
-      delivery_method: order.delivery,
-      remarks: order.remarks,
-      order_items: order.items,
-      total_amount: order.total,
-      payment_proof_url: paymentProofUrl,
-      status: 'pending',
-      created_at: new Date().toISOString()
-    }]);
-
-    if (insertError) throw insertError;
-
-    // 成功处理（保持不变）
-    showSuccessMessage(whatsappMsg);
-    resetForm();
-
-  } catch (error) {
-    console.error('完整错误日志：', error);
-    alert(`提交失败：${error.message}\n请截图此界面并联系管理员`);
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '🚀 提交订单 Submit Order';
-  }
-}
-
-// 新增：表单重置函数
-function resetForm() {
-  document.getElementById('orderForm').reset();
-  document.querySelectorAll('.quantity-input').forEach(input => input.value = '0');
-  calculateTotal();
-  
-  const fileLabel = document.querySelector('.file-upload-label');
-  const fileNameSpan = fileLabel.querySelector('.file-name');
-  if (fileNameSpan) fileLabel.removeChild(fileNameSpan);
-  
-  document.getElementById('fileUploadInitialText').style.display = 'block';
-  document.getElementById('selfPickupAddress').style.display = 'none';
+            showSuccessMessage(whatsappMsg);
+            document.getElementById('orderForm').reset();
+            document.querySelectorAll('.quantity-input').forEach(input => input.value = '0');
+            calculateTotal();
+            const fileUploadLabel = document.querySelector('.file-upload-label');
+            const fileNameSpan = fileUploadLabel.querySelector('.file-name');
+            const initialTextSpan = document.getElementById('fileUploadInitialText');
+            if (fileNameSpan) {
+              fileUploadLabel.removeChild(fileNameSpan);
+            }
+            initialTextSpan.style.display = 'block';
+            clearError('paymentProofGroup');
+            document.getElementById('selfPickupAddress').style.display = 'none';
           } catch (error) {
             console.error('提交订单错误:', error);
             alert(`提交失败: ${error.message || '未知错误'}\n请截图此错误并联系管理员。`);
