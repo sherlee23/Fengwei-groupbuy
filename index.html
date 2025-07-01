@@ -770,16 +770,20 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-        const SUPABASE_URL = 'https://edfnhhthztskuuosuasw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampvLYJr-KgqVwXsKoAo';
-        const WHATSAPP_NUMBER = '60162327792';
-        const ADMIN_PASSWORD = 'fengweipaiadmin';
-        const SELF_PICKUP_ADDRESS_DISPLAY = `667, Jalan 24,\nTaman Perindustrian Ehsan Jaya, Kepong,\n52100, Kuala Lumpur.`;
-        const SELF_PICKUP_ADDRESS_WHATSAPP = `667, Jalan 24, Taman Perindustrian Ehsan Jaya, Kepong, 52100, Kuala Lumpur.`;
-        const CONTACT_PHONE = '0162327792';
+      // Supabase配置 - 修正后的初始化代码
+      const SUPABASE_URL = 'https://edfnhhthztskuuosuasw.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampvLYJr-KgqVwXsKoAo';
+      
+      // 正确的Supabase初始化方式
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampvLYJr-KgqVwXsKoAo'
+      // 其他常量定义保持不变
+      const WHATSAPP_NUMBER = '60162327792';
+      const ADMIN_PASSWORD = 'fengweipaiadmin';
+      const SELF_PICKUP_ADDRESS_DISPLAY = `667, Jalan 24,\nTaman Perindustrian Ehsan Jaya, Kepong,\n52100, Kuala Lumpur.`;
+      const SELF_PICKUP_ADDRESS_WHATSAPP = `667, Jalan 24, Taman Perindustrian Ehsan Jaya, Kepong, 52100, Kuala Lumpur.`;
+      const CONTACT_PHONE = '0162327792';
+
 );
 
         const productsData = [
@@ -1156,74 +1160,102 @@
           };
         }
 
-        async function submitOrder(order, whatsappMsg) {
-          const submitBtn = document.querySelector('.submit-btn');
-          try {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="loading">⏳ 提交中...</span>';
+ async function submitOrder(order, whatsappMsg) {
+        const submitBtn = document.querySelector('.submit-btn');
+        try {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span class="loading">⏳ 提交中...</span>';
 
-            const file = document.getElementById('paymentProof').files[0];
-            let paymentProofUrl = '';
+          const file = document.getElementById('paymentProof').files[0];
+          let paymentProofUrl = '';
 
-            if (file) {
-              const ext = file.name.split('.').pop();
-const filename = `proofs/${order.orderId}.${ext}`;  // 确保路径以proofs/开头
+          if (file) {
+            const ext = file.name.split('.').pop();
+            const filename = `proofs/${order.orderId}.${ext}`;
+            
+            console.log('准备上传文件到:', filename); // 调试日志
+            
+            // 修正后的上传代码
+            const { data, error } = await supabase.storage
+              .from('order-proofs')
+              .upload(filename, file, {
+                cacheControl: '3600',
+                upsert: true,
+                contentType: file.type
+              });
 
-const { data, error } = await supabase.storage
-  .from('order-proofs')
-  .upload(filename, file, { 
-    cacheControl: '3600', 
-    upsert: true 
-  });
-
-              if (error) {
-  console.error('文件上传错误详情:', {
-    status: error.status,
-    message: error.message,
-    details: error.error_description
-  });
-  throw new Error(`文件上传失败 (${error.status}): ${error.message}`);
-}
-              paymentProofUrl = supabase.storage.from('order-proofs').getPublicUrl(filename).data.publicUrl;
+            if (error) {
+              console.error('文件上传错误详情:', {
+                status: error.status,
+                message: error.message,
+                details: error.error_description
+              });
+              throw new Error(`文件上传失败 (${error.status}): ${error.message}`);
             }
+            
+            console.log('文件上传成功:', data);
+            const { data: urlData } = supabase.storage
+              .from('order-proofs')
+              .getPublicUrl(filename);
+            paymentProofUrl = urlData.publicUrl;
+          }
 
-            const { error: insertError } = await supabase.from('orders').insert([{
-              order_id: order.orderId,
-              name: order.name,
-              phone: order.phone,
-              delivery_method: order.delivery,
-              remarks: order.remarks,
-              order_items: order.items,
-              total_amount: order.total,
-              payment_proof_url: paymentProofUrl,
-              status: 'pending',
-              created_at: new Date().toISOString()
-            }]);
+          // 数据库插入保持不变
+          const { error: insertError } = await supabase.from('orders').insert([{
+            order_id: order.orderId,
+            name: order.name,
+            phone: order.phone,
+            delivery_method: order.delivery,
+            remarks: order.remarks,
+            order_items: order.items,
+            total_amount: order.total,
+            payment_proof_url: paymentProofUrl,
+            status: 'pending',
+            created_at: new Date().toISOString()
+          }]);
 
-            if (insertError) {
-              console.error('数据库插入错误:', insertError);
-              throw new Error('订单数据保存失败。请重试或联系管理员。');
-            }
+          if (insertError) {
+            console.error('数据库插入错误:', insertError);
+            throw new Error('订单数据保存失败。请重试或联系管理员。');
+          }
 
-            showSuccessMessage(whatsappMsg);
-            document.getElementById('orderForm').reset();
-            document.querySelectorAll('.quantity-input').forEach(input => input.value = '0');
-            calculateTotal();
-            const fileUploadLabel = document.querySelector('.file-upload-label');
-            const fileNameSpan = fileUploadLabel.querySelector('.file-name');
-            const initialTextSpan = document.getElementById('fileUploadInitialText');
-            if (fileNameSpan) {
-              fileUploadLabel.removeChild(fileNameSpan);
-            }
-            initialTextSpan.style.display = 'block';
-            clearError('paymentProofGroup');
-            document.getElementById('selfPickupAddress').style.display = 'none';
-          } catch (error) {
-            console.error('提交订单错误:', error);
-            alert(`提交失败: ${error.message || '未知错误'}\n请截图此错误并联系管理员。`);
-          } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '🚀 提交订单 Submit Order';
+          showSuccessMessage(whatsappMsg);
+          // 重置表单代码保持不变
+          document.getElementById('orderForm').reset();
+          document.querySelectorAll('.quantity-input').forEach(input => input.value = '0');
+          calculateTotal();
+          const fileUploadLabel = document.querySelector('.file-upload-label');
+          const fileNameSpan = fileUploadLabel.querySelector('.file-name');
+          const initialTextSpan = document.getElementById('fileUploadInitialText');
+          if (fileNameSpan) {
+            fileUploadLabel.removeChild(fileNameSpan);
+          }
+          initialTextSpan.style.display = 'block';
+          clearError('paymentProofGroup');
+          document.getElementById('selfPickupAddress').style.display = 'none';
+        } catch (error) {
+          console.error('提交订单完整错误:', {
+            error: error,
+            order: order,
+            file: file ? {
+              name: file.name,
+              size: file.size,
+              type: file.type
+            } : null
+          });
+          
+          let errorMsg = `提交失败: ${error.message || '未知错误'}`;
+          if (error.status === 403) {
+            errorMsg += "\n\n权限被拒绝，可能是存储策略配置问题";
+          } else if (error.status === 413) {
+            errorMsg += "\n\n文件太大，请压缩后重试";
+          }
+          
+          errorMsg += "\n请截图此错误并联系管理员。";
+          alert(errorMsg);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '🚀 提交订单 Submit Order';
           }
         }
 
