@@ -11,63 +11,9 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <!-- Custom Styles (You should move all CSS from your original file into a styles/main.css file and link it here) -->
-    <style>
-        /* All CSS from your first file goes here. I'm omitting it for brevity, but you should copy/paste it. */
-        /* For example: */
-        :root {
-            --primary: #d10000;
-            --secondary: #000000;
-            --accent: #f8b500;
-            --light: #f8f8f8;
-            --dark: #333333;
-            --success: #28a745;
-            --warning: #ffc107;
-            --danger: #dc3545;
-            --info: #17a2b8;
-            --bg-gradient: linear-gradient(135deg, #f9f9f9 0%, #eeeeee 100%);
-            --section-bg: rgba(255, 255, 255, 0.95);
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --border-radius: 12px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
-        }
-        body { font-family: var(--font-family); max-width: 800px; margin: 0 auto; padding: 0; background: var(--bg-gradient); color: var(--dark); }
-        /* ... Paste all your other CSS rules here ... */
-        .header { text-align: center; padding: 32px 20px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; border-radius: 0 0 24px 24px; margin-bottom: 24px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
-        .header h1 { margin: 0 0 8px 0; font-size: clamp(24px, 5vw, 32px); font-weight: 700; }
-        .container { background: var(--section-bg); border-radius: var(--border-radius); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow); }
-        .product-list { display: grid; gap: 20px; }
-        .product { background: white; border-radius: var(--border-radius); padding: 20px; box-shadow: var(--shadow); border-left: 4px solid var(--primary); }
-        .product-name { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-        .product-price { color: var(--primary); font-size: 20px; font-weight: 700; }
-        .quantity-control { display: flex; align-items: center; gap: 12px; }
-        .quantity-btn { width: 40px; height: 40px; border: none; border-radius: 8px; background: var(--primary); color: white; font-size: 18px; cursor: pointer; }
-        .quantity-input { width: 60px; height: 40px; text-align: center; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; }
-        .form-group { margin-bottom: 24px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
-        .required { color: var(--danger); }
-        input[type="text"], input[type="tel"], select, textarea { width: 100%; padding: 14px 16px; border: 2px solid #e0e0e0; border-radius: var(--border-radius); font-size: 16px; }
-        .error-message { color: var(--danger); font-size: 14px; margin-top: 6px; display: none; }
-        .form-group.error .error-message { display: block; }
-        .form-group.error input, .form-group.error select, .form-group.error textarea { border-color: var(--danger); }
-        .btn { display: inline-flex; padding: 14px 24px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: var(--border-radius); font-size: 16px; cursor: pointer; }
-        .submit-btn { width: 100%; padding: 18px; font-size: 18px; margin-top: 24px; justify-content: center; }
-        .dialog-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 1000; display: none; align-items: center; justify-content: center; }
-        .dialog-overlay.show { display: flex; }
-        .dialog-content { background: white; border-radius: var(--border-radius); max-width: 500px; width: 100%; }
-        .dialog-header { padding: 24px; border-bottom: 1px solid #eee; }
-        .dialog-body { padding: 24px; }
-        .dialog-footer { padding: 24px; border-top: 1px solid #eee; text-align: right; }
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: none; justify-content: center; align-items: center; z-index: 9999; }
-        .loading-spinner i { font-size: 48px; color: var(--primary); }
-        .loading-spinner p { color: white; }
-        .pickup-address { background: #f0f8ff; padding: 16px; border-radius: var(--border-radius); margin-top: 12px; border-left: 4px solid #2196f3; font-size: 14px; }
-        .qr-code-item { text-align: center; }
-        .qr-placeholder { width: 100%; height: 200px; background: white; border: 2px dashed #d0d0d0; border-radius: var(--border-radius); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; }
-        .qr-placeholder img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        /* Add all other styles from your first file... */
-    </style>
+    <!-- This is the crucial new line that links your stylesheet -->
+    <link rel="stylesheet" href="styles/main.css">
+
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -131,7 +77,7 @@
                         <h4>自取地址 / Pickup Address:</h4>
                         <p>667, Jalan 24, Taman Perindustrian Ehsan Jaya, Kepong, 52100, Kuala Lumpur.</p>
                         <p><strong>取货时间 / Pickup Time:</strong> 另行通知</p>
-                        <p><strong>联络号码 / Contact:</strong> 0162327792</p> <!-- CORRECTED: Added phone number -->
+                        <p><strong>联络号码 / Contact:</strong> 0162327792</p>
                     </div>
                     <div class="error-message">请选择取货方式</div>
                 </div>
@@ -154,8 +100,8 @@
                 <!-- Products will be loaded dynamically -->
             </div>
             <div class="cart-summary" id="cartSummary" style="display: none;">
-                <div class="total">总计: <span id="totalAmount">RM0.00</span></div>
-                <div class="item-count">共 <span id="itemCount">0</span> 件商品</div>
+                <div class="total" id="totalAmount">总计: RM0.00</div>
+                <div class="item-count"><span id="itemCount">0</span> 件商品</div>
             </div>
         </section>
 
@@ -203,7 +149,7 @@
     <div id="confirmationDialog" class="dialog-overlay">
         <div class="dialog-content">
             <div class="dialog-header"><h3>确认订单</h3></div>
-            <div class="dialog-body"><div id="orderSummary"></div></div>
+            <div class="dialog-body" id="orderSummary"></div>
             <div class="dialog-footer">
                 <button type="button" class="btn btn-secondary" id="cancelOrder">取消</button>
                 <button type="button" class="btn" id="confirmOrder">确认提交</button>
@@ -214,7 +160,7 @@
     <!-- Success Dialog -->
     <div id="successDialog" class="dialog-overlay">
         <div class="dialog-content">
-            <div class="dialog-header"><h3><i class="fas fa-check-circle"></i> 订单提交成功</h3></div>
+            <div class="dialog-header"><h3><i class="fas fa-check-circle success-icon"></i> 订单提交成功</h3></div>
             <div class="dialog-body">
                 <p>您的订单已成功提交！订单号: <strong id="orderNumber"></strong></p>
                 <p>我们会尽快处理您的订单，请保持电话畅通。</p>
