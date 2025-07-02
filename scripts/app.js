@@ -121,7 +121,7 @@ class FoodOrderApp {
     setupEventListeners() {
         document.getElementById('mainForm').addEventListener('submit', (e) => { e.preventDefault(); this.handleFormSubmit(); });
         document.getElementById('deliveryMethod').addEventListener('change', this.handleDeliveryChange);
-        document.getElementById('paymentMethod').addEventListener('change', this.handlePaymentChange);
+        document.getElementById('paymentMethod').addEventListener('change', this.handlePaymentChange.bind(this));
         document.getElementById('paymentProof').addEventListener('change', this.handleFileUpload.bind(this));
         document.getElementById('customerPhone').addEventListener('input', (e) => e.target.value = PhoneFormatter.format(e.target.value));
         document.getElementById('cancelOrder').addEventListener('click', () => this.hideDialog('confirmationDialog'));
@@ -134,6 +134,10 @@ class FoodOrderApp {
         const searchInput = document.getElementById('searchInput');
         searchInput.addEventListener('input', this.debounce(() => this.handleSearch(searchInput.value), 300));
         document.getElementById('searchBtn').addEventListener('click', () => this.handleSearch(searchInput.value));
+        
+        document.getElementById('tngBtn').addEventListener('click', () => {
+            window.open('https://touchngo.com.my/ewallet/', '_blank');
+        });
     }
     
     attachCategoryListeners() {
@@ -168,6 +172,7 @@ class FoodOrderApp {
         document.getElementById('selfPickupAddress').style.display = e.target.value === 'self-pickup' ? 'block' : 'none';
     }
     
+    // THIS FUNCTION WAS MISSING
     handlePaymentChange(e) {
         const method = e.target.value;
         document.getElementById('paymentDetails').style.display = method ? 'block' : 'none';
@@ -278,7 +283,7 @@ class FoodOrderApp {
         this.showLoading(true);
         try {
             const orderData = this.pendingOrderData;
-            const orderNumber = await this.generateOrderNumber(); // Await the sequential number
+            const orderNumber = await this.generateOrderNumber();
             const paymentProofUrl = await window.supabaseConfig.uploadPaymentProof(orderData.paymentProofFile, orderNumber);
             
             const client = window.supabaseConfig.getClient();
@@ -364,7 +369,6 @@ class FoodOrderApp {
         
         if (error) {
             console.error("Error fetching order count:", error);
-            // Fallback to a timestamp-based ID if query fails
             return `FW-ERR-${Date.now().toString().slice(-8)}`;
         }
         
