@@ -36,17 +36,17 @@
         <section class="container" id="orderForm">
             <h2 class="section-title"><i class="fas fa-user-edit"></i> 订单信息</h2>
             <form id="mainForm" novalidate>
-                <div class="form-group">
+                <div class="form-group" id="customerNameGroup">
                     <label for="customerName">姓名 <span class="required">*</span></label>
                     <input type="text" id="customerName" name="customerName" required placeholder="请输入您的姓名">
                     <div class="error-message"></div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="customerPhoneGroup">
                     <label for="customerPhone">电话 <span class="required">*</span></label>
                     <input type="tel" id="customerPhone" name="customerPhone" required placeholder="e.g., 0123456789">
                     <div class="error-message"></div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="deliveryMethodGroup">
                     <label for="deliveryMethod">取货方式 <span class="required">*</span></label>
                     <select id="deliveryMethod" name="deliveryMethod" required>
                         <option value="">请选择 / Please select</option>
@@ -86,19 +86,36 @@
         </section>
         <section class="container">
             <h2 class="section-title"><i class="fas fa-credit-card"></i> 付款信息 / Payment Info</h2>
-            <div class="bank-info">
-                <h4><i class="fas fa-university"></i> Maybank / WeChat Pay 转账信息</h4>
-                <p><strong>银行名称 / Bank:</strong> Maybank</p>
-                <p><strong>户口名 / Account Name:</strong> Choong Sher Lee</p>
-                <p><strong>户口号码 / Account No.:</strong> 114209540438</p>
+            <!-- THIS SECTION WAS MISSING AND IS NOW CORRECT -->
+            <div class="form-group" id="paymentMethodGroup">
+                <label for="paymentMethod">选择付款方式 <span class="required">*</span></label>
+                <select id="paymentMethod" name="paymentMethod" required>
+                    <option value="">请选择付款方式 / Please select</option>
+                    <option value="maybank">Maybank 转账</option>
+                    <option value="touchngo">Touch n Go eWallet</option>
+                </select>
+                <div class="error-message"></div>
+            </div>
+            <div id="paymentDetails" style="display: none;">
+                <div class="bank-info" id="maybankDetails" style="display: none;">
+                    <h4><i class="fas fa-university"></i> Maybank 转账信息</h4>
+                    <p><strong>银行名称 / Bank:</strong> Maybank</p>
+                    <p><strong>户口名 / Account Name:</strong> Choong Sher Lee</p>
+                    <p><strong>户口号码 / Account No.:</strong> 114209540438</p>
+                </div>
+                <div class="bank-info" id="touchngoDetails" style="display: none;">
+                    <h4><i class="fas fa-mobile-alt"></i> Touch n Go eWallet</h4>
+                    <p><strong>收款人:</strong> Choong Sher Lee</p>
+                    <p><strong>手机号码:</strong> +60162327792</p>
+                </div>
                 <div class="qr-code-container">
-                    <div class="qr-code-item">
+                    <div class="qr-code-item" id="maybankQR" style="display: none;">
                         <h4>Maybank QR Code</h4>
                         <div class="qr-placeholder"><img src="IMG_4043.jpeg" alt="Maybank QR Code"></div>
                     </div>
-                    <div class="qr-code-item">
-                        <h4>WeChat Pay QR Code</h4>
-                        <div class="qr-placeholder"><img src="IMG_4042.png" alt="WeChat Pay QR Code"></div>
+                    <div class="qr-code-item" id="touchngoQR" style="display: none;">
+                        <h4>Touch n Go QR Code</h4>
+                        <div class="qr-placeholder"><img src="IMG_4042.png" alt="Touch n Go QR Code"></div>
                     </div>
                 </div>
             </div>
@@ -125,7 +142,7 @@
             <div class="dialog-body" id="orderSummary"></div>
             <div class="dialog-footer">
                 <button type="button" class="btn btn-secondary" id="cancelOrder">取消</button>
-                <button type="button" class="btn" id="confirmOrder">确认提交</button>
+                <button type="button" class="btn" id="confirmOrder">确认并发送</button>
             </div>
         </div>
     </div>
