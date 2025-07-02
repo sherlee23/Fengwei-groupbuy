@@ -23,10 +23,7 @@ class FoodOrderApp {
         this.renderProducts();
         this.updateCartSummary();
         this.showToast('应用加载成功', 'success');
-        
-        // Show alerts only once after a short delay
-        setTimeout(() => this.showInventoryAlerts(), 1000);
-        
+        setTimeout(() => this.showInventoryAlerts(), 1500);
         this.showLoading(false);
     }
 
@@ -92,12 +89,9 @@ class FoodOrderApp {
     renderProducts() {
         const productList = document.getElementById('productList');
         let filtered = this.products;
-        if (this.currentCategory !== 'all') {
-            filtered = filtered.filter(p => p.category === this.currentCategory);
-        }
-        if (this.searchQuery) {
-            filtered = filtered.filter(p => p.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
-        }
+        if (this.currentCategory !== 'all') filtered = filtered.filter(p => p.category === this.currentCategory);
+        if (this.searchQuery) filtered = filtered.filter(p => p.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
+        
         productList.innerHTML = filtered.length > 0
             ? filtered.map(p => this.renderProduct(p)).join('')
             : `<p>没有找到商品。</p>`;
@@ -111,10 +105,7 @@ class FoodOrderApp {
         return `
             <div class="product ${isOutOfStock ? 'out-of-stock' : ''}" data-product-id="${product.id}">
                 ${stockStatus.badge}
-                <div class="product-image-container">
-                    <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy">
-                    ${isOutOfStock ? '<div class="out-of-stock-overlay">已售完</div>' : ''}
-                </div>
+                <div class="product-image-container"><img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy"></div>
                 <div class="product-name">${product.emoji} ${product.name}</div>
                 <div class="product-price">RM${product.price.toFixed(2)}</div>
                 <div class="stock-info ${stockStatus.class}"><i class="fas ${stockStatus.icon}"></i> 库存: ${product.stock > 0 ? `${product.stock} 件` : '已售完'}</div>
@@ -130,13 +121,13 @@ class FoodOrderApp {
     setupEventListeners() {
         document.getElementById('mainForm').addEventListener('submit', (e) => { e.preventDefault(); this.handleFormSubmit(); });
         document.getElementById('deliveryMethod').addEventListener('change', this.handleDeliveryChange);
+        document.getElementById('paymentMethod').addEventListener('change', this.handlePaymentChange);
         document.getElementById('paymentProof').addEventListener('change', this.handleFileUpload.bind(this));
         document.getElementById('customerPhone').addEventListener('input', (e) => e.target.value = PhoneFormatter.format(e.target.value));
         document.getElementById('cancelOrder').addEventListener('click', () => this.hideDialog('confirmationDialog'));
         document.getElementById('confirmOrder').addEventListener('click', () => this.submitOrder());
         document.getElementById('showExportBtn').addEventListener('click', () => {
-            const panel = document.getElementById('adminPanel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            document.getElementById('adminPanel').style.display = document.getElementById('adminPanel').style.display === 'none' ? 'block' : 'none';
         });
         document.getElementById('realExportBtn').addEventListener('click', () => this.handleAdminExport(document.getElementById('adminPassword').value));
         
@@ -177,11 +168,20 @@ class FoodOrderApp {
         document.getElementById('selfPickupAddress').style.display = e.target.value === 'self-pickup' ? 'block' : 'none';
     }
     
+    handlePaymentChange(e) {
+        const method = e.target.value;
+        document.getElementById('paymentDetails').style.display = method ? 'block' : 'none';
+        document.getElementById('maybankDetails').style.display = method === 'maybank' ? 'block' : 'none';
+        document.getElementById('touchngoDetails').style.display = method === 'touchngo' ? 'block' : 'none';
+        document.getElementById('maybankQR').style.display = method === 'maybank' ? 'block' : 'none';
+        document.getElementById('touchngoQR').style.display = method === 'touchngo' ? 'block' : 'none';
+    }
+
     handleFileUpload(event) {
         document.querySelector('.file-name').textContent = event.target.files[0] ? event.target.files[0].name : '';
     }
 
-    // CART & QUANTITY LOGIC
+    // CART & QUANTITY
     updateQuantity(productId, action) {
         let quantity = this.cart.get(productId) || 0;
         const product = this.products.find(p => p.id === productId);
@@ -206,17 +206,14 @@ class FoodOrderApp {
         let total = 0, count = 0;
         this.cart.forEach((quantity, productId) => {
             const product = this.products.find(p => p.id === productId);
-            if (product) {
-                total += product.price * quantity;
-                count += quantity;
-            }
+            if (product) { total += product.price * quantity; count += quantity; }
         });
         document.querySelector('#cartSummary .total').textContent = `总计: RM${total.toFixed(2)}`;
         document.querySelector('#cartSummary .item-count').textContent = `${count} 件商品`;
         document.getElementById('cartSummary').style.display = count > 0 ? 'block' : 'none';
     }
 
-    // INVENTORY LOGIC
+    // INVENTORY
     getStockStatus(product) {
         if (product.stock === 0) return { class: 'out-of-stock', icon: 'fa-times-circle', badge: '<div class="stock-badge out-of-stock-badge">售完</div>' };
         if (product.stock <= product.minStock) return { class: 'low-stock', icon: 'fa-exclamation-triangle', badge: '<div class="stock-badge low-stock-badge">库存不足</div>' };
@@ -229,13 +226,9 @@ class FoodOrderApp {
 
     showInventoryAlerts() {
         const lowStock = this.products.filter(p => p.stock > 0 && p.stock <= p.minStock);
-        if (lowStock.length > 0) {
-            this.showToast(`${lowStock.map(p => p.name).slice(0, 3).join(', ')} 等商品库存不足`, 'warning');
-        }
+        if (lowStock.length > 0) this.showToast(`${lowStock.map(p => p.name).slice(0, 3).join(', ')} 等商品库存不足`, 'warning');
         const outOfStock = this.products.filter(p => p.stock === 0);
-        if (outOfStock.length > 0) {
-            this.showToast(`${outOfStock.map(p => p.name).slice(0, 3).join(', ')} 已售完`, 'danger');
-        }
+        if (outOfStock.length > 0) this.showToast(`${outOfStock.map(p => p.name).slice(0, 3).join(', ')} 已售完`, 'danger');
     }
 
     // FORM SUBMISSION
@@ -252,13 +245,10 @@ class FoodOrderApp {
     collectFormData() {
         const form = document.getElementById('mainForm');
         return {
-            agreeTerms: form.agreeTerms.checked,
-            customerName: form.customerName.value.trim(),
-            customerPhone: form.customerPhone.value.trim(),
-            deliveryMethod: form.deliveryMethod.value,
-            deliveryAddress: form.deliveryAddress.value.trim(),
-            specialRequests: form.specialRequests.value.trim(),
-            paymentProofFile: form.paymentProof.files[0],
+            agreeTerms: form.agreeTerms.checked, customerName: form.customerName.value.trim(),
+            customerPhone: form.customerPhone.value.trim(), deliveryMethod: form.deliveryMethod.value,
+            deliveryAddress: form.deliveryAddress.value.trim(), paymentMethod: form.paymentMethod.value,
+            specialRequests: form.specialRequests.value.trim(), paymentProofFile: form.paymentProof.files[0],
             cart: Array.from(this.cart.entries()).map(([id, quantity]) => ({ ...this.products.find(p => p.id === id), quantity }))
         };
     }
@@ -267,7 +257,6 @@ class FoodOrderApp {
         this.pendingOrderData = formData;
         const total = formData.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
         const whatsappMsg = this.buildWhatsAppMessage(formData, total);
-
         document.getElementById('orderSummary').innerHTML = `
             <p><strong>姓名:</strong> ${formData.customerName}</p>
             <p><strong>电话:</strong> ${formData.customerPhone}</p>
@@ -289,14 +278,14 @@ class FoodOrderApp {
         this.showLoading(true);
         try {
             const orderData = this.pendingOrderData;
-            const orderNumber = this.generateOrderNumber();
+            const orderNumber = await this.generateOrderNumber(); // Await the sequential number
             const paymentProofUrl = await window.supabaseConfig.uploadPaymentProof(orderData.paymentProofFile, orderNumber);
             
             const client = window.supabaseConfig.getClient();
             const { error } = await client.from('orders').insert([{
                 order_id: orderNumber, name: orderData.customerName, phone: orderData.customerPhone,
                 delivery_method: orderData.deliveryMethod, delivery_address: orderData.deliveryAddress,
-                remarks: orderData.specialRequests,
+                remarks: orderData.specialRequests, payment_method: orderData.paymentMethod,
                 order_items: orderData.cart.map(({id, name, price, quantity}) => ({id, name, price, quantity})),
                 total_amount: orderData.cart.reduce((s, i) => s + i.price * i.quantity, 0),
                 payment_proof_url: paymentProofUrl, status: 'pending'
@@ -320,11 +309,9 @@ class FoodOrderApp {
         const total = formData.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
         const whatsappMsg = this.buildWhatsAppMessage(formData, total, orderNumber);
         const whatsappLink = `https://wa.me/60162327792?text=${encodeURIComponent(whatsappMsg)}`;
-
-        const dialog = document.getElementById('successDialog');
+        
         document.getElementById('orderNumber').textContent = orderNumber;
         
-        // Remove old button and add new one to avoid multiple listeners
         const oldBtn = document.getElementById('closeSuccess');
         const newBtn = oldBtn.cloneNode(true);
         oldBtn.parentNode.replaceChild(newBtn, oldBtn);
@@ -334,7 +321,6 @@ class FoodOrderApp {
             window.open(whatsappLink, '_blank');
             this.resetForm();
         };
-
         this.showDialog('successDialog');
     }
 
@@ -344,16 +330,13 @@ class FoodOrderApp {
         msg += `📛 姓名: ${order.customerName}\n`;
         msg += `📱 电话: ${order.customerPhone}\n`;
         msg += `🚚 取货方式: ${order.deliveryMethod === 'self-pickup' ? '自取' : 'Lalamove送货'}\n`;
-        if (order.deliveryMethod === 'lalamove') {
-            msg += `📍 地址: ${order.deliveryAddress}\n`;
-        }
+        if (order.deliveryMethod === 'lalamove') msg += `📍 地址: ${order.deliveryAddress}\n`;
+        msg += `💳 付款方式: ${order.paymentMethod}\n`;
         msg += `\n🛒 *订单明细*\n`;
-        order.cart.forEach(item => {
-          msg += `${item.emoji} ${item.name} × ${item.quantity} = RM${(item.quantity * item.price).toFixed(2)}\n`;
-        });
+        order.cart.forEach(item => { msg += `${item.emoji} ${item.name} × ${item.quantity} = RM${(item.quantity * item.price).toFixed(2)}\n`; });
         msg += `\n💰 *总金额: RM${total.toFixed(2)}*\n`;
         msg += `📝 *备注*: ${order.specialRequests || '无'}\n`;
-        msg += `📅 *下单时间*: ${new Date().toLocaleString('zh-CN')}`;
+        msg += `📅 *下单时间*: ${new Date().toLocaleString('en-GB', { timeZone: 'Asia/Kuala_Lumpur' })}`;
         return msg;
     }
 
@@ -364,14 +347,31 @@ class FoodOrderApp {
         this.updateCartSummary();
         document.querySelector('.file-name').textContent = '';
         document.getElementById('deliveryAddressGroup').style.display = 'none';
+        document.getElementById('paymentDetails').style.display = 'none';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
     // UTILITY & ADMIN
-    generateOrderNumber() {
-        const d = new Date();
-        return `FW${d.getFullYear()}${(d.getMonth() + 1).toString().padStart(2, '0')}${d.getDate().toString().padStart(2, '0')}${Date.now().toString().slice(-6)}`;
+    async generateOrderNumber() {
+        const client = window.supabaseConfig.getClient();
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const datePrefix = `FW${yyyy}${mm}${dd}`;
+
+        const { count, error } = await client.from('orders').select('order_id', { count: 'exact', head: true }).like('order_id', `${datePrefix}%`);
+        
+        if (error) {
+            console.error("Error fetching order count:", error);
+            // Fallback to a timestamp-based ID if query fails
+            return `FW-ERR-${Date.now().toString().slice(-8)}`;
+        }
+        
+        const sequence = String(count + 1).padStart(3, '0');
+        return `${datePrefix}${sequence}`;
     }
+
     showDialog(id) { document.getElementById(id).classList.add('show'); }
     hideDialog(id) { document.getElementById(id).classList.remove('show'); }
     showLoading(show) { document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none'; }
@@ -400,7 +400,7 @@ class FoodOrderApp {
             ]));
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsData), '订单数据');
-            XLSX.writeFile(wb, `锋味派订单_${this.generateOrderNumber().slice(2, 10)}.xlsx`);
+            XLSX.writeFile(wb, `锋味派订单_${new Date().toISOString().slice(0,10)}.xlsx`);
         } catch (err) { this.showToast(`导出失败: ${err.message}`, 'error'); } 
         finally { this.showLoading(false); }
     }
