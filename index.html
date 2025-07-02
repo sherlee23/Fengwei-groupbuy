@@ -31,7 +31,7 @@
                 <input type="checkbox" id="agreeTerms" name="agreeTerms">
                 <label for="agreeTerms">我已阅读并同意上述条款 <span class="required">*</span></label>
             </div>
-            <div class="error-message">请勾选此项以继续</div>
+            <div class="error-message"></div>
         </section>
         <section class="container" id="orderForm">
             <h2 class="section-title"><i class="fas fa-user-edit"></i> 订单信息</h2>
@@ -74,15 +74,14 @@
         </section>
         <section class="container" id="productsSection">
             <h2 class="section-title"><i class="fas fa-shopping-basket"></i> 请选择商品</h2>
-            <!-- SEARCH BAR ADDED BACK -->
             <div class="search-container">
                 <input type="search" id="searchInput" class="search-input" placeholder="搜索商品名称...">
                 <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i></button>
             </div>
             <div id="productList" class="product-list"></div>
             <div class="cart-summary" id="cartSummary" style="display: none;">
-                <div class="total" id="totalAmount">总计: RM0.00</div>
-                <div class="item-count"><span id="itemCount">0</span> 件商品</div>
+                <div class="total"></div>
+                <div class="item-count"></div>
             </div>
         </section>
         <section class="container">
@@ -135,9 +134,9 @@
             <div class="dialog-header"><h3><i class="fas fa-check-circle success-icon"></i> 订单提交成功</h3></div>
             <div class="dialog-body">
                 <p>您的订单已成功提交！订单号: <strong id="orderNumber"></strong></p>
-                <p>我们会尽快处理您的订单，请保持电话畅通。</p>
+                <p>接下来将跳转到 WhatsApp, 请点击发送以完成订单。</p>
             </div>
-            <div class="dialog-footer"><button type="button" class="btn" id="closeSuccess">完成</button></div>
+            <div class="dialog-footer"><button type="button" class="btn" id="closeSuccess">好的</button></div>
         </div>
     </div>
     <div id="toastContainer" class="toast-container"></div>
