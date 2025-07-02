@@ -1,7 +1,9 @@
+// HELPER: Handles phone number formatting
 const PhoneFormatter = {
     format: (value) => value.replace(/\D/g, '')
 };
 
+// Main Application Class
 class FoodOrderApp {
     constructor() {
         this.cart = new Map();
@@ -15,16 +17,20 @@ class FoodOrderApp {
     async initializeApp() {
         this.showLoading(true);
         await this.loadProducts();
-        this.loadInventoryFromStorage(); // RESTORED
+        this.loadInventoryFromStorage();
         this.renderCategories();
         this.setupEventListeners();
         this.renderProducts();
         this.updateCartSummary();
-        this.showInventoryAlerts(); // RESTORED
-        this.showLoading(false);
         this.showToast('应用加载成功', 'success');
+        
+        // Show alerts only once after a short delay
+        setTimeout(() => this.showInventoryAlerts(), 1000);
+        
+        this.showLoading(false);
     }
 
+    // DATA LOADING
     async loadProducts() {
         this.products = [
             { id: 1, name: '原味烤肠', price: 28, image: 'IMG_3859.jpeg', category: '烤肠系列', emoji: '🌭', stock: 45, minStock: 10 },
@@ -57,7 +63,20 @@ class FoodOrderApp {
         ];
     }
     
-    // SETUP AND RENDERING
+    loadInventoryFromStorage() {
+        try {
+            const saved = localStorage.getItem('inventoryData');
+            if (saved) {
+                const inventoryData = JSON.parse(saved);
+                inventoryData.forEach(item => {
+                    const product = this.products.find(p => p.id === item.id);
+                    if (product) product.stock = item.stock;
+                });
+            }
+        } catch (e) { console.error("Failed to load inventory from storage", e); }
+    }
+
+    // UI RENDERING
     renderCategories() {
         const nav = document.getElementById('categoryNav');
         const categories = ['all', ...new Set(this.products.map(p => p.category))];
@@ -79,7 +98,9 @@ class FoodOrderApp {
         if (this.searchQuery) {
             filtered = filtered.filter(p => p.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
         }
-        productList.innerHTML = filtered.map(p => this.renderProduct(p)).join('');
+        productList.innerHTML = filtered.length > 0
+            ? filtered.map(p => this.renderProduct(p)).join('')
+            : `<p>没有找到商品。</p>`;
         this.attachQuantityListeners();
     }
 
@@ -96,7 +117,7 @@ class FoodOrderApp {
                 </div>
                 <div class="product-name">${product.emoji} ${product.name}</div>
                 <div class="product-price">RM${product.price.toFixed(2)}</div>
-                <div class="stock-info ${stockStatus.class}"><i class="fas ${stockStatus.icon}"></i> 库存: ${product.stock} 件</div>
+                <div class="stock-info ${stockStatus.class}"><i class="fas ${stockStatus.icon}"></i> 库存: ${product.stock > 0 ? `${product.stock} 件` : '已售完'}</div>
                 <div class="quantity-control">
                     <button class="quantity-btn" data-action="decrease" ${quantity === 0 || isOutOfStock ? 'disabled' : ''}>-</button>
                     <input type="number" class="quantity-input" value="${quantity}" min="0" max="${product.stock}" ${isOutOfStock ? 'disabled' : ''}>
@@ -113,8 +134,10 @@ class FoodOrderApp {
         document.getElementById('customerPhone').addEventListener('input', (e) => e.target.value = PhoneFormatter.format(e.target.value));
         document.getElementById('cancelOrder').addEventListener('click', () => this.hideDialog('confirmationDialog'));
         document.getElementById('confirmOrder').addEventListener('click', () => this.submitOrder());
-        document.getElementById('closeSuccess').addEventListener('click', () => { this.hideDialog('successDialog'); this.resetForm(); });
-        document.getElementById('showExportBtn').addEventListener('click', () => document.getElementById('adminPanel').style.display = document.getElementById('adminPanel').style.display === 'none' ? 'block' : 'none');
+        document.getElementById('showExportBtn').addEventListener('click', () => {
+            const panel = document.getElementById('adminPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        });
         document.getElementById('realExportBtn').addEventListener('click', () => this.handleAdminExport(document.getElementById('adminPassword').value));
         
         const searchInput = document.getElementById('searchInput');
@@ -137,7 +160,7 @@ class FoodOrderApp {
         });
     }
 
-    // HANDLERS
+    // EVENT HANDLERS
     handleCategoryChange(category) {
         this.currentCategory = category;
         document.querySelectorAll('.category-link').forEach(link => link.classList.toggle('active', link.dataset.category === category));
@@ -145,7 +168,7 @@ class FoodOrderApp {
     }
     
     handleSearch(query) {
-        this.searchQuery = query;
+        this.searchQuery = query.trim();
         this.renderProducts();
     }
 
@@ -158,7 +181,7 @@ class FoodOrderApp {
         document.querySelector('.file-name').textContent = event.target.files[0] ? event.target.files[0].name : '';
     }
 
-    // QUANTITY & CART
+    // CART & QUANTITY LOGIC
     updateQuantity(productId, action) {
         let quantity = this.cart.get(productId) || 0;
         const product = this.products.find(p => p.id === productId);
@@ -176,7 +199,7 @@ class FoodOrderApp {
         if (quantity > 0) this.cart.set(productId, quantity);
         else this.cart.delete(productId);
         this.updateCartSummary();
-        this.renderProducts(); // Re-render to update disabled states
+        this.renderProducts();
     }
 
     updateCartSummary() {
@@ -188,12 +211,12 @@ class FoodOrderApp {
                 count += quantity;
             }
         });
-        document.getElementById('totalAmount').textContent = `总计: RM${total.toFixed(2)}`;
-        document.getElementById('itemCount').textContent = count;
+        document.querySelector('#cartSummary .total').textContent = `总计: RM${total.toFixed(2)}`;
+        document.querySelector('#cartSummary .item-count').textContent = `${count} 件商品`;
         document.getElementById('cartSummary').style.display = count > 0 ? 'block' : 'none';
     }
 
-    // INVENTORY MANAGEMENT (RESTORED)
+    // INVENTORY LOGIC
     getStockStatus(product) {
         if (product.stock === 0) return { class: 'out-of-stock', icon: 'fa-times-circle', badge: '<div class="stock-badge out-of-stock-badge">售完</div>' };
         if (product.stock <= product.minStock) return { class: 'low-stock', icon: 'fa-exclamation-triangle', badge: '<div class="stock-badge low-stock-badge">库存不足</div>' };
@@ -203,34 +226,25 @@ class FoodOrderApp {
     saveInventoryToStorage() {
         localStorage.setItem('inventoryData', JSON.stringify(this.products.map(p => ({ id: p.id, stock: p.stock }))));
     }
-    
-    loadInventoryFromStorage() {
-        const saved = localStorage.getItem('inventoryData');
-        if (!saved) return;
-        JSON.parse(saved).forEach(item => {
-            const product = this.products.find(p => p.id === item.id);
-            if (product) product.stock = item.stock;
-        });
-    }
 
     showInventoryAlerts() {
-        const outOfStock = this.products.filter(p => p.stock === 0);
         const lowStock = this.products.filter(p => p.stock > 0 && p.stock <= p.minStock);
-        if (outOfStock.length > 0) this.showToast(`${outOfStock.map(p => p.name).join(', ')} 已售完`, 'danger');
-        if (lowStock.length > 0) this.showToast(`${lowStock.map(p => p.name).join(', ')} 等商品库存不足`, 'warning');
+        if (lowStock.length > 0) {
+            this.showToast(`${lowStock.map(p => p.name).slice(0, 3).join(', ')} 等商品库存不足`, 'warning');
+        }
+        const outOfStock = this.products.filter(p => p.stock === 0);
+        if (outOfStock.length > 0) {
+            this.showToast(`${outOfStock.map(p => p.name).slice(0, 3).join(', ')} 已售完`, 'danger');
+        }
     }
 
     // FORM SUBMISSION
     async handleFormSubmit() {
-        if (this.cart.size === 0) {
-            this.showToast('请至少选择一件商品', 'warning');
-            return;
-        }
+        if (this.cart.size === 0) { return this.showToast('请至少选择一件商品', 'warning'); }
         const formData = this.collectFormData();
         if (!this.validator.validateForm(formData)) {
             this.validator.showAllErrors();
-            this.showToast('请检查表单，有未填写的必填项', 'error');
-            return;
+            return this.showToast('请检查表单，有未填写的必填项', 'error');
         }
         this.showConfirmationDialog(formData);
     }
@@ -250,16 +264,23 @@ class FoodOrderApp {
     }
     
     showConfirmationDialog(formData) {
+        this.pendingOrderData = formData;
         const total = formData.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const whatsappMsg = this.buildWhatsAppMessage(formData, total);
+
         document.getElementById('orderSummary').innerHTML = `
             <p><strong>姓名:</strong> ${formData.customerName}</p>
             <p><strong>电话:</strong> ${formData.customerPhone}</p>
             <p><strong>取货方式:</strong> ${formData.deliveryMethod === 'self-pickup' ? '自取' : 'Lalamove'}</p>
-            ${formData.deliveryMethod === 'lalamove' ? `<p><strong>地址:</strong> ${formData.deliveryAddress}</p>` : ''}
+            ${formData.deliveryMethod === 'lalamove' ? `<p><strong>地址:</strong> ${formData.deliveryAddress || 'N/A'}</p>` : ''}
             <hr><h4>订单商品:</h4>
             <ul>${formData.cart.map(item => `<li>${item.name} x ${item.quantity}</li>`).join('')}</ul>
-            <h4>总计: RM${total.toFixed(2)}</h4>`;
-        this.pendingOrderData = formData;
+            <h4>总计: RM${total.toFixed(2)}</h4>
+            <div class="whatsapp-preview">
+              <strong>将发送到WhatsApp的内容:</strong>
+              <p style="color:red; font-weight:bold; font-size: 12px; margin-top: 5px;">请务必在跳转WhatsApp后点击发送！</p>
+              <p style="font-size: 12px; margin-top: 5px;">${whatsappMsg.replace(/\n/g, '<br>')}</p>
+            </div>`;
         this.showDialog('confirmationDialog');
     }
 
@@ -282,14 +303,12 @@ class FoodOrderApp {
             }]);
             if (error) throw error;
             
-            // DEDUCT STOCK
             orderData.cart.forEach(item => {
                 const product = this.products.find(p => p.id === item.id);
                 if (product) product.stock -= item.quantity;
             });
             this.saveInventoryToStorage();
-
-            this.showSuccessDialog(orderNumber);
+            this.showSuccessDialog(orderData, orderNumber);
         } catch (error) {
             this.showToast(`订单提交失败: ${error.message}`, 'error');
         } finally {
@@ -297,9 +316,45 @@ class FoodOrderApp {
         }
     }
     
-    showSuccessDialog(orderNumber) {
+    showSuccessDialog(formData, orderNumber) {
+        const total = formData.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const whatsappMsg = this.buildWhatsAppMessage(formData, total, orderNumber);
+        const whatsappLink = `https://wa.me/60162327792?text=${encodeURIComponent(whatsappMsg)}`;
+
+        const dialog = document.getElementById('successDialog');
         document.getElementById('orderNumber').textContent = orderNumber;
+        
+        // Remove old button and add new one to avoid multiple listeners
+        const oldBtn = document.getElementById('closeSuccess');
+        const newBtn = oldBtn.cloneNode(true);
+        oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+
+        newBtn.onclick = () => {
+            this.hideDialog('successDialog');
+            window.open(whatsappLink, '_blank');
+            this.resetForm();
+        };
+
         this.showDialog('successDialog');
+    }
+
+    buildWhatsAppMessage(order, total, orderId = "...") {
+        let msg = `🛎️ *锋味派新订单 #${orderId}*\n\n`;
+        msg += `👤 *客户信息*\n`;
+        msg += `📛 姓名: ${order.customerName}\n`;
+        msg += `📱 电话: ${order.customerPhone}\n`;
+        msg += `🚚 取货方式: ${order.deliveryMethod === 'self-pickup' ? '自取' : 'Lalamove送货'}\n`;
+        if (order.deliveryMethod === 'lalamove') {
+            msg += `📍 地址: ${order.deliveryAddress}\n`;
+        }
+        msg += `\n🛒 *订单明细*\n`;
+        order.cart.forEach(item => {
+          msg += `${item.emoji} ${item.name} × ${item.quantity} = RM${(item.quantity * item.price).toFixed(2)}\n`;
+        });
+        msg += `\n💰 *总金额: RM${total.toFixed(2)}*\n`;
+        msg += `📝 *备注*: ${order.specialRequests || '无'}\n`;
+        msg += `📅 *下单时间*: ${new Date().toLocaleString('zh-CN')}`;
+        return msg;
     }
 
     resetForm() {
@@ -312,7 +367,7 @@ class FoodOrderApp {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
-    // UTILITIES
+    // UTILITY & ADMIN
     generateOrderNumber() {
         const d = new Date();
         return `FW${d.getFullYear()}${(d.getMonth() + 1).toString().padStart(2, '0')}${d.getDate().toString().padStart(2, '0')}${Date.now().toString().slice(-6)}`;
@@ -325,28 +380,20 @@ class FoodOrderApp {
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
-        toast.innerHTML = `<i class="toast-icon fas ${icons[type]}"></i><span class="toast-message">${message}</span><button class="toast-close">×</button>`;
+        toast.innerHTML = `<i class="toast-icon fas ${icons[type]}"></i><span class="toast-message">${message}</span><button type="button" class="toast-close">×</button>`;
         toast.querySelector('.toast-close').onclick = () => toast.remove();
         container.appendChild(toast);
-        setTimeout(() => toast.remove(), 5000);
+        setTimeout(() => { if (toast) toast.remove(); }, 5000);
     }
-    debounce(func, wait) {
-        let timeout;
-        return (...args) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-    }
-
-    // ADMIN
+    debounce(func, wait) { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; }
     async handleAdminExport(password) {
-        if (password !== 'fengweipaiadmin') { this.showToast('管理员密码错误', 'error'); return; }
+        if (password !== 'fengweipaiadmin') { return this.showToast('管理员密码错误', 'error'); }
         this.showLoading(true);
         try {
-            const { data: orders, error } = await window.supabaseConfig.getClient().from('orders').select('*').order('created_at', { ascending: false });
+            const { data, error } = await window.supabaseConfig.getClient().from('orders').select('*').order('created_at', { ascending: false });
             if (error) throw error;
             const wsData = [['订单号', '姓名', '电话', '取货方式', '地址', '备注', '总金额', '状态', '下单时间', '支付凭证', '商品']];
-            orders.forEach(o => wsData.push([
+            data.forEach(o => wsData.push([
                 o.order_id, o.name, o.phone, o.delivery_method, o.delivery_address, o.remarks, o.total_amount,
                 o.status, new Date(o.created_at).toLocaleString(), o.payment_proof_url,
                 o.order_items.map(i => `${i.name}x${i.quantity}`).join('; ')
@@ -354,12 +401,9 @@ class FoodOrderApp {
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsData), '订单数据');
             XLSX.writeFile(wb, `锋味派订单_${this.generateOrderNumber().slice(2, 10)}.xlsx`);
-            this.showToast('导出成功', 'success');
-        } catch (err) {
-            this.showToast(`导出失败: ${err.message}`, 'error');
-        } finally {
-            this.showLoading(false);
-        }
+        } catch (err) { this.showToast(`导出失败: ${err.message}`, 'error'); } 
+        finally { this.showLoading(false); }
     }
 }
+
 document.addEventListener('DOMContentLoaded', () => { window.app = new FoodOrderApp(); });
