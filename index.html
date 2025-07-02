@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>锋味派美食团购</title>
+    <meta name="description" content="锋味派美食团购平台 - 新鲜美食，团购优惠" />
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>处理中...</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <h1><i class="fas fa-utensils"></i> 锋味派美食团购</h1>
+        <p class="header-subtitle">新鲜美食，团购优惠</p>
+    </header>
+
+    <!-- Category Navigation -->
+    <nav class="category-nav" id="categoryNav">
+        <div class="category-links">
+            <a href="#all" class="category-link active" data-category="all">全部</a>
+            <a href="#sausage" class="category-link" data-category="烤肠系列">🌭 烤肠系列</a>
+            <a href="#shrimp" class="category-link" data-category="虾肠系列">🦐 虾肠系列</a>
+            <a href="#pizza" class="category-link" data-category="披萨系列">🍕 披萨系列</a>
+            <a href="#dumpling" class="category-link" data-category="小笼汤包系列">🥟 小笼汤包系列</a>
+            <a href="#pastry" class="category-link" data-category="酥饼系列">🥮 酥饼系列</a>
+            <a href="#chicken" class="category-link" data-category="鸡排系列">🍗 鸡排系列</a>
+            <a href="#wings" class="category-link" data-category="鸡翅系列">🍗 鸡翅系列</a>
+            <a href="#shumai" class="category-link" data-category="纸皮烧卖系列">🥟 纸皮烧卖系列</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Important Notice - 重要声明 -->
+        <section class="disclaimer-box">
+            <h3><i class="fas fa-exclamation-triangle"></i> 重要声明 / Important Notice</h3>
+            <ul>
+                <li>此为预购商品，订单汇总后统一向供应商订购</li>
+                <li>This is a pre-order. We will place the bulk order after collecting all purchases</li>
+                <li>预计等待时间：30-60天（从下单日起计算）</li>
+                <li>Estimated waiting time: 30-60 days (from order date)</li>
+                <li>当前价格<strong>不包含</strong>国际运费，运费将根据实际物流成本后续通知收取</li>
+                <li>Current prices <strong>DO NOT INCLUDE</strong> international shipping fees</li>
+                <li>付款后请保留凭证，以便查询订单状态</li>
+                <li>商品价格可能因市场情况有所调整</li>
+            </ul>
+            
+            <div class="disclaimer-checkbox">
+                <input type="checkbox" id="agreeTerms" required>
+                <label for="agreeTerms">
+                    我已阅读并同意上述条款 / I have read and agree to the terms <span class="required">*</span>
+                </label>
+            </div>
+            <div class="error-message">请勾选此项以继续 / Please check this box to continue</div>
+        </section>
+
+        <!-- Order Form - 客户资料 -->
+        <section class="container" id="orderForm">
+            <h2 class="section-title">
+                <i class="fas fa-user-edit"></i>
+                订单信息
+            </h2>
+
+            <form id="mainForm" novalidate>
+                <!-- Personal Information -->
+                <div class="form-group">
+                    <label for="customerName">
+                        <i class="fas fa-user"></i>
+                        姓名 <span class="required">*</span>
+                    </label>
+                    <input type="text" id="customerName" name="customerName" required 
+                           placeholder="请输入您的姓名" autocomplete="name">
+                    <div class="error-message">请输入有效的姓名</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="customerPhone">
+                        <i class="fas fa-phone"></i>
+                        电话 <span class="required">*</span>
+                    </label>
+                    <input type="tel" id="customerPhone" name="customerPhone" required 
+                           placeholder="请输入您的电话号码" autocomplete="tel">
+                    <div class="error-message">请输入有效的电话号码</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="deliveryAddress">
+                        <i class="fas fa-map-marker-alt"></i>
+                        配送地址 <span class="required">*</span>
+                    </label>
+                    <textarea id="deliveryAddress" name="deliveryAddress" required 
+                              placeholder="请输入详细的配送地址" autocomplete="street-address"></textarea>
+                    <div class="error-message">请输入配送地址</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="specialRequests">
+                        <i class="fas fa-comment"></i>
+                        特殊要求
+                    </label>
+                    <textarea id="specialRequests" name="specialRequests" 
+                              placeholder="如有特殊要求请在此说明（可选）"></textarea>
+                </div>
+
+                <!-- Payment Information -->
+                <div class="form-group">
+                    <label for="deliveryMethod">
+                        <i class="fas fa-truck"></i>
+                        取货方式 / Delivery Method <span class="required">*</span>
+                    </label>
+                    <select id="deliveryMethod" name="deliveryMethod" required>
+                        <option value="">请选择 / Please select</option>
+                        <option value="self-pickup">自取 Self pickup</option>
+                        <option value="lalamove">Lalamove 送货</option>
+                    </select>
+                    <div id="selfPickupAddress" class="pickup-address" style="display: none;">
+                        <h4>自取地址 / Pickup Address:</h4>
+                        <p>667, Jalan 24,</p>
+                        <p>Taman Perindustrian Ehsan Jaya, Kepong,</p>
+                        <p>52100, Kuala Lumpur.</p>
+                        <p><strong>取货时间 / Pickup Time:</strong> 另行通知</p>
+                        <p><strong>联络号码 / Contact:</strong> 0162327792</p>
+                    </div>
+                    <div class="error-message">请选择取货方式 / Please select a delivery method</div>
+                </div>
+
+
+            </form>
+        </section>
+
+        <!-- Products Section -->
+        <section class="container" id="productsSection">
+            <h2 class="section-title">
+                <i class="fas fa-shopping-basket"></i>
+                🛒 请选择商品
+            </h2>
+            
+            <!-- Search Bar -->
+
+            
+            <div id="productList" class="product-list">
+                <!-- Products will be loaded dynamically -->
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="cart-summary" id="cartSummary">
+                <div class="total">
+                    总计: <span id="totalAmount">RM0</span>
+                </div>
+                <div class="item-count">
+                    共 <span id="itemCount">0</span> 件商品
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment Information -->
+        <section class="container">
+            <h2 class="section-title">
+                <i class="fas fa-credit-card"></i>
+                💳 付款信息 / Payment Info
+            </h2>
+            
+            <!-- Payment Method Selection -->
+            <div class="form-group">
+                <label for="paymentMethod">
+                    <i class="fas fa-credit-card"></i>
+                    选择付款方式 / Select Payment Method <span class="required">*</span>
+                </label>
+                <select id="paymentMethod" name="paymentMethod" required>
+                    <option value="">请选择付款方式 / Please select</option>
+                    <option value="maybank">Maybank 转账</option>
+                    <option value="touchngo">Touch n Go eWallet</option>
+                </select>
+                <div class="error-message">请选择付款方式 / Please select payment method</div>
+            </div>
+            
+            <!-- Payment Details -->
+            <div id="paymentDetails" style="display: none;">
+                <div class="bank-info">
+                    <div id="maybankDetails" style="display: none;">
+                        <h4><i class="fas fa-university"></i> Maybank 转账信息</h4>
+                        <p><strong>银行名称 / Bank:</strong> Maybank</p>
+                        <p><strong>户口名 / Account Name:</strong> Choong Sher Lee</p>
+                        <p><strong>户口号码 / Account No.:</strong> 114209540438</p>
+                        <p><strong>备注:</strong> 请在转账备注中填写您的姓名和电话</p>
+                        
+
+                        
+                        <div class="qr-code-item">
+                            <h4>Maybank QR Code</h4>
+                            <div class="qr-placeholder">
+                                <i class="fas fa-qrcode"></i>
+                                <p>扫描二维码转账</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="touchngoDetails" style="display: none;">
+                        <h4><i class="fas fa-mobile-alt"></i> Touch n Go eWallet</h4>
+                        <p><strong>收款人:</strong> Choong Sher Lee</p>
+                        <p><strong>手机号码:</strong> +60162327792</p>
+                        
+                        <div class="payment-action">
+                            <button type="button" class="btn btn-secondary" id="touchngoPayBtn">
+                                <i class="fas fa-mobile-alt"></i>
+                                打开 Touch n Go App
+                            </button>
+                        </div>
+                        
+                        <div class="qr-code-item">
+                            <h4>Touch n Go QR Code</h4>
+                            <div class="qr-placeholder">
+                                <i class="fas fa-qrcode"></i>
+                                <p>扫描二维码付款</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Payment Proof Upload -->
+            <div class="form-group" id="paymentProofSection" style="display: none;">
+                <label for="paymentProof">
+                    <i class="fas fa-upload"></i>
+                    上传付款凭证 / Upload Payment Proof <span class="required">*</span>
+                </label>
+                <div class="file-upload">
+                    <input type="file" id="paymentProof" name="paymentProof" 
+                           accept="image/*" required>
+                    <label for="paymentProof" class="file-upload-label">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <div class="upload-text">点击上传付款凭证</div>
+                        <div class="upload-hint">支持 JPG, PNG, GIF 格式</div>
+                        <span class="file-name"></span>
+                    </label>
+                </div>
+                <div class="error-message">请上传付款凭证</div>
+                
+                <p style="margin-top:15px;font-size:14px;color:#666;">
+                    ⚠️ 完成付款后，请上传转账凭证以便我们确认您的订单
+                </p>
+            </div>
+        </section>
+
+
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn submit-btn" id="submitBtn" form="mainForm">
+            <i class="fas fa-paper-plane"></i>
+            提交订单
+        </button>
+    </main>
+
+    <!-- Confirmation Dialog -->
+    <div id="confirmationDialog" class="dialog-overlay" role="dialog" aria-labelledby="confirmTitle" aria-modal="true">
+        <div class="dialog-content" id="confirmationContent">
+            <div class="dialog-header">
+                <h3 id="confirmTitle"><i class="fas fa-check-circle"></i> 确认订单</h3>
+                <button type="button" class="dialog-close" id="closeConfirmation" aria-label="关闭对话框">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="dialog-body">
+                <div id="orderSummary"></div>
+                <p class="confirmation-text">请确认以上信息无误后提交订单</p>
+            </div>
+            
+            <div class="dialog-footer">
+                <button type="button" class="btn btn-secondary" id="cancelOrder">取消</button>
+                <button type="button" class="btn" id="confirmOrder">确认提交</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Dialog -->
+    <div id="successDialog" class="dialog-overlay" role="dialog" aria-labelledby="successTitle" aria-modal="true">
+        <div class="dialog-content" id="successContent">
+            <div class="dialog-header">
+                <h3 id="successTitle"><i class="fas fa-check-circle success-icon"></i> 订单提交成功</h3>
+            </div>
+            
+            <div class="dialog-body">
+                <p>您的订单已成功提交！</p>
+                <p>订单号: <strong id="orderNumber"></strong></p>
+                <p>我们会尽快处理您的订单，请保持电话畅通。</p>
+            </div>
+            
+            <div class="dialog-footer">
+                <button type="button" class="btn" id="closeSuccess">完成</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Admin Section -->
+    <div class="admin-section">
+        <button class="btn btn-secondary" id="showExportBtn">
+            <i class="fas fa-download"></i>
+            📤 管理员导出订单 (需密码)
+        </button>
+        <div id="adminPanel" style="display:none;">
+            <input type="password" id="adminPassword" placeholder="请输入管理员密码" />
+            <button class="btn btn-secondary" id="realExportBtn">
+                <i class="fas fa-file-excel"></i>
+                📥 导出 Excel
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="scripts/supabase-config.js"></script>
+    <script src="scripts/validation.js"></script>
+    <script src="scripts/app.js"></script>
+</body>
+</html>
+
+// Main Application Logic
+class FoodOrderApp {
+    constructor() {
+        this.cart = new Map();
+        this.products = [];
+        this.validator = new FormValidator();
+        this.currentCategory = 'all';
+        this.searchQuery = '';
+        
+        this.initializeApp();
+    }
+    
+    async initializeApp() {
+        try {
+            this.showLoading(true);
+            await this.loadProducts();
+            this.setupEventListeners();
+            this.renderProducts();
+            this.updateCartSummary();
+            this.showLoading(false);
+            
+            this.showToast('应用加载成功', 'success');
+        } catch (error) {
+            console.error('Failed to initialize app:', error);
+            this.showToast('应用加载失败，请刷新页面重试', 'error');
+            this.showLoading(false);
+        }
+    }
+    
+    async loadProducts() {
+        // 完整的产品数据 - 从原始HTML文件恢复
+        this.products = [
+            { id: 1, name: '原味烤肠', price: 28, image: 'IMG_3859.jpeg', category: '烤肠系列', emoji: '🌭', description: '经典原味烤肠，传统工艺制作' },
+            { id: 2, name: '烟熏蜜汁烤肠', price: 28, image: 'IMG_3864.jpeg', category: '烤肠系列', emoji: '🌭', description: '烟熏风味配蜜汁调料，香甜可口' },
+            { id: 3, name: '法式香草烤肠', price: 28, image: 'IMG_3863.jpeg', category: '烤肠系列', emoji: '🌭', description: '法式香草调味，口感丰富' },
+            { id: 4, name: '黑胡椒烤肠', price: 28, image: 'IMG_3860.jpeg', category: '烤肠系列', emoji: '🌭', description: '浓郁黑胡椒味，微辣爽口' },
+            { id: 5, name: '孜然脆骨烤肠', price: 28, image: 'IMG_3862.jpeg', category: '烤肠系列', emoji: '🌭', description: '孜然调味配脆骨，口感独特' },
+            { id: 6, name: '芝士玉米烤肠', price: 28, image: 'IMG_3861.jpeg', category: '烤肠系列', emoji: '🌭', description: '香浓芝士配玉米粒，奶香十足' },
+            { id: 7, name: '原味虾肠', price: 33, image: 'IMG_3853.jpeg', category: '虾肠系列', emoji: '🦐', description: '新鲜虾肉制作，口感Q弹' },
+            { id: 8, name: '辣味虾肠', price: 33, image: 'IMG_3854.jpeg', category: '虾肠系列', emoji: '🦐', description: '微辣调味虾肠，鲜辣开胃' },
+            { id: 9, name: '原味虾饼', price: 28, image: 'IMG_3873.jpeg', category: '虾肠系列', emoji: '🍤', description: '虾肉制成饼状，酥脆可口' },
+            { id: 10, name: '玛格丽特披萨', price: 25, image: 'IMG_3841.jpeg', category: '披萨系列', emoji: '🍕', description: '经典玛格丽特口味，简单美味' },
+            { id: 11, name: '黑椒牛肉披萨', price: 25, image: 'IMG_3839.jpeg', category: '披萨系列', emoji: '🍕', description: '黑胡椒牛肉配料，香味浓郁' },
+            { id: 12, name: '奥尔良鸡肉披萨', price: 25, image: 'IMG_3840.jpeg', category: '披萨系列', emoji: '🍕', description: '奥尔良风味鸡肉，香辣美味' },
+            { id: 13, name: '双料榴莲披萨', price: 40, image: 'IMG_3852.jpeg', category: '披萨系列', emoji: '🍕', description: '双倍榴莲果肉，浓郁香甜' },
+            { id: 14, name: '鲜肉小笼汤包', price: 12, image: 'IMG_3874.jpeg', category: '小笼汤包系列', emoji: '🥟', description: '传统鲜肉馅，汤汁丰富' },
+            { id: 15, name: '菌菇小笼汤包', price: 12, image: 'IMG_3875.jpeg', category: '小笼汤包系列', emoji: '🥟', description: '多种菌菇调味，清香可口' },
+            { id: 16, name: '黑松露小笼汤包', price: 12, image: 'IMG_3876.jpeg', category: '小笼汤包系列', emoji: '🥟', description: '珍贵黑松露调味，高端享受' },
+            { id: 17, name: '黑猪肉酥饼', price: 55, image: 'IMG_3837.jpeg', category: '酥饼系列', emoji: '🥮', description: '优质黑猪肉制作，酥脆香甜' },
+            { id: 18, name: '安格斯牛肉酥饼', price: 55, image: 'IMG_3838.jpeg', category: '酥饼系列', emoji: '🥮', description: '进口安格斯牛肉，品质上乘' },
+            { id: 19, name: '原味鸡排', price: 20, image: 'IMG_3835.jpeg', category: '鸡排系列', emoji: '🍗', description: '原味鸡排，外酥内嫩' },
+            { id: 20, name: '奥尔良鸡排', price: 20, image: 'IMG_3836.jpeg', category: '鸡排系列', emoji: '🍗', description: '奥尔良风味调料，香辣诱人' },
+            { id: 21, name: '奥尔良鸡翅', price: 25, image: 'IMG_3865.jpeg', category: '鸡翅系列', emoji: '🍗', description: '奥尔良风味鸡翅，嫩滑多汁' },
+            { id: 22, name: '青花椒鸡翅', price: 25, image: 'IMG_3866.jpeg', category: '鸡翅系列', emoji: '🍗', description: '青花椒调味，麻香回味' },
+            { id: 23, name: '黑猪三丁纸皮烧卖', price: 15, image: 'IMG_3843.jpeg', category: '纸皮烧卖系列', emoji: '🥟', description: '黑猪肉三丁馅，纸皮包裹' },
+            { id: 24, name: '黑椒牛肉纸皮烧卖', price: 15, image: 'IMG_3842.jpeg', category: '纸皮烧卖系列', emoji: '🥟', description: '黑椒牛肉馅，香辣美味' },
+            { id: 25, name: '黑猪梅菜干纸皮烧卖', price: 15, image: 'IMG_3844.jpeg', category: '纸皮烧卖系列', emoji: '🥟', description: '梅菜干配黑猪肉，经典搭配' },
+            { id: 26, name: '三丁芝士纸皮烧卖', price: 15, image: 'IMG_3845.jpeg', category: '纸皮烧卖系列', emoji: '🥟', description: '三丁配芝士，奶香浓郁' },
+            { id: 27, name: '乌米腊味纸皮烧卖', price: 15, image: 'IMG_3846.jpeg', category: '纸皮烧卖系列', emoji: '🥟', description: '乌米配腊味，传统风味' }
+        ];
+    }
+    
+    setupEventListeners() {
+        // Category navigation
+        document.querySelectorAll('.category-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleCategoryChange(link.dataset.category);
+            });
+        });
+        
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', this.debounce((e) => {
+                this.handleSearch(e.target.value);
+            }, 300));
+            
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.handleSearch(e.target.value);
+                }
+            });
+        }
+        
+        if (searchBtn) {
+            searchBtn.addEventListener('click', () => {
+                this.handleSearch(searchInput.value);
+            });
+        }
+        
+        // Form submission
+        const mainForm = document.getElementById('mainForm');
+        if (mainForm) {
+            mainForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleFormSubmit();
+            });
+        }
+        
+        // File upload
+        const paymentProof = document.getElementById('paymentProof');
+        if (paymentProof) {
+            paymentProof.addEventListener('change', this.handleFileUpload.bind(this));
+        }
+        
+        // Phone formatting
+        const phoneInput = document.getElementById('customerPhone');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', (e) => {
+                e.target.value = PhoneFormatter.format(e.target.value);
+            });
+        }
+        
+        // Real-time validation
+        this.setupRealTimeValidation();
+        
+        // Delivery method selection
+        this.setupDeliveryMethodHandling();
+        
+        // Payment method selection
+        this.setupPaymentMethodHandling();
+        
+        // Dialog controls
+        this.setupDialogControls();
+        
+        // Admin controls
+        this.setupAdminControls();
+        
+        // Terms checkbox
+        const agreeTerms = document.getElementById('agreeTerms');
+        if (agreeTerms) {
+            agreeTerms.addEventListener('change', () => {
+                this.validator.clearFieldError('agreeTerms');
+                const disclaimerBox = document.querySelector('.disclaimer-box');
+                if (disclaimerBox) {
+                    disclaimerBox.classList.remove('error');
+                }
+            });
+        }
+    }
+    
+    setupRealTimeValidation() {
+        const fields = ['customerName', 'customerPhone', 'deliveryAddress', 'deliveryMethod', 'paymentMethod'];
+        
+        fields.forEach(fieldName => {
+            const field = document.getElementById(fieldName);
+            if (field) {
+                field.addEventListener('blur', () => {
+                    this.validateSingleField(fieldName);
+                });
+                
+                field.addEventListener('input', () => {
+                    if (field.classList.contains('error')) {
+                        this.validator.clearFieldError(fieldName);
+                    }
+                });
+            }
+        });
+    }
+    
+    setupDeliveryMethodHandling() {
+        const deliveryMethod = document.getElementById('deliveryMethod');
+        const selfPickupAddress = document.getElementById('selfPickupAddress');
+        
+        if (deliveryMethod && selfPickupAddress) {
+            deliveryMethod.addEventListener('change', (e) => {
+                if (e.target.value === 'self-pickup') {
+                    selfPickupAddress.style.display = 'block';
+                } else {
+                    selfPickupAddress.style.display = 'none';
+                }
+            });
+        }
+    }
+    
+    setupPaymentMethodHandling() {
+        const paymentMethod = document.getElementById('paymentMethod');
+        const paymentDetails = document.getElementById('paymentDetails');
+        const maybankDetails = document.getElementById('maybankDetails');
+        const touchngoDetails = document.getElementById('touchngoDetails');
+        const paymentProofSection = document.getElementById('paymentProofSection');
+        
+        if (paymentMethod) {
+            paymentMethod.addEventListener('change', (e) => {
+                const selectedMethod = e.target.value;
+                
+                // Hide all details first
+                if (paymentDetails) paymentDetails.style.display = 'none';
+                if (maybankDetails) maybankDetails.style.display = 'none';
+                if (touchngoDetails) touchngoDetails.style.display = 'none';
+                if (paymentProofSection) paymentProofSection.style.display = 'none';
+                
+                // Show relevant details based on selection
+                if (selectedMethod) {
+                    if (paymentDetails) paymentDetails.style.display = 'block';
+                    if (paymentProofSection) paymentProofSection.style.display = 'block';
+                    
+                    if (selectedMethod === 'maybank' && maybankDetails) {
+                        maybankDetails.style.display = 'block';
+                    } else if (selectedMethod === 'touchngo' && touchngoDetails) {
+                        touchngoDetails.style.display = 'block';
+                    }
+                }
+            });
+        }
+        
+        // Setup payment buttons
+        const touchngoPayBtn = document.getElementById('touchngoPayBtn');
+        
+
+        
+        if (touchngoPayBtn) {
+            touchngoPayBtn.addEventListener('click', () => {
+                // Try to open Touch n Go app (mobile) or website
+                if (this.isMobileDevice()) {
+                    // Try to open the app first
+                    window.location.href = 'touchngo://';
+                    
+                    // Fallback to website if app is not installed
+                    setTimeout(() => {
+                        window.open('https://www.touchngo.com.my/ewallet/', '_blank');
+                    }, 1000);
+                } else {
+                    // Open website on desktop
+                    window.open('https://www.touchngo.com.my/ewallet/', '_blank');
+                }
+                this.showToast('请完成 Touch n Go 付款后上传凭证', 'info');
+            });
+        }
+    }
+    
+    isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+    
+    validateSingleField(fieldName) {
+        const field = document.getElementById(fieldName);
+        if (!field) return;
+        
+        const value = field.value;
+        const isValid = this.validator.validateField(fieldName, value);
+        
+        if (!isValid) {
+            this.validator.showFieldError(fieldName, this.validator.getError(fieldName));
+        } else {
+            this.validator.clearFieldError(fieldName);
+        }
+    }
+    
+    setupDialogControls() {
+        // Confirmation dialog
+        const closeConfirmation = document.getElementById('closeConfirmation');
+        const cancelOrder = document.getElementById('cancelOrder');
+        const confirmOrder = document.getElementById('confirmOrder');
+        
+        if (closeConfirmation) {
+            closeConfirmation.addEventListener('click', () => this.hideDialog('confirmationDialog'));
+        }
+        
+        if (cancelOrder) {
+            cancelOrder.addEventListener('click', () => this.hideDialog('confirmationDialog'));
+        }
+        
+        if (confirmOrder) {
+            confirmOrder.addEventListener('click', () => this.submitOrder());
+        }
+        
+        // Success dialog
+        const closeSuccess = document.getElementById('closeSuccess');
+        if (closeSuccess) {
+            closeSuccess.addEventListener('click', () => {
+                this.hideDialog('successDialog');
+                this.resetForm();
+            });
+        }
+        
+        // Close dialogs on overlay click
+        document.querySelectorAll('.dialog-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    this.hideDialog(overlay.id);
+                }
+            });
+        });
+        
+        // Escape key to close dialogs
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const openDialog = document.querySelector('.dialog-overlay.show');
+                if (openDialog) {
+                    this.hideDialog(openDialog.id);
+                }
+            }
+        });
+    }
+    
+    handleCategoryChange(category) {
+        this.currentCategory = category;
+        
+        // Update active link
+        document.querySelectorAll('.category-link').forEach(link => {
+            link.classList.toggle('active', link.dataset.category === category);
+        });
+        
+        this.renderProducts();
+    }
+    
+
+    
+    renderProducts() {
+        const productList = document.getElementById('productList');
+        if (!productList) return;
+        
+        let filteredProducts = this.products;
+        
+        // Filter by category
+        if (this.currentCategory !== 'all') {
+            filteredProducts = filteredProducts.filter(product => 
+                product.category === this.currentCategory
+            );
+        }
+        
+
+        
+        if (filteredProducts.length === 0) {
+            productList.innerHTML = `
+                <div class="no-products">
+                    <i class="fas fa-search"></i>
+                    <p>没有找到匹配的商品</p>
+                    <button class="btn btn-secondary" onclick="app.clearFilters()">清除筛选</button>
+                </div>
+            `;
+            return;
+        }
+        
+        productList.innerHTML = filteredProducts.map(product => this.renderProduct(product)).join('');
+        
+        // Setup quantity controls
+        this.setupQuantityControls();
+    }
+    
+    renderProduct(product) {
+        const quantity = this.cart.get(product.id) || 0;
+        
+        return `
+            <div class="product" data-product-id="${product.id}">
+                <div class="product-category">${product.emoji || '✨'} ${product.category}</div>
+                <div class="product-image-container">
+                    <div class="product-placeholder">
+                        <span class="product-emoji">${product.emoji || '🍴'}</span>
+                        <small>图片即将上传</small>
+                    </div>
+                </div>
+                <div class="product-name">${product.name}</div>
+                <div class="product-description" style="font-size: 14px; color: #666; margin-bottom: 12px;">
+                    ${product.description}
+                </div>
+                <div class="product-price">RM${product.price.toFixed(2)}</div>
+                <div class="quantity-control">
+                    <button class="quantity-btn" data-action="decrease" data-product-id="${product.id}" 
+                            ${quantity === 0 ? 'disabled' : ''}>
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <input type="number" class="quantity-input" value="${quantity}" 
+                           data-product-id="${product.id}" min="0" max="99">
+                    <button class="quantity-btn" data-action="increase" data-product-id="${product.id}">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    setupQuantityControls() {
+        // Quantity buttons
+        document.querySelectorAll('.quantity-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const productId = parseInt(btn.dataset.productId);
+                const action = btn.dataset.action;
+                this.updateQuantity(productId, action);
+            });
+        });
+        
+        // Quantity inputs
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const productId = parseInt(input.dataset.productId);
+                const quantity = Math.max(0, Math.min(99, parseInt(e.target.value) || 0));
+                e.target.value = quantity;
+                this.setQuantity(productId, quantity);
+            });
+        });
+    }
+    
+    updateQuantity(productId, action) {
+        const currentQuantity = this.cart.get(productId) || 0;
+        let newQuantity = currentQuantity;
+        
+        if (action === 'increase') {
+            newQuantity = Math.min(99, currentQuantity + 1);
+        } else if (action === 'decrease') {
+            newQuantity = Math.max(0, currentQuantity - 1);
+        }
+        
+        this.setQuantity(productId, newQuantity);
+    }
+    
+    setQuantity(productId, quantity) {
+        if (quantity <= 0) {
+            this.cart.delete(productId);
+        } else {
+            this.cart.set(productId, quantity);
+        }
+        
+        // Update UI
+        const quantityInput = document.querySelector(`.quantity-input[data-product-id="${productId}"]`);
+        if (quantityInput) {
+            quantityInput.value = quantity;
+        }
+        
+        const decreaseBtn = document.querySelector(`.quantity-btn[data-action="decrease"][data-product-id="${productId}"]`);
+        if (decreaseBtn) {
+            decreaseBtn.disabled = quantity === 0;
+        }
+        
+        this.updateCartSummary();
+        
+        // Show feedback
+        const product = this.products.find(p => p.id === productId);
+        if (product) {
+            if (quantity > 0) {
+                this.showToast(`已${quantity > (this.cart.get(productId) || 0) ? '添加' : '更新'} ${product.name}`, 'success');
+            } else {
+                this.showToast(`已移除 ${product.name}`, 'info');
+            }
+        }
+    }
+    
+    updateCartSummary() {
+        const totalAmount = document.getElementById('totalAmount');
+        const itemCount = document.getElementById('itemCount');
+        
+        let total = 0;
+        let count = 0;
+        
+        this.cart.forEach((quantity, productId) => {
+            const product = this.products.find(p => p.id === productId);
+            if (product) {
+                total += product.price * quantity;
+                count += quantity;
+            }
+        });
+        
+        if (totalAmount) {
+            totalAmount.textContent = `RM${total.toFixed(2)}`;
+        }
+        
+        if (itemCount) {
+            itemCount.textContent = count.toString();
+        }
+        
+        // Show/hide cart summary
+        const cartSummary = document.getElementById('cartSummary');
+        if (cartSummary) {
+            cartSummary.style.display = count > 0 ? 'block' : 'none';
+        }
+    }
+    
+    clearFilters() {
+        this.currentCategory = 'all';
+        this.searchQuery = '';
+        
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        
+        document.querySelectorAll('.category-link').forEach(link => {
+            link.classList.toggle('active', link.dataset.category === 'all');
+        });
+        
+        this.renderProducts();
+    }
+    
+    handleFileUpload(event) {
+        const file = event.target.files[0];
+        const label = event.target.nextElementSibling;
+        const fileNameSpan = label.querySelector('.file-name');
+        
+        if (file) {
+            // Validate file
+            const isValid = this.validator.validateField('paymentProof', file.name, file);
+            
+            if (isValid) {
+                fileNameSpan.textContent = `已选择: ${file.name}`;
+                this.validator.clearFieldError('paymentProof');
+                this.showToast('付款凭证上传成功', 'success');
+            } else {
+                fileNameSpan.textContent = '';
+                event.target.value = '';
+                this.validator.showFieldError('paymentProof', this.validator.getError('paymentProof'));
+                this.showToast(this.validator.getError('paymentProof'), 'error');
+            }
+        } else {
+            fileNameSpan.textContent = '';
+        }
+    }
+    
+    async handleFormSubmit() {
+        try {
+            this.showLoading(true);
+            
+            // Validate cart
+            if (this.cart.size === 0) {
+                this.showToast('请选择商品后再提交订单', 'warning');
+                this.showLoading(false);
+                return;
+            }
+            
+            // Collect form data
+            const formData = this.collectFormData();
+            
+            // Validate form
+            if (!this.validator.validateForm(formData)) {
+                this.showValidationErrors();
+                this.showLoading(false);
+                return;
+            }
+            
+            // Show confirmation dialog
+            this.showConfirmationDialog(formData);
+            this.showLoading(false);
+            
+        } catch (error) {
+            console.error('Form submission error:', error);
+            this.showToast('表单提交出错，请重试', 'error');
+            this.showLoading(false);
+        }
+    }
+    
+    collectFormData() {
+        const formElements = document.getElementById('mainForm').elements;
+        const formData = {};
+        
+        // Collect form fields
+        for (let element of formElements) {
+            if (element.name) {
+                if (element.type === 'checkbox') {
+                    formData[element.name] = element.checked;
+                } else if (element.type === 'file') {
+                    formData[element.name + 'File'] = element.files[0];
+                    formData[element.name] = element.files[0]?.name || '';
+                } else {
+                    formData[element.name] = element.value.trim();
+                }
+            }
+        }
+        
+        // Add terms agreement
+        const agreeTerms = document.getElementById('agreeTerms');
+        formData.agreeTerms = agreeTerms ? agreeTerms.checked : false;
+        
+        // Add cart data
+        formData.cart = Array.from(this.cart.entries()).map(([productId, quantity]) => {
+            const product = this.products.find(p => p.id === productId);
+            return {
+                productId,
+                name: product.name,
+                price: product.price,
+                quantity,
+                total: product.price * quantity
+            };
+        });
+        
+        return formData;
+    }
+    
+    showValidationErrors() {
+        const errors = this.validator.getErrors();
+        
+        Object.keys(errors).forEach(fieldName => {
+            this.validator.showFieldError(fieldName, errors[fieldName]);
+        });
+        
+        // Show first error in toast
+        const firstError = Object.values(errors)[0];
+        this.showToast(firstError, 'error');
+        
+        // Scroll to first error
+        const firstErrorElement = document.querySelector('.form-group.error, .disclaimer-box.error');
+        if (firstErrorElement) {
+            firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+    
+    showConfirmationDialog(formData) {
+        const dialog = document.getElementById('confirmationDialog');
+        const orderSummary = document.getElementById('orderSummary');
+        
+        if (!dialog || !orderSummary) return;
+        
+        // Generate order summary
+        let total = 0;
+        const itemsHtml = formData.cart.map(item => {
+            total += item.total;
+            return `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>${item.name} × ${item.quantity}</span>
+                    <span>¥${item.total.toFixed(2)}</span>
+                </div>
+            `;
+        }).join('');
+        
+        orderSummary.innerHTML = `
+            <div class="order-summary-section">
+                <h4>订单商品</h4>
+                ${itemsHtml}
+                <div style="border-top: 2px solid #eee; padding-top: 12px; margin-top: 12px; font-weight: bold;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>总计</span>
+                        <span style="color: var(--primary);">¥${total.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-summary-section" style="margin-top: 20px;">
+                <h4>配送信息</h4>
+                <p><strong>姓名:</strong> ${formData.customerName}</p>
+                <p><strong>电话:</strong> ${formData.customerPhone}</p>
+                <p><strong>地址:</strong> ${formData.deliveryAddress}</p>
+                ${formData.specialRequests ? `<p><strong>特殊要求:</strong> ${formData.specialRequests}</p>` : ''}
+            </div>
+            
+            <div class="order-summary-section" style="margin-top: 20px;">
+                <h4>付款信息</h4>
+                <p><strong>付款方式:</strong> ${this.getPaymentMethodText(formData.paymentMethod)}</p>
+                <p><strong>付款凭证:</strong> ${formData.paymentProof}</p>
+            </div>
+        `;
+        
+        // Store form data for submission
+        this.pendingOrderData = formData;
+        
+        this.showDialog('confirmationDialog');
+    }
+    
+    getPaymentMethodText(method) {
+        const methods = {
+            'maybank': 'Maybank 转账',
+            'touchngo': 'Touch n Go eWallet'
+        };
+        return methods[method] || method;
+    }
+    
+    async submitOrder() {
+        try {
+            this.showLoading(true);
+            this.hideDialog('confirmationDialog');
+            
+            const orderData = this.prepareOrderData(this.pendingOrderData);
+            
+            // Check if Supabase is configured
+            if (window.supabaseConfig && window.supabaseConfig.getClient()) {
+                // Use real Supabase
+                await this.submitToSupabase(orderData);
+            } else {
+                // Demo mode - simulate API call
+                console.log('Demo mode: Order would be submitted:', orderData);
+                await this.simulateApiCall();
+            }
+            
+            // Generate order number
+            const orderNumber = this.generateOrderNumber();
+            
+            // Show success dialog
+            this.showSuccessDialog(orderNumber);
+            
+            this.showLoading(false);
+            
+        } catch (error) {
+            console.error('Order submission error:', error);
+            this.showToast('订单提交失败，请重试', 'error');
+            this.showLoading(false);
+        }
+    }
+    
+    async submitToSupabase(orderData) {
+        const client = window.supabaseConfig.getClient();
+        
+        // Upload payment proof if exists
+        let paymentProofUrl = '';
+        const fileInput = document.getElementById('paymentProof');
+        if (fileInput && fileInput.files[0]) {
+            paymentProofUrl = await window.supabaseConfig.uploadPaymentProof(
+                fileInput.files[0], 
+                orderData.orderNumber
+            );
+        }
+        
+        // Save order to database
+        const { data, error } = await client
+            .from('orders')
+            .insert([{
+                order_id: orderData.orderNumber,
+                name: orderData.customerName,
+                phone: orderData.customerPhone,
+                delivery_method: orderData.deliveryMethod || orderData.deliveryAddress,
+                remarks: orderData.specialRequests,
+                order_items: orderData.items,
+                total_amount: orderData.totalAmount,
+                payment_proof_url: paymentProofUrl,
+                status: 'pending',
+                created_at: new Date().toISOString()
+            }])
+            .select();
+            
+        if (error) {
+            throw error;
+        }
+        
+        return data[0];
+    }
+    
+    prepareOrderData(formData) {
+        return {
+            orderNumber: this.generateOrderNumber(),
+            customerName: formData.customerName,
+            customerPhone: formData.customerPhone,
+            deliveryAddress: formData.deliveryAddress,
+            specialRequests: formData.specialRequests,
+            paymentMethod: formData.paymentMethod,
+            items: formData.cart,
+            totalAmount: formData.cart.reduce((sum, item) => sum + item.total, 0),
+            status: 'pending',
+            createdAt: new Date().toISOString()
+        };
+    }
+    
+    generateOrderNumber() {
+        const date = new Date();
+        const dateStr = date.getFullYear().toString() + 
+                       (date.getMonth() + 1).toString().padStart(2, '0') + 
+                       date.getDate().toString().padStart(2, '0');
+        const timeStr = Date.now().toString().slice(-6);
+        return `FW${dateStr}${timeStr}`;
+    }
+    
+    async simulateApiCall() {
+        // Simulate network delay
+        return new Promise(resolve => setTimeout(resolve, 2000));
+    }
+    
+    showSuccessDialog(orderNumber) {
+        const dialog = document.getElementById('successDialog');
+        const orderNumberElement = document.getElementById('orderNumber');
+        
+        if (orderNumberElement) {
+            orderNumberElement.textContent = orderNumber;
+        }
+        
+        this.showDialog('successDialog');
+    }
+    
+    resetForm() {
+        // Clear form
+        const form = document.getElementById('mainForm');
+        if (form) {
+            form.reset();
+        }
+        
+        // Clear cart
+        this.cart.clear();
+        
+        // Clear file upload display
+        const fileNameSpan = document.querySelector('.file-name');
+        if (fileNameSpan) {
+            fileNameSpan.textContent = '';
+        }
+        
+        // Clear validation errors
+        this.validator.clearAllErrors();
+        
+        // Update UI
+        this.updateCartSummary();
+        this.renderProducts();
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        this.showToast('表单已重置', 'info');
+    }
+    
+    showDialog(dialogId) {
+        const dialog = document.getElementById(dialogId);
+        if (dialog) {
+            dialog.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            
+            // Focus management for accessibility
+            const firstFocusable = dialog.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (firstFocusable) {
+                firstFocusable.focus();
+            }
+        }
+    }
+    
+    hideDialog(dialogId) {
+        const dialog = document.getElementById(dialogId);
+        if (dialog) {
+            dialog.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+    }
+    
+    showLoading(show) {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = show ? 'flex' : 'none';
+        }
+    }
+    
+    showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) return;
+        
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        const icons = {
+            success: 'fas fa-check-circle',
+            error: 'fas fa-exclamation-circle',
+            warning: 'fas fa-exclamation-triangle',
+            info: 'fas fa-info-circle'
+        };
+        
+        toast.innerHTML = `
+            <i class="toast-icon ${icons[type]}"></i>
+            <span class="toast-message">${message}</span>
+            <button type="button" class="toast-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.remove();
+            }
+        }, 5000);
+    }
+    
+    setupAdminControls() {
+        const showExportBtn = document.getElementById('showExportBtn');
+        const adminPanel = document.getElementById('adminPanel');
+        const realExportBtn = document.getElementById('realExportBtn');
+        const adminPassword = document.getElementById('adminPassword');
+        
+        if (showExportBtn && adminPanel) {
+            showExportBtn.addEventListener('click', () => {
+                const isVisible = adminPanel.style.display !== 'none';
+                adminPanel.style.display = isVisible ? 'none' : 'block';
+            });
+        }
+        
+        if (realExportBtn && adminPassword) {
+            realExportBtn.addEventListener('click', () => {
+                this.handleAdminExport(adminPassword.value);
+            });
+        }
+    }
+    
+    async handleAdminExport(password) {
+        const ADMIN_PASSWORD = 'fengweipaiadmin'; // 在实际应用中应该从环境变量获取
+        
+        if (password !== ADMIN_PASSWORD) {
+            this.showToast('管理员密码错误 / Incorrect admin password', 'error');
+            return;
+        }
+        
+        try {
+            this.showLoading(true);
+            
+            // 从 Supabase 获取订单数据
+            const { data: orders, error } = await window.supabaseConfig.getClient()
+                .from('orders')
+                .select('*')
+                .order('created_at', { ascending: false });
+                
+            if (error) {
+                throw error;
+            }
+            
+            // 准备Excel数据
+            const wsData = [
+                ['订单号', '姓名', '电话', '配送方式', '备注', '总金额', '状态', '下单时间', '支付凭证URL', '产品明细']
+            ];
+            
+            orders.forEach(order => {
+                const productDetails = Array.isArray(order.order_items)
+                    ? order.order_items.map(item => `${item.product} x ${item.quantity} (RM${item.price.toFixed(2)})`).join('; ')
+                    : 'N/A';
+                    
+                wsData.push([
+                    order.order_id,
+                    order.name,
+                    order.phone,
+                    order.delivery_method === 'self-pickup' ? '自取' : 'Lalamove送货',
+                    order.remarks || '无',
+                    `RM${order.total_amount.toFixed(2)}`,
+                    order.status,
+                    new Date(order.created_at).toLocaleString(),
+                    order.payment_proof_url || '无',
+                    productDetails
+                ]);
+            });
+            
+            // 使用SheetJS导出Excel
+            if (typeof XLSX !== 'undefined') {
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, '订单数据');
+                XLSX.writeFile(wb, `锋味派订单_${new Date().toISOString().slice(0, 10)}.xlsx`);
+                
+                this.showToast('导出成功 / Export successful', 'success');
+            } else {
+                throw new Error('Excel library not loaded');
+            }
+            
+        } catch (error) {
+            console.error('Export error:', error);
+            this.showToast(`导出订单时出错: ${error.message || '未知错误'}`, 'error');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+    
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+}
+
+// Initialize app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.app = new FoodOrderApp();
+});
+
+// Service Worker registration for better performance
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // Service worker would be implemented here for production
+        console.log('Service Worker support detected');
+    });
+}
