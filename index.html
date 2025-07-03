@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>锋味派美食团购</title>
+    <meta name="description" content="锋味派美食团购平台 - 新鲜美食，团购优惠" />
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* CSS Custom Properties */
+        :root {
+            --primary: #d10000; --secondary: #000000; --accent: #f8b500; --light: #f8f8f8; --dark: #333333;
+            --success: #28a745; --warning: #ffc107; --danger: #dc3545; --info: #17a2b8;
+            --bg-gradient: linear-gradient(135deg, #f9f9f9 0%, #eeeeee 100%);
+            --section-bg: rgba(255, 255, 255, 0.95);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08); --shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.12);
+            --border-radius: 12px; --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family); max-width: 800px; margin: 0 auto; background: var(--bg-gradient); color: var(--dark); line-height: 1.6; }
+
+        /* All other styles from your original file are preserved */
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(5px); }
+        .loading-spinner { text-align: center; color: white; }
+        .loading-spinner i { font-size: 48px; margin-bottom: 16px; color: var(--primary); }
+        .header { text-align: center; padding: 32px 20px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; border-radius: 0 0 24px 24px; margin-bottom: 24px; box-shadow: var(--shadow); }
+        .header h1 { margin: 0 0 8px 0; font-size: clamp(24px, 5vw, 32px); }
+        .category-nav { position: sticky; top: 0; background: white; z-index: 100; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; border-radius: var(--border-radius); }
+        .category-links { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 4px; scrollbar-width: none; }
+        .category-links::-webkit-scrollbar { display: none; }
+        .category-link { white-space: nowrap; padding: 8px 16px; background: #f5f5f5; border-radius: 20px; text-decoration: none; color: var(--dark); }
+        .category-link.active, .category-link:hover { background: var(--primary); color: white; }
+        .main-content { padding: 0 20px 40px; }
+        .container { background: var(--section-bg); border-radius: var(--border-radius); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow); }
+        .section-title { font-size: 24px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+        .section-title i { color: var(--primary); }
+        .product-list { display: grid; gap: 20px; margin-bottom: 24px; }
+        .product { background: white; border-radius: var(--border-radius); padding: 20px; box-shadow: var(--shadow); border-left: 4px solid var(--primary); }
+        .product.out-of-stock { opacity: 0.7; }
+        .product-image-container { width: 100%; height: 200px; overflow: hidden; border-radius: 8px; margin-bottom: 16px; position: relative; }
+        .product-image { max-width: 100%; max-height: 100%; object-fit: cover; }
+        .product-name { font-size: 18px; font-weight: 700; }
+        .product-price { color: var(--primary); font-size: 20px; font-weight: 700; }
+        .stock-info { margin: 8px 0; text-align: center; }
+        .stock-count { font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+        .stock-count.in-stock { color: var(--success); } .stock-count.low-stock { color: var(--warning); } .stock-count.out-of-stock { color: var(--danger); }
+        .stock-badge { position: absolute; top: 8px; right: 8px; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; z-index: 1; }
+        .out-of-stock-badge { background: var(--danger); color: white; } .low-stock-badge { background: var(--warning); color: #212529; }
+        .out-of-stock-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(220, 53, 69, 0.9); color: white; padding: 8px 16px; border-radius: 20px; font-weight: 600; z-index: 2; }
+        .quantity-control { display: flex; align-items: center; gap: 12px; justify-content: center; }
+        .quantity-btn { width: 40px; height: 40px; border: none; border-radius: 8px; background: var(--primary); color: white; font-size: 18px; cursor: pointer; }
+        .quantity-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .quantity-input { width: 60px; height: 40px; text-align: center; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; }
+        .cart-summary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 20px; border-radius: var(--border-radius); text-align: center; margin-top: 24px; }
+        .total { font-size: 24px; font-weight: 700; }
+        .form-group { margin-bottom: 24px; position: relative; }
+        .form-group label { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; }
+        .required { color: var(--danger); }
+        input[type="text"], input[type="tel"], select, textarea { width: 100%; padding: 14px 16px; border: 2px solid #e0e0e0; border-radius: var(--border-radius); font-size: 16px; box-sizing: border-box; }
+        .error-message { color: var(--danger); font-size: 14px; margin-top: 6px; display: none; }
+        .form-group.error .error-message, .disclaimer-box.error .error-message { display: block; }
+        .form-group.error input, .form-group.error select { border-color: var(--danger); }
+        .file-upload-label { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; padding: 24px; background: var(--light); border: 2px dashed #d0d0d0; border-radius: var(--border-radius); cursor: pointer; }
+        .file-upload input[type="file"] { display: none; }
+        .file-name { color: var(--primary); font-weight: 600; }
+        .disclaimer-box { background: #fff9f9; padding: 24px; border-radius: var(--border-radius); margin-bottom: 24px; border-left: 4px solid var(--primary); }
+        .disclaimer-checkbox { display: flex; align-items: flex-start; gap: 12px; margin-top: 20px; }
+        .disclaimer-checkbox input[type="checkbox"] { width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; }
+        .disclaimer-box.error { border-left-color: var(--danger); }
+        .pickup-address { background: #f0f8ff; padding: 16px; border-radius: var(--border-radius); margin-top: 12px; border-left: 4px solid #2196f3; }
+        .bank-info { background: linear-gradient(135deg, #fff9f9, #fff5f5); padding: 24px; border-radius: var(--border-radius); margin-top: 24px; border-left: 4px solid var(--primary); }
+        .payment-action { margin: 16px 0; text-align: center; }
+        .qr-placeholder { width: 100%; height: 200px; background: white; border: 2px dashed #d0d0d0; display: flex; justify-content: center; align-items: center; }
+        .qr-placeholder img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .dialog-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
+        .dialog-overlay.show { display: flex; }
+        .dialog-content { background: white; border-radius: var(--border-radius); max-width: 500px; width: 100%; }
+        .dialog-header { padding: 24px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .dialog-footer { padding: 20px 24px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 12px; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 24px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: var(--border-radius); font-size: 16px; cursor: pointer; }
+        .btn-secondary { background: var(--dark); }
+        .submit-btn { width: 100%; padding: 18px; font-size: 18px; margin-top: 24px; }
+        .admin-section { margin-top: 40px; background: white; padding: 24px; border-radius: var(--border-radius); box-shadow: var(--shadow); }
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1100; }
+    </style>
+</head>
+<body>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i><p>处理中...</p></div>
+    </div>
+    <header class="header">
+        <h1><i class="fas fa-utensils"></i> 锋味派美食团购</h1>
+        <p class="header-subtitle">新鲜美食，团购优惠</p>
+    </header>
+    <nav class="category-nav" id="categoryNav">
+        <div class="category-links">
+            <a href="#all" class="category-link active" data-category="all">全部</a>
+            <a href="#sausage" class="category-link" data-category="烤肠系列">🌭 烤肠系列</a>
+            <a href="#shrimp" class="category-link" data-category="虾肠系列">🦐 虾肠系列</a>
+            <a href="#pizza" class="category-link" data-category="披萨系列">🍕 披萨系列</a>
+            <a href="#dumpling" class="category-link" data-category="小笼汤包系列">🥟 小笼汤包系列</a>
+            <a href="#pastry" class="category-link" data-category="酥饼系列">🥮 酥饼系列</a>
+            <a href="#chicken" class="category-link" data-category="鸡排系列">🍗 鸡排系列</a>
+            <a href="#wings" class="category-link" data-category="鸡翅系列">🍗 鸡翅系列</a>
+            <a href="#shumai" class="category-link" data-category="纸皮烧卖系列">🥟 纸皮烧卖系列</a>
+        </div>
+    </nav>
+    <main class="main-content">
+        <section class="disclaimer-box" id="disclaimerBox">
+            <h3><i class="fas fa-exclamation-triangle"></i> 重要声明 / Important Notice</h3>
+            <ul>
+                <li>此为预购商品，订单汇总后统一向供应商订购</li>
+                <li>预计等待时间：30-60天（从下单日起计算）</li>
+                <li>当前价格<strong>不包含</strong>国际运费，运费将根据实际物流成本后续通知收取</li>
+            </ul>
+            <div class="disclaimer-checkbox">
+                <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
+                <label for="agreeTerms">我已阅读并同意上述条款 <span class="required">*</span></label>
+            </div>
+            <div class="error-message"></div>
+        </section>
+        <section class="container" id="orderForm">
+            <h2 class="section-title"><i class="fas fa-user-edit"></i> 订单信息</h2>
+            <form id="mainForm" novalidate>
+                <div class="form-group">
+                    <label for="customerName"><i class="fas fa-user"></i> 姓名 <span class="required">*</span></label>
+                    <input type="text" id="customerName" name="customerName" required placeholder="请输入您的姓名">
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="customerPhone"><i class="fas fa-phone"></i> 电话 <span class="required">*</span></label>
+                    <input type="tel" id="customerPhone" name="customerPhone" required placeholder="请输入您的电话号码">
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="deliveryMethod"><i class="fas fa-truck"></i> 取货方式 <span class="required">*</span></label>
+                    <select id="deliveryMethod" name="deliveryMethod" required>
+                        <option value="">请选择</option>
+                        <option value="self-pickup">自取</option>
+                        <option value="lalamove">Lalamove</option>
+                    </select>
+                    <div id="selfPickupAddress" class="pickup-address" style="display: none;">
+                        <h4>自取地址:</h4>
+                        <p>667, Jalan 24, Taman Perindustrian Ehsan Jaya, Kepong, 52100, Kuala Lumpur.</p>
+                        <p><strong>联络号码:</strong> 0162327792</p>
+                    </div>
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group" id="deliveryAddressGroup" style="display: none;">
+                    <label for="deliveryAddress"><i class="fas fa-map-marker-alt"></i> 配送地址 <span class="required">*</span></label>
+                    <textarea id="deliveryAddress" name="deliveryAddress" placeholder="请输入详细的配送地址"></textarea>
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="specialRequests"><i class="fas fa-comment"></i> 特殊要求</label>
+                    <textarea id="specialRequests" name="specialRequests" placeholder="（可选）"></textarea>
+                </div>
+            </form>
+        </section>
+        <section class="container" id="productsSection">
+            <h2 class="section-title"><i class="fas fa-shopping-basket"></i> 请选择商品</h2>
+            <div id="productList" class="product-list"></div>
+            <div class="cart-summary" id="cartSummary" style="display:none;">
+                <div class="total">总计: <span id="totalAmount">RM0</span></div>
+                <div class="item-count">共 <span id="itemCount">0</span> 件商品</div>
+            </div>
+        </section>
+        <section class="container">
+            <h2 class="section-title"><i class="fas fa-credit-card"></i> 付款信息</h2>
+            <div class="form-group">
+                <label for="paymentMethod"><i class="fas fa-credit-card"></i> 付款方式 <span class="required">*</span></label>
+                <select id="paymentMethod" name="paymentMethod" required>
+                    <option value="">请选择</option>
+                    <option value="maybank">Maybank</option>
+                    <option value="touchngo">Touch n Go</option>
+                </select>
+                <div class="error-message"></div>
+            </div>
+            <div id="paymentDetails" style="display: none;">
+                <div class="bank-info" id="maybankDetails" style="display: none;">
+                    <h4><i class="fas fa-university"></i> Maybank</h4>
+                    <p><strong>Account Name:</strong> Choong Sher Lee</p>
+                    <p><strong>Account No.:</strong> 114209540438</p>
+                    <div class="qr-placeholder"><img src="IMG_4043.jpeg" alt="Maybank QR"></div>
+                </div>
+                <div class="bank-info" id="touchngoDetails" style="display: none;">
+                    <h4><i class="fas fa-mobile-alt"></i> Touch n Go</h4>
+                    <p><strong>Name:</strong> Choong Sher Lee</p>
+                    <p><strong>Phone:</strong> +60162327792</p>
+                    <div class="payment-action">
+                        <button type="button" class="btn btn-secondary" id="touchngoPayBtn">打开 App</button>
+                    </div>
+                    <div class="qr-placeholder"><img src="IMG_4042.png" alt="TNG QR"></div>
+                </div>
+            </div>
+            <div class="form-group" id="paymentProofSection" style="display: none;">
+                <label for="paymentProof"><i class="fas fa-upload"></i> 上传凭证 <span class="required">*</span></label>
+                <div class="file-upload">
+                    <input type="file" id="paymentProof" name="paymentProof" accept="image/*" required>
+                    <label for="paymentProof" class="file-upload-label">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>点击上传</span>
+                        <span class="file-name"></span>
+                    </label>
+                </div>
+                <div class="error-message"></div>
+            </div>
+        </section>
+        <button type="submit" class="btn submit-btn" id="submitBtn" form="mainForm">
+            <i class="fas fa-paper-plane"></i> 提交订单
+        </button>
+    </main>
+    <div id="confirmationDialog" class="dialog-overlay">
+        <div class="dialog-content">
+            <div class="dialog-header"><h3>确认订单</h3></div>
+            <div class="dialog-body" id="orderSummary"></div>
+            <div class="dialog-footer">
+                <button type="button" class="btn btn-secondary" id="cancelOrder">取消</button>
+                <button type="button" class="btn" id="confirmOrder">确认</button>
+            </div>
+        </div>
+    </div>
+    <div id="successDialog" class="dialog-overlay">
+         <div class="dialog-content">
+            <div class="dialog-header"><h3><i class="fas fa-check-circle success-icon"></i> 订单成功</h3></div>
+            <div class="dialog-body">
+                <p>订单号: <strong id="orderNumber"></strong></p>
+                <p>请保持电话畅通。</p>
+            </div>
+            <div class="dialog-footer"><button type="button" class="btn" id="closeSuccess">完成</button></div>
+        </div>
+    </div>
+    <div id="toastContainer" class="toast-container"></div>
+    <div class="admin-section">
+        <button class="btn btn-secondary" id="showExportBtn"><i class="fas fa-download"></i> 管理员</button>
+        <div id="adminPanel" style="display:none;">
+            <input type="password" id="adminPassword" placeholder="密码" />
+            <button class="btn btn-secondary" id="realExportBtn"><i class="fas fa-file-excel"></i> 导出</button>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://edfnhhthztskuuosuasw.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZm5oaHRoenRza3V1b3N1YXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTYxMTYsImV4cCI6MjA2NTU3MjExNn0.O3g2gjvsWagmWgmzoeJA8mPampvLYJr-KgqVwXsKoAo';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    const PhoneFormatter = { format: (value) => value.replace(/\D/g, '') };
+
+    class FormValidator {
+        constructor() { this.errors = {}; }
+        validateForm(formData) {
+            this.errors = {};
+            const phoneRegex = /^(\+?6?01)[0-46-9]-?[0-9]{7,8}$/;
+
+            // Validate all required fields
+            if (!formData.agreeTerms) this.errors.agreeTerms = '请同意条款';
+            if (!formData.customerName?.trim()) this.errors.customerName = '请输入姓名';
+            if (!formData.customerPhone || !phoneRegex.test(formData.customerPhone)) 
+                this.errors.customerPhone = '请输入有效电话';
+            if (!formData.deliveryMethod) this.errors.deliveryMethod = '请选择取货方式';
+            if (formData.deliveryMethod === 'lalamove' && !formData.deliveryAddress?.trim()) 
+                this.errors.deliveryAddress = '请输入地址';
+            if (!formData.paymentMethod) this.errors.paymentMethod = '请选择付款方式';
+            if (!formData.paymentProofFile) this.errors.paymentProof = '请上传凭证';
+            if (formData.cart?.size === 0) this.errors.cart = '请至少选择一件商品';
+            
+            return Object.keys(this.errors).length === 0;
+        }
+
+        showAllErrors() {
+            // Clear previous errors
+            document.querySelectorAll('.form-group.error, .disclaimer-box.error').forEach(el => 
+                el.classList.remove('error'));
+            
+            // Show new errors
+            for (const [fieldName, errorMsg] of Object.entries(this.errors)) {
+                let element;
+                if (fieldName === 'agreeTerms') {
+                    element = document.getElementById('disclaimerBox');
+                } else if (fieldName === 'paymentProof') {
+                    element = document.getElementById('paymentProofSection');
+                } else if (fieldName === 'cart') {
+                    // Handle cart error separately
+                    this.showToast(errorMsg, 'warning');
+                    continue;
+                } else {
+                    element = document.getElementById(fieldName)?.closest('.form-group');
+                }
+
+                if (element) {
+                    element.classList.add('error');
+                    const errorElement = element.querySelector('.error-message');
+                    if (errorElement) errorElement.textContent = errorMsg;
+                }
+            }
+
+            // Scroll to first error
+            const firstErrorKey = Object.keys(this.errors)[0];
+            if (firstErrorKey) {
+                const el = document.getElementById(firstErrorKey) || 
+                          document.getElementById('disclaimerBox') ||
+                          document.getElementById('productsSection');
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    }
+
+    class FoodOrderApp {
+        constructor() {
+            this.cart = new Map();
+            this.products = [];
+            this.validator = new FormValidator();
+            this.currentCategory = 'all';
+            this.initializeApp();
+        }
+
+            async initializeApp() {
+                this.showLoading(true);
+                await this.loadProducts();
+                this.loadInventoryFromStorage();
+                this.setupEventListeners();
+                this.renderProducts();
+                this.updateCartSummary();
+                this.showLoading(false);
+                this.showToast('应用加载成功', 'success');
+                setTimeout(() => this.showInventoryAlerts(), 1500);
+            }
+
+            async loadProducts() {
+                this.products = [
+                    { id: 1, name: '原味烤肠', price: 28, image: 'IMG_3859.jpeg', category: '烤肠系列', emoji: '🌭', stock: 45, minStock: 10 },
+                    { id: 2, name: '烟熏蜜汁烤肠', price: 28, image: 'IMG_3864.jpeg', category: '烤肠系列', emoji: '🌭', stock: 38, minStock: 10 },
+                    { id: 3, name: '法式香草烤肠', price: 28, image: 'IMG_3863.jpeg', category: '烤肠系列', emoji: '🌭', stock: 52, minStock: 10 },
+                    { id: 4, name: '黑胡椒烤肠', price: 28, image: 'IMG_3860.jpeg', category: '烤肠系列', emoji: '🌭', stock: 8, minStock: 10 },
+                    { id: 5, name: '孜然脆骨烤肠', price: 28, image: 'IMG_3862.jpeg', category: '烤肠系列', emoji: '🌭', stock: 23, minStock: 10 },
+                    { id: 6, name: '芝士玉米烤肠', price: 28, image: 'IMG_3861.jpeg', category: '烤肠系列', emoji: '🌭', stock: 41, minStock: 10 },
+                    { id: 7, name: '原味虾肠', price: 33, image: 'IMG_3853.jpeg', category: '虾肠系列', emoji: '🦐', stock: 30, minStock: 8 },
+                    { id: 8, name: '辣味虾肠', price: 33, image: 'IMG_3854.jpeg', category: '虾肠系列', emoji: '🦐', stock: 27, minStock: 8 },
+                    { id: 9, name: '原味虾饼', price: 28, image: 'IMG_3873.jpeg', category: '虾肠系列', emoji: '🍤', stock: 19, minStock: 8 },
+                    { id: 10, name: '玛格丽特披萨', price: 25, image: 'IMG_3841.jpeg', category: '披萨系列', emoji: '🍕', stock: 15, minStock: 5 },
+                    { id: 11, name: '黑椒牛肉披萨', price: 25, image: 'IMG_3839.jpeg', category: '披萨系列', emoji: '🍕', stock: 12, minStock: 5 },
+                    { id: 12, name: '奥尔良鸡肉披萨', price: 25, image: 'IMG_3840.jpeg', category: '披萨系列', emoji: '🍕', stock: 18, minStock: 5 },
+                    { id: 13, name: '双料榴莲披萨', price: 40, image: 'IMG_3852.jpeg', category: '披萨系列', emoji: '🍕', stock: 3, minStock: 3 },
+                    { id: 14, name: '鲜肉小笼汤包', price: 12, image: 'IMG_3874.jpeg', category: '小笼汤包系列', emoji: '🥟', stock: 60, minStock: 15 },
+                    { id: 15, name: '菌菇小笼汤包', price: 12, image: 'IMG_3875.jpeg', category: '小笼汤包系列', emoji: '🥟', stock: 45, minStock: 15 },
+                    { id: 16, name: '黑松露小笼汤包', price: 12, image: 'IMG_3876.jpeg', category: '小笼汤包系列', emoji: '🥟', stock: 20, minStock: 10 },
+                    { id: 17, name: '黑猪肉酥饼', price: 55, image: 'IMG_3837.jpeg', category: '酥饼系列', emoji: '🥮', stock: 8, minStock: 5 },
+                    { id: 18, name: '安格斯牛肉酥饼', price: 55, image: 'IMG_3838.jpeg', category: '酥饼系列', emoji: '🥮', stock: 12, minStock: 5 },
+                    { id: 19, name: '原味鸡排', price: 20, image: 'IMG_3835.jpeg', category: '鸡排系列', emoji: '🍗', stock: 25, minStock: 8 },
+                    { id: 20, name: '奥尔良鸡排', price: 20, image: 'IMG_3836.jpeg', category: '鸡排系列', emoji: '🍗', stock: 22, minStock: 8 },
+                    { id: 21, name: '奥尔良鸡翅', price: 25, image: 'IMG_3865.jpeg', category: '鸡翅系列', emoji: '🍗', stock: 35, minStock: 10 },
+                    { id: 22, name: '青花椒鸡翅', price: 25, image: 'IMG_3866.jpeg', category: '鸡翅系列', emoji: '🍗', stock: 28, minStock: 10 },
+                    { id: 23, name: '黑猪三丁纸皮烧卖', price: 15, image: 'IMG_3843.jpeg', category: '纸皮烧卖系列', emoji: '🥟', stock: 40, minStock: 12 },
+                    { id: 24, name: '黑椒牛肉纸皮烧卖', price: 15, image: 'IMG_3842.jpeg', category: '纸皮烧卖系列', emoji: '🥟', stock: 5, minStock: 12 },
+                    { id: 25, name: '黑猪梅菜干纸皮烧卖', price: 15, image: 'IMG_3844.jpeg', category: '纸皮烧卖系列', emoji: '🥟', stock: 32, minStock: 12 },
+                    { id: 26, name: '三丁芝士纸皮烧卖', price: 15, image: 'IMG_3845.jpeg', category: '纸皮烧卖系列', emoji: '🥟', stock: 0, minStock: 12 },
+                    { id: 27, name: '乌米腊味纸皮烧卖', price: 15, image: 'IMG_3846.jpeg', category: '纸皮烧卖系列', emoji: '🥟', stock: 18, minStock: 12 }
+                ];
+            }
+            
+            loadInventoryFromStorage() {
+                try {
+                    const saved = localStorage.getItem('inventoryData');
+                    if (saved) {
+                        const inventoryData = JSON.parse(saved);
+                        inventoryData.forEach(item => {
+                            const product = this.products.find(p => p.id === item.id);
+                            if (product) product.stock = item.stock;
+                        });
+                    }
+                } catch (e) { console.error("Failed to load inventory from storage", e); }
+            }
+
+            setupEventListeners() {
+                document.getElementById('categoryNav').addEventListener('click', (e) => {
+                    if (e.target.matches('.category-link')) {
+                        e.preventDefault();
+                        this.handleCategoryChange(e.target.dataset.category);
+                    }
+                });
+                document.getElementById('mainForm').addEventListener('submit', (e) => { e.preventDefault(); this.handleFormSubmit(); });
+                document.getElementById('deliveryMethod').addEventListener('change', this.handleDeliveryChange);
+                document.getElementById('paymentMethod').addEventListener('change', this.handlePaymentChange.bind(this));
+                document.getElementById('paymentProof').addEventListener('change', this.handleFileUpload.bind(this));
+                document.getElementById('customerPhone').addEventListener('input', (e) => e.target.value = PhoneFormatter.format(e.target.value));
+                document.getElementById('cancelOrder').addEventListener('click', () => this.hideDialog('confirmationDialog'));
+                document.getElementById('confirmOrder').addEventListener('click', () => this.submitOrder());
+                document.getElementById('closeSuccess').addEventListener('click', () => this.hideDialog('successDialog'));
+                document.getElementById('showExportBtn').addEventListener('click', () => {
+                    document.getElementById('adminPanel').style.display = document.getElementById('adminPanel').style.display === 'none' ? 'block' : 'none';
+                });
+                document.getElementById('realExportBtn').addEventListener('click', () => this.handleAdminExport(document.getElementById('adminPassword').value));
+                document.getElementById('touchngoPayBtn').addEventListener('click', () => window.open('https://touchngo.com.my/ewallet/', '_blank'));
+            }
+
+            renderProducts() {
+                let filtered = this.products;
+                if (this.currentCategory !== 'all') {
+                    filtered = this.products.filter(p => p.category === this.currentCategory);
+                }
+                document.getElementById('productList').innerHTML = filtered.map(p => this.renderProduct(p)).join('');
+                this.attachQuantityListeners();
+            }
+
+            renderProduct(product) {
+                const quantity = this.cart.get(product.id) || 0;
+                const stockStatus = this.getStockStatus(product);
+                const isOutOfStock = product.stock === 0;
+                return `
+                    <div class="product ${isOutOfStock ? 'out-of-stock' : ''}" data-product-id="${product.id}">
+                        ${stockStatus.badge}
+                        <div class.product-image-container"><img src="${product.image}" alt="${product.name}" class="product-image"></div>
+                        <div class="product-name">${product.emoji} ${product.name}</div>
+                        <div class="product-price">RM${product.price.toFixed(2)}</div>
+                        <div class="stock-info ${stockStatus.class}"><i class="fas ${stockStatus.icon}"></i> 库存: ${product.stock > 0 ? `${product.stock} 件` : '已售完'}</div>
+                        <div class="quantity-control">
+                            <button class="quantity-btn" data-action="decrease" ${quantity === 0 || isOutOfStock ? 'disabled' : ''}><i class="fas fa-minus"></i></button>
+                            <input type="number" class="quantity-input" value="${quantity}" min="0" max="${product.stock}" ${isOutOfStock ? 'disabled' : ''}>
+                            <button class="quantity-btn" data-action="increase" ${quantity >= product.stock || isOutOfStock ? 'disabled' : ''}><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>`;
+            }
+
+            attachQuantityListeners() {
+                document.querySelectorAll('.quantity-control').forEach(control => {
+                    const productId = parseInt(control.closest('.product').dataset.productId);
+                    control.querySelector('.quantity-btn[data-action="increase"]').addEventListener('click', () => this.updateQuantity(productId, 'increase'));
+                    control.querySelector('.quantity-btn[data-action="decrease"]').addEventListener('click', () => this.updateQuantity(productId, 'decrease'));
+                    control.querySelector('.quantity-input').addEventListener('change', (e) => this.setQuantity(productId, parseInt(e.target.value) || 0));
+                });
+            }
+
+            handleCategoryChange(category) {
+                this.currentCategory = category;
+                document.querySelectorAll('.category-link').forEach(link => link.classList.toggle('active', link.dataset.category === category));
+                this.renderProducts();
+            }
+
+            handleDeliveryChange(e) {
+                document.getElementById('deliveryAddressGroup').style.display = e.target.value === 'lalamove' ? 'block' : 'none';
+                document.getElementById('selfPickupAddress').style.display = e.target.value === 'self-pickup' ? 'block' : 'none';
+            }
+
+            handlePaymentChange(e) {
+                const method = e.target.value;
+                document.getElementById('paymentDetails').style.display = method ? 'block' : 'none';
+                document.getElementById('paymentProofSection').style.display = method ? 'block' : 'none';
+                document.getElementById('maybankDetails').style.display = method === 'maybank' ? 'block' : 'none';
+                document.getElementById('touchngoDetails').style.display = method === 'touchngo' ? 'block' : 'none';
+            }
+
+            handleFileUpload(event) {
+                document.querySelector('.file-name').textContent = event.target.files[0] ? event.target.files[0].name : '';
+            }
+
+            updateQuantity(productId, action) {
+                let quantity = this.cart.get(productId) || 0;
+                const product = this.products.find(p => p.id === productId);
+                if (action === 'increase' && quantity < product.stock) quantity++;
+                else if (action === 'decrease' && quantity > 0) quantity--;
+                this.setQuantity(productId, quantity);
+            }
+            
+            setQuantity(productId, quantity) {
+                const product = this.products.find(p => p.id === productId);
+                if (quantity > product.stock) {
+                    quantity = product.stock;
+                    this.showToast(`库存不足`, 'warning');
+                }
+                if (quantity > 0) this.cart.set(productId, quantity); else this.cart.delete(productId);
+                this.updateCartSummary();
+                const el = document.querySelector(`.product[data-product-id="${productId}"]`);
+                if(el) {
+                    el.querySelector('.quantity-input').value = quantity;
+                    el.querySelector('[data-action="decrease"]').disabled = quantity === 0;
+                    el.querySelector('[data-action="increase"]').disabled = quantity >= product.stock;
+                }
+            }
+
+            updateCartSummary() {
+                let total = 0, count = 0;
+                this.cart.forEach((q, id) => {
+                    const p = this.products.find(pr => pr.id === id);
+                    if(p) { total += p.price * q; count += q; }
+                });
+                document.querySelector('#cartSummary .total').textContent = `总计: RM${total.toFixed(2)}`;
+                document.querySelector('#cartSummary .item-count').textContent = `共 ${count} 件商品`;
+                document.getElementById('cartSummary').style.display = count > 0 ? 'block' : 'none';
+            }
+
+            getStockStatus(product) {
+                if (product.stock === 0) return { class: 'out-of-stock', icon: 'fa-times-circle', badge: '<div class="stock-badge out-of-stock-badge">售完</div>' };
+                if (product.stock <= product.minStock) return { class: 'low-stock', icon: 'fa-exclamation-triangle', badge: '<div class="stock-badge low-stock-badge">库存不足</div>' };
+                return { class: 'in-stock', icon: 'fa-check-circle', badge: '' };
+            }
+            
+            saveInventoryToStorage() {
+                localStorage.setItem('inventoryData', JSON.stringify(this.products.map(p => ({ id: p.id, stock: p.stock }))));
+            }
+
+            showInventoryAlerts() {
+                const lowStock = this.products.filter(p => p.stock > 0 && p.stock <= p.minStock);
+                if (lowStock.length > 0) this.showToast(`${lowStock.map(p=>p.name).slice(0,2).join(', ')}等库存不足`, 'warning');
+                const outOfStock = this.products.filter(p => p.stock === 0);
+                if (outOfStock.length > 0) this.showToast(`${outOfStock.map(p=>p.name).join(', ')}已售完`, 'danger');
+            }
+
+            async handleFormSubmit() {
+            const formData = this.collectFormData();
+            
+            if (!this.validator.validateForm(formData)) {
+                this.validator.showAllErrors();
+                return;
+            }
+            
+            this.showConfirmationDialog(formData);
+        }
+
+        async submitOrder() {
+            if (!this.pendingOrderData) return;
+            this.hideDialog('confirmationDialog');
+            this.showLoading(true);
+            
+            try {
+                const orderData = this.pendingOrderData;
+                const orderNumber = await this.generateOrderNumber();
+                
+                // Upload payment proof
+                let paymentProofUrl = '';
+                if (orderData.paymentProofFile) {
+                    const fileName = `proofs/${orderNumber}.${orderData.paymentProofFile.name.split('.').pop()}`;
+                    const { error: uploadError } = await supabase.storage
+                        .from('payment-proofs')
+                        .upload(fileName, orderData.paymentProofFile);
+                    
+                    if (uploadError) throw new Error('凭证上传失败');
+                    
+                    const { data: urlData } = supabase.storage
+                        .from('payment-proofs')
+                        .getPublicUrl(fileName);
+                    paymentProofUrl = urlData.publicUrl;
+                }
+
+                // Calculate total amount
+                const totalAmount = orderData.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                
+                // Prepare order items for database
+                const orderItems = orderData.cart.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity
+                }));
+
+                // Insert order into database
+                const { error: dbError } = await supabase.from('orders').insert([{
+                    order_id: orderNumber,
+                    name: orderData.customerName,
+                    phone: orderData.customerPhone,
+                    delivery_method: orderData.deliveryMethod,
+                    delivery_address: orderData.deliveryAddress || null,
+                    remarks: orderData.specialRequests || null,
+                    payment_method: orderData.paymentMethod,
+                    order_items: orderItems,
+                    total_amount: totalAmount,
+                    payment_proof_url: paymentProofUrl,
+                    status: 'pending'
+                }]);
+
+                if (dbError) throw dbError;
+
+                // Update local inventory
+                orderData.cart.forEach(item => {
+                    const product = this.products.find(p => p.id === item.id);
+                    if (product) product.stock -= item.quantity;
+                });
+                this.saveInventoryToStorage();
+
+                // Send WhatsApp message
+                this.sendWhatsAppMessage(orderData, orderNumber, totalAmount);
+
+                // Show success
+                this.showSuccessDialog(orderNumber);
+            } catch (error) {
+                console.error('Order submission error:', error);
+                this.showToast(`提交失败: ${error.message}`, 'error');
+            } finally {
+                this.showLoading(false);
+            }
+        }
+
+        sendWhatsAppMessage(orderData, orderNumber, totalAmount) {
+            const phone = '60162327792'; // Your WhatsApp number
+            const itemsText = orderData.cart.map(item => 
+                `${item.name} x ${item.quantity} = RM${(item.price * item.quantity).toFixed(2)}`
+            ).join('%0A');
+            
+            const message = `*新订单通知*%0A%0A` +
+                `订单号: ${orderNumber}%0A` +
+                `姓名: ${orderData.customerName}%0A` +
+                `电话: ${orderData.customerPhone}%0A` +
+                `取货方式: ${orderData.deliveryMethod === 'self-pickup' ? '自取' : 'Lalamove'}%0A` +
+                `${orderData.deliveryAddress ? '地址: ' + orderData.deliveryAddress + '%0A' : ''}` +
+                `${orderData.specialRequests ? '备注: ' + orderData.specialRequests + '%0A' : ''}` +
+                `%0A*商品明细*%0A${itemsText}%0A%0A` +
+                `总计: RM${totalAmount.toFixed(2)}%0A` +
+                `付款方式: ${orderData.paymentMethod === 'maybank' ? 'Maybank' : 'Touch n Go'}`;
+            
+            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+        }
+
+                    orderData.cart.forEach(item => {
+                        const product = this.products.find(p => p.id === item.id);
+                        if(product) product.stock -= item.quantity;
+                    });
+                    this.saveInventoryToStorage();
+                    this.showSuccessDialog(orderNumber);
+                } catch (error) {
+                    this.showToast(`提交失败: ${error.message}`, 'error');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            async uploadProof(file, orderId) {
+                if (!file) return { publicUrl: '' };
+                const fileName = `proofs/${orderId}.${file.name.split('.').pop()}`;
+                const { error } = await supabase.storage.from('payment-proofs').upload(fileName, file, { upsert: true });
+                if (error) throw new Error('凭证上传失败');
+                const { data } = supabase.storage.from('payment-proofs').getPublicUrl(fileName);
+                return data;
+            }
+            
+            showSuccessDialog(orderNumber) {
+                document.getElementById('orderNumber').textContent = orderNumber;
+                this.showDialog('successDialog');
+                const closeBtn = document.getElementById('closeSuccess');
+                const newCloseBtn = closeBtn.cloneNode(true);
+                closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+                newCloseBtn.addEventListener('click', () => {
+                    this.hideDialog('successDialog');
+                    this.resetForm();
+                });
+            }
+
+            resetForm() {
+                document.getElementById('mainForm').reset();
+                this.cart.clear();
+                this.renderProducts();
+                this.updateCartSummary();
+                document.querySelector('.file-name').textContent = '';
+                document.getElementById('deliveryAddressGroup').style.display = 'none';
+                document.getElementById('paymentDetails').style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            
+            async generateOrderNumber() {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                const datePrefix = `FW${yyyy}${mm}${dd}`;
+                const { count, error } = await supabase.from('orders').select('order_id', { count: 'exact', head: true }).like('order_id', `${datePrefix}%`);
+                if (error) {
+                    console.error("Error fetching order count:", error);
+                    return `FW-ERR-${Date.now().toString().slice(-8)}`;
+                }
+                const sequence = String(count + 1).padStart(3, '0');
+                return `${datePrefix}${sequence}`;
+            }
+
+            showDialog(id) { document.getElementById(id).classList.add('show'); }
+            hideDialog(id) { document.getElementById(id).classList.remove('show'); }
+            showLoading(show) { document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none'; }
+            showToast(message, type = 'info') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+                toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
+                container.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            async handleAdminExport(password) {
+                if (password !== 'fengweipaiadmin') { return this.showToast('密码错误', 'error'); }
+                this.showLoading(true);
+                try {
+                    const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+                    if (error) throw error;
+                    const wsData = [['订单号', '姓名', '电话', '取货方式', '地址', '备注', '总金额', '状态', '下单时间', '支付凭证', '商品']];
+                    data.forEach(o => wsData.push([ o.order_id, o.name, o.phone, o.delivery_method, o.delivery_address, o.remarks, o.total_amount, o.status, new Date(o.created_at).toLocaleString(), o.payment_proof_url, o.order_items.map(i => `${i.name}x${i.quantity}`).join('; ') ]));
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsData), 'Orders');
+                    XLSX.writeFile(wb, `Orders_${new Date().toISOString().slice(0,10)}.xlsx`);
+                } catch (err) { this.showToast(`导出失败: ${err.message}`, 'error'); } 
+                finally { this.showLoading(false); }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { window.app = new FoodOrderApp(); });
+    </script>
+</body>
+</html>
