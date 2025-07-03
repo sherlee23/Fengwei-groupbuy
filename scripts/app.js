@@ -1,9 +1,5 @@
-// HELPER: Handles phone number formatting
-const PhoneFormatter = {
-    format: (value) => value.replace(/\D/g, '')
-};
+const PhoneFormatter = { format: (value) => value.replace(/\D/g, '') };
 
-// Main Application Class
 class FoodOrderApp {
     constructor() {
         this.cart = new Map();
@@ -18,16 +14,14 @@ class FoodOrderApp {
         this.showLoading(true);
         await this.loadProducts();
         this.loadInventoryFromStorage();
-        this.renderCategories();
         this.setupEventListeners();
         this.renderProducts();
         this.updateCartSummary();
+        this.showLoading(false);
         this.showToast('应用加载成功', 'success');
         setTimeout(() => this.showInventoryAlerts(), 1500);
-        this.showLoading(false);
     }
 
-    // DATA LOADING
     async loadProducts() {
         this.products = [
             { id: 1, name: '原味烤肠', price: 28, image: 'IMG_3859.jpeg', category: '烤肠系列', emoji: '🌭', stock: 45, minStock: 10 },
@@ -73,28 +67,29 @@ class FoodOrderApp {
         } catch (e) { console.error("Failed to load inventory from storage", e); }
     }
 
-    // UI RENDERING
-    renderCategories() {
-        const nav = document.getElementById('categoryNav');
-        const categories = ['all', ...new Set(this.products.map(p => p.category))];
-        const linksHtml = categories.map(cat => {
-            if (cat === 'all') return `<a href="#" class="category-link active" data-category="all">全部</a>`;
-            const product = this.products.find(p => p.category === cat);
-            return `<a href="#" class="category-link" data-category="${cat}">${product.emoji} ${cat}</a>`;
-        }).join('');
-        nav.innerHTML = `<div class="category-links">${linksHtml}</div>`;
-        this.attachCategoryListeners();
+    setupEventListeners() {
+        document.getElementById('mainForm').addEventListener('submit', (e) => { e.preventDefault(); this.handleFormSubmit(); });
+        document.getElementById('deliveryMethod').addEventListener('change', this.handleDeliveryChange);
+        document.getElementById('paymentMethod').addEventListener('change', this.handlePaymentChange.bind(this));
+        document.getElementById('paymentProof').addEventListener('change', this.handleFileUpload.bind(this));
+        document.getElementById('customerPhone').addEventListener('input', (e) => e.target.value = PhoneFormatter.format(e.target.value));
+        document.getElementById('cancelOrder').addEventListener('click', () => this.hideDialog('confirmationDialog'));
+        document.getElementById('confirmOrder').addEventListener('click', () => this.submitOrder());
+        document.getElementById('closeSuccess').addEventListener('click', () => this.hideDialog('successDialog'));
+        document.getElementById('showExportBtn').addEventListener('click', () => {
+            document.getElementById('adminPanel').style.display = document.getElementById('adminPanel').style.display === 'none' ? 'block' : 'none';
+        });
+        document.getElementById('realExportBtn').addEventListener('click', () => this.handleAdminExport(document.getElementById('adminPassword').value));
+        document.getElementById('touchngoPayBtn').addEventListener('click', () => window.open('https://touchngo.com.my/ewallet/', '_blank'));
+
+        document.querySelectorAll('.category-link').forEach(link => {
+            link.addEventListener('click', (e) => { e.preventDefault(); this.handleCategoryChange(e.currentTarget.dataset.category); });
+        });
     }
 
     renderProducts() {
         const productList = document.getElementById('productList');
-        let filtered = this.products;
-        if (this.currentCategory !== 'all') filtered = filtered.filter(p => p.category === this.currentCategory);
-        if (this.searchQuery) filtered = filtered.filter(p => p.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
-        
-        productList.innerHTML = filtered.length > 0
-            ? filtered.map(p => this.renderProduct(p)).join('')
-            : `<p>没有找到商品。</p>`;
+        productList.innerHTML = this.products.map(p => this.renderProduct(p)).join('');
         this.attachQuantityListeners();
     }
 
@@ -110,40 +105,11 @@ class FoodOrderApp {
                 <div class="product-price">RM${product.price.toFixed(2)}</div>
                 <div class="stock-info ${stockStatus.class}"><i class="fas ${stockStatus.icon}"></i> 库存: ${product.stock > 0 ? `${product.stock} 件` : '已售完'}</div>
                 <div class="quantity-control">
-                    <button class="quantity-btn" data-action="decrease" ${quantity === 0 || isOutOfStock ? 'disabled' : ''}>-</button>
+                    <button class="quantity-btn" data-action="decrease" ${quantity === 0 || isOutOfStock ? 'disabled' : ''}><i class="fas fa-minus"></i></button>
                     <input type="number" class="quantity-input" value="${quantity}" min="0" max="${product.stock}" ${isOutOfStock ? 'disabled' : ''}>
-                    <button class="quantity-btn" data-action="increase" ${quantity >= product.stock || isOutOfStock ? 'disabled' : ''}>+</button>
+                    <button class="quantity-btn" data-action="increase" ${quantity >= product.stock || isOutOfStock ? 'disabled' : ''}><i class="fas fa-plus"></i></button>
                 </div>
             </div>`;
-    }
-    
-    // EVENT LISTENERS
-    setupEventListeners() {
-        document.getElementById('mainForm').addEventListener('submit', (e) => { e.preventDefault(); this.handleFormSubmit(); });
-        document.getElementById('deliveryMethod').addEventListener('change', this.handleDeliveryChange);
-        document.getElementById('paymentMethod').addEventListener('change', this.handlePaymentChange.bind(this));
-        document.getElementById('paymentProof').addEventListener('change', this.handleFileUpload.bind(this));
-        document.getElementById('customerPhone').addEventListener('input', (e) => e.target.value = PhoneFormatter.format(e.target.value));
-        document.getElementById('cancelOrder').addEventListener('click', () => this.hideDialog('confirmationDialog'));
-        document.getElementById('confirmOrder').addEventListener('click', () => this.submitOrder());
-        document.getElementById('showExportBtn').addEventListener('click', () => {
-            document.getElementById('adminPanel').style.display = document.getElementById('adminPanel').style.display === 'none' ? 'block' : 'none';
-        });
-        document.getElementById('realExportBtn').addEventListener('click', () => this.handleAdminExport(document.getElementById('adminPassword').value));
-        
-        const searchInput = document.getElementById('searchInput');
-        searchInput.addEventListener('input', this.debounce(() => this.handleSearch(searchInput.value), 300));
-        document.getElementById('searchBtn').addEventListener('click', () => this.handleSearch(searchInput.value));
-        
-        document.getElementById('tngBtn').addEventListener('click', () => {
-            window.open('https://touchngo.com.my/ewallet/', '_blank');
-        });
-    }
-    
-    attachCategoryListeners() {
-        document.querySelectorAll('.category-link').forEach(link => {
-            link.addEventListener('click', (e) => { e.preventDefault(); this.handleCategoryChange(link.dataset.category); });
-        });
     }
 
     attachQuantityListeners() {
@@ -155,15 +121,9 @@ class FoodOrderApp {
         });
     }
 
-    // EVENT HANDLERS
     handleCategoryChange(category) {
         this.currentCategory = category;
         document.querySelectorAll('.category-link').forEach(link => link.classList.toggle('active', link.dataset.category === category));
-        this.renderProducts();
-    }
-    
-    handleSearch(query) {
-        this.searchQuery = query.trim();
         this.renderProducts();
     }
 
@@ -171,22 +131,19 @@ class FoodOrderApp {
         document.getElementById('deliveryAddressGroup').style.display = e.target.value === 'lalamove' ? 'block' : 'none';
         document.getElementById('selfPickupAddress').style.display = e.target.value === 'self-pickup' ? 'block' : 'none';
     }
-    
-    // THIS FUNCTION WAS MISSING
+
     handlePaymentChange(e) {
         const method = e.target.value;
         document.getElementById('paymentDetails').style.display = method ? 'block' : 'none';
+        document.getElementById('paymentProofSection').style.display = method ? 'block' : 'none';
         document.getElementById('maybankDetails').style.display = method === 'maybank' ? 'block' : 'none';
         document.getElementById('touchngoDetails').style.display = method === 'touchngo' ? 'block' : 'none';
-        document.getElementById('maybankQR').style.display = method === 'maybank' ? 'block' : 'none';
-        document.getElementById('touchngoQR').style.display = method === 'touchngo' ? 'block' : 'none';
     }
 
     handleFileUpload(event) {
         document.querySelector('.file-name').textContent = event.target.files[0] ? event.target.files[0].name : '';
     }
 
-    // CART & QUANTITY
     updateQuantity(productId, action) {
         let quantity = this.cart.get(productId) || 0;
         const product = this.products.find(p => p.id === productId);
@@ -204,7 +161,12 @@ class FoodOrderApp {
         if (quantity > 0) this.cart.set(productId, quantity);
         else this.cart.delete(productId);
         this.updateCartSummary();
-        this.renderProducts();
+        const productElement = document.querySelector(`.product[data-product-id="${productId}"]`);
+        if (productElement) {
+            productElement.querySelector('.quantity-input').value = quantity;
+            productElement.querySelector('.quantity-btn[data-action="decrease"]').disabled = quantity === 0;
+            productElement.querySelector('.quantity-btn[data-action="increase"]').disabled = quantity >= product.stock;
+        }
     }
 
     updateCartSummary() {
@@ -214,11 +176,10 @@ class FoodOrderApp {
             if (product) { total += product.price * quantity; count += quantity; }
         });
         document.querySelector('#cartSummary .total').textContent = `总计: RM${total.toFixed(2)}`;
-        document.querySelector('#cartSummary .item-count').textContent = `${count} 件商品`;
+        document.querySelector('#cartSummary .item-count').textContent = `共 ${count} 件商品`;
         document.getElementById('cartSummary').style.display = count > 0 ? 'block' : 'none';
     }
 
-    // INVENTORY
     getStockStatus(product) {
         if (product.stock === 0) return { class: 'out-of-stock', icon: 'fa-times-circle', badge: '<div class="stock-badge out-of-stock-badge">售完</div>' };
         if (product.stock <= product.minStock) return { class: 'low-stock', icon: 'fa-exclamation-triangle', badge: '<div class="stock-badge low-stock-badge">库存不足</div>' };
@@ -236,7 +197,6 @@ class FoodOrderApp {
         if (outOfStock.length > 0) this.showToast(`${outOfStock.map(p => p.name).slice(0, 3).join(', ')} 已售完`, 'danger');
     }
 
-    // FORM SUBMISSION
     async handleFormSubmit() {
         if (this.cart.size === 0) { return this.showToast('请至少选择一件商品', 'warning'); }
         const formData = this.collectFormData();
@@ -261,7 +221,6 @@ class FoodOrderApp {
     showConfirmationDialog(formData) {
         this.pendingOrderData = formData;
         const total = formData.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        const whatsappMsg = this.buildWhatsAppMessage(formData, total);
         document.getElementById('orderSummary').innerHTML = `
             <p><strong>姓名:</strong> ${formData.customerName}</p>
             <p><strong>电话:</strong> ${formData.customerPhone}</p>
@@ -269,16 +228,13 @@ class FoodOrderApp {
             ${formData.deliveryMethod === 'lalamove' ? `<p><strong>地址:</strong> ${formData.deliveryAddress || 'N/A'}</p>` : ''}
             <hr><h4>订单商品:</h4>
             <ul>${formData.cart.map(item => `<li>${item.name} x ${item.quantity}</li>`).join('')}</ul>
-            <h4>总计: RM${total.toFixed(2)}</h4>
-            <div class="whatsapp-preview">
-              <strong>将发送到WhatsApp的内容:</strong>
-              <p style="color:red; font-weight:bold; font-size: 12px; margin-top: 5px;">请务必在跳转WhatsApp后点击发送！</p>
-              <p style="font-size: 12px; margin-top: 5px;">${whatsappMsg.replace(/\n/g, '<br>')}</p>
-            </div>`;
+            <h4 style="margin-top: 1rem;">总计: RM${total.toFixed(2)}</h4>
+            <div class="confirmation-text">请确认以上信息无误后提交订单</div>`;
         this.showDialog('confirmationDialog');
     }
 
     async submitOrder() {
+        if (!this.pendingOrderData) return;
         this.hideDialog('confirmationDialog');
         this.showLoading(true);
         try {
@@ -302,7 +258,7 @@ class FoodOrderApp {
                 if (product) product.stock -= item.quantity;
             });
             this.saveInventoryToStorage();
-            this.showSuccessDialog(orderData, orderNumber);
+            this.showSuccessDialog(orderNumber);
         } catch (error) {
             this.showToast(`订单提交失败: ${error.message}`, 'error');
         } finally {
@@ -310,39 +266,16 @@ class FoodOrderApp {
         }
     }
     
-    showSuccessDialog(formData, orderNumber) {
-        const total = formData.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        const whatsappMsg = this.buildWhatsAppMessage(formData, total, orderNumber);
-        const whatsappLink = `https://wa.me/60162327792?text=${encodeURIComponent(whatsappMsg)}`;
-        
+    showSuccessDialog(orderNumber) {
         document.getElementById('orderNumber').textContent = orderNumber;
-        
-        const oldBtn = document.getElementById('closeSuccess');
-        const newBtn = oldBtn.cloneNode(true);
-        oldBtn.parentNode.replaceChild(newBtn, oldBtn);
-
-        newBtn.onclick = () => {
+        const closeBtn = document.getElementById('closeSuccess');
+        const newCloseBtn = closeBtn.cloneNode(true);
+        closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+        newCloseBtn.addEventListener('click', () => {
             this.hideDialog('successDialog');
-            window.open(whatsappLink, '_blank');
             this.resetForm();
-        };
+        });
         this.showDialog('successDialog');
-    }
-
-    buildWhatsAppMessage(order, total, orderId = "...") {
-        let msg = `🛎️ *锋味派新订单 #${orderId}*\n\n`;
-        msg += `👤 *客户信息*\n`;
-        msg += `📛 姓名: ${order.customerName}\n`;
-        msg += `📱 电话: ${order.customerPhone}\n`;
-        msg += `🚚 取货方式: ${order.deliveryMethod === 'self-pickup' ? '自取' : 'Lalamove送货'}\n`;
-        if (order.deliveryMethod === 'lalamove') msg += `📍 地址: ${order.deliveryAddress}\n`;
-        msg += `💳 付款方式: ${order.paymentMethod}\n`;
-        msg += `\n🛒 *订单明细*\n`;
-        order.cart.forEach(item => { msg += `${item.emoji} ${item.name} × ${item.quantity} = RM${(item.quantity * item.price).toFixed(2)}\n`; });
-        msg += `\n💰 *总金额: RM${total.toFixed(2)}*\n`;
-        msg += `📝 *备注*: ${order.specialRequests || '无'}\n`;
-        msg += `📅 *下单时间*: ${new Date().toLocaleString('en-GB', { timeZone: 'Asia/Kuala_Lumpur' })}`;
-        return msg;
     }
 
     resetForm() {
@@ -356,7 +289,6 @@ class FoodOrderApp {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
-    // UTILITY & ADMIN
     async generateOrderNumber() {
         const client = window.supabaseConfig.getClient();
         const today = new Date();
@@ -364,14 +296,11 @@ class FoodOrderApp {
         const mm = String(today.getMonth() + 1).padStart(2, '0');
         const dd = String(today.getDate()).padStart(2, '0');
         const datePrefix = `FW${yyyy}${mm}${dd}`;
-
         const { count, error } = await client.from('orders').select('order_id', { count: 'exact', head: true }).like('order_id', `${datePrefix}%`);
-        
         if (error) {
             console.error("Error fetching order count:", error);
             return `FW-ERR-${Date.now().toString().slice(-8)}`;
         }
-        
         const sequence = String(count + 1).padStart(3, '0');
         return `${datePrefix}${sequence}`;
     }
