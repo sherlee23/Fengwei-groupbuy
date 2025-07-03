@@ -6,7 +6,6 @@ class FoodOrderApp {
         this.products = [];
         this.validator = new FormValidator();
         this.currentCategory = 'all';
-        this.searchQuery = '';
         this.initializeApp();
     }
 
@@ -14,7 +13,8 @@ class FoodOrderApp {
         this.showLoading(true);
         await this.loadProducts();
         this.loadInventoryFromStorage();
-        this.setupEventListeners();
+        this.renderCategories(); // This will now create the nav links
+        this.setupEventListeners(); // This will attach listeners to the *new* nav links
         this.renderProducts();
         this.updateCartSummary();
         this.showLoading(false);
@@ -24,6 +24,7 @@ class FoodOrderApp {
 
     async loadProducts() {
         this.products = [
+            // Your complete product list
             { id: 1, name: '原味烤肠', price: 28, image: 'IMG_3859.jpeg', category: '烤肠系列', emoji: '🌭', stock: 45, minStock: 10 },
             { id: 2, name: '烟熏蜜汁烤肠', price: 28, image: 'IMG_3864.jpeg', category: '烤肠系列', emoji: '🌭', stock: 38, minStock: 10 },
             { id: 3, name: '法式香草烤肠', price: 28, image: 'IMG_3863.jpeg', category: '烤肠系列', emoji: '🌭', stock: 52, minStock: 10 },
@@ -67,7 +68,24 @@ class FoodOrderApp {
         } catch (e) { console.error("Failed to load inventory from storage", e); }
     }
 
+    renderCategories() {
+        const nav = document.getElementById('categoryNav');
+        const categories = ['all', '烤肠系列', '虾肠系列', '披萨系列', '小笼汤包系列', '酥饼系列', '鸡排系列', '鸡翅系列', '纸皮烧卖系列'];
+        const linksHtml = categories.map(cat => {
+            if (cat === 'all') return `<a href="#" class="category-link active" data-category="all">全部</a>`;
+            const product = this.products.find(p => p.category === cat);
+            return `<a href="#" class="category-link" data-category="${cat}">${product.emoji} ${cat}</a>`;
+        }).join('');
+        nav.innerHTML = `<div class="category-links">${linksHtml}</div>`;
+    }
+
     setupEventListeners() {
+        document.getElementById('categoryNav').addEventListener('click', (e) => {
+            if (e.target.matches('.category-link')) {
+                e.preventDefault();
+                this.handleCategoryChange(e.target.dataset.category);
+            }
+        });
         document.getElementById('mainForm').addEventListener('submit', (e) => { e.preventDefault(); this.handleFormSubmit(); });
         document.getElementById('deliveryMethod').addEventListener('change', this.handleDeliveryChange);
         document.getElementById('paymentMethod').addEventListener('change', this.handlePaymentChange.bind(this));
@@ -81,15 +99,13 @@ class FoodOrderApp {
         });
         document.getElementById('realExportBtn').addEventListener('click', () => this.handleAdminExport(document.getElementById('adminPassword').value));
         document.getElementById('touchngoPayBtn').addEventListener('click', () => window.open('https://touchngo.com.my/ewallet/', '_blank'));
-
-        document.querySelectorAll('.category-link').forEach(link => {
-            link.addEventListener('click', (e) => { e.preventDefault(); this.handleCategoryChange(e.currentTarget.dataset.category); });
-        });
     }
 
     renderProducts() {
         const productList = document.getElementById('productList');
-        productList.innerHTML = this.products.map(p => this.renderProduct(p)).join('');
+        let filtered = this.products;
+        if (this.currentCategory !== 'all') filtered = filtered.filter(p => p.category === this.currentCategory);
+        productList.innerHTML = filtered.map(p => this.renderProduct(p)).join('');
         this.attachQuantityListeners();
     }
 
